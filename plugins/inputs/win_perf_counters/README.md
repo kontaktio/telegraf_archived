@@ -12,6 +12,8 @@ more info.
 
 In case of query for all instances `["*"]`, the plugin does not return the
 instance `_Total` by default. See [IncludeTotal](#includetotal) for more info.
+In case of query for all instances `["*"]`, the plugin does not return the instance `_Total`
+by default. See [IncludeTotal](#includetotal) for more info.
 
 ## Basics
 
@@ -48,6 +50,15 @@ name on Windows Vista and newer.
 
 If disabled, wildcards (not partial) in instance names can still be
 used, but instance indexes will not be returned in the instance names.
+If `UseWildcardsExpansion` is set to true, wildcards can be used in instance name and counter name
+. 
+Partial wildcard (e.g. `chrome*`) is supported only in instance name on Windows Vista and newer. 
+
+On localized Windows, returned counters will be also localized. 
+
+It also returns instance indexes in instance names.
+
+If set to `false`, wildcards (not partial) in instance names can still be used, but instance indexes will not be returned in instance names.
 
 Example:
 `UseWildcardsExpansion=true`
@@ -80,11 +91,15 @@ specified by the `CountersRefreshInterval` parameter. The default value is `1m`
 
 If wildcards are used in instance or counter names, they are expanded at this
 point, if the `UseWildcardsExpansion` param is set to `true`.
+If wildcards are used in instance or counter names, they are expanded at this point, if the `UseWildcardsExpansion` param is set to `true`.
 
 Setting the `CountersRefreshInterval` too low (order of seconds) can cause
 Telegraf to create a high CPU load.
 
 Set it to `0s` to disable periodic refreshing.
+
+Example:
+`CountersRefreshInterval=1m`
 
 Example:
 `CountersRefreshInterval=1m`
@@ -163,6 +178,7 @@ Alternatively see the option `IncludeTotal` below.
 
 It is also possible to set partial wildcards, eg. `["chrome*"]`, if the
 `UseWildcardsExpansion` param is set to `true`
+It is also possible to set partial wildcards, eg. `["chrome*"]`, if the `UseWildcardsExpansion` param is set to `true`
 
 Some Objects do not have instances to select from at all.
 Here only one option is valid if you want data back,
@@ -180,6 +196,8 @@ Example: `Counters = ["% Idle Time", "% Disk Read Time", "% Disk Write Time"]`
 This must be specified for every counter you want the results of, or use
 `["*"]` for all the counters of the object, if the `UseWildcardsExpansion` param
 is set to `true`.
+This must be specified for every counter you want the results of, or use `["*"]` for all the counters for object, 
+if the `UseWildcardsExpansion` param is set to `true`
 
 #### Measurement
 
