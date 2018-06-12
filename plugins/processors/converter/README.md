@@ -8,6 +8,9 @@ Values that cannot be converted are dropped.
 **Note:** When converting tags to fields, take care to ensure the series is
 still uniquely identifiable.  Fields with the same series key (measurement +
 tags) will overwrite one another.
+**Note:** When converting tags to fields, take care to ensure the series is still
+uniquely identifiable.  Fields with the same series key (measurement + tags)
+will overwrite one another.
 
 **Note on large strings being converted to numeric types:** When converting a
 string value to a numeric type, precision may be lost if the number is too
