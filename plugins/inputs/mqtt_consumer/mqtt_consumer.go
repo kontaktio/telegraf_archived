@@ -138,7 +138,7 @@ func (m *MQTTConsumer) Start(acc telegraf.Accumulator) error {
 func (m *MQTTConsumer) connect() error {
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
 		err := token.Error()
-		log.Printf("D! MQTT Consumer, connection error - %v", err)
+		log.Printf("D! MQTT Consumer, connection error - %v", err.Error())
 
 		return err
 	}
