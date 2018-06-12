@@ -138,7 +138,7 @@ func (m *MQTTConsumer) Start(acc telegraf.Accumulator) error {
 func (m *MQTTConsumer) connect() error {
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
 		err := token.Error()
-		log.Printf("D! MQTT Consumer, connection error - %v", err.Error())
+		log.Printf("D! MQTT Consumer, connection error - %v", err)
 
 		return err
 	}
@@ -237,19 +237,16 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	}
 
 	if tlsCfg != nil {
-		log.Printf("D! TLS Enabled")
 		opts.SetTLSConfig(tlsCfg)
 	}
 
 	user := m.Username
 	if user != "" {
 		opts.SetUsername(user)
-		log.Printf("D! UserName: %s", user)
 	}
 	password := m.Password
 	if password != "" {
 		opts.SetPassword(password)
-		log.Printf("D! Password: %s", password)
 	}
 
 	if len(m.Servers) == 0 {
@@ -257,7 +254,6 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	}
 
 	for _, server := range m.Servers {
-		log.Printf("D! Server: %s", server)
 		// Preserve support for host:port style servers; deprecated in Telegraf 1.4.4
 		if !strings.Contains(server, "://") {
 			log.Printf("W! mqtt_consumer server %q should be updated to use `scheme://host:port` format", server)
