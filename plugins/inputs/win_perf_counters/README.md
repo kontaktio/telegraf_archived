@@ -2,6 +2,7 @@
 
 This document presents the input plugin to read Performance Counters on Windows
 operating systems.
+This document presents the input plugin to read Performance Counters on Windows operating systems.
 
 The configuration is parsed and then tested for validity, such as
 whether the Object, Instance and Counter exist on Telegraf startup.
@@ -9,6 +10,8 @@ whether the Object, Instance and Counter exist on Telegraf startup.
 Counter paths are refreshed periodically, see the
 [CountersRefreshInterval](#countersrefreshinterval) configuration parameter for
 more info.
+Counter paths are refreshed periodically, see the [CountersRefreshInterval](#countersrefreshinterval)
+configuration parameter for more info.
 
 In case of query for all instances `["*"]`, the plugin does not return the
 instance `_Total` by default. See [IncludeTotal](#includetotal) for more info.
@@ -91,6 +94,7 @@ Example:
 Configured counters are matched against available counters at the interval
 specified by the `CountersRefreshInterval` parameter. The default value is `1m`
 (1 minute).
+specified by the `CountersRefreshInterval` parameter. The default value is `1m` (1 minute).
 
 If wildcards are used in instance or counter names, they are expanded at this
 point, if the `UseWildcardsExpansion` param is set to `true`.
@@ -103,6 +107,10 @@ Set it to `0s` to disable periodic refreshing.
 
 Example:
 `CountersRefreshInterval=1m`
+Setting the `CountersRefreshInterval` too low (order of seconds) can cause Telegraf to create
+a high CPU load.
+
+Set it to `0s` to disable periodic refreshing.
 
 Example:
 `CountersRefreshInterval=1m`
@@ -114,6 +122,7 @@ dynamically)
 
 Bool, if set to `true`, the plugin will use the localized PerfCounter interface
 that has been present since before Vista for backwards compatibility.
+Bool, if set to `true`, the plugin will use the localized PerfCounter interface that has been present since before Vista for backwards compatability.
 
 It is recommended NOT to use this on OSes starting with Vista and newer because
 it requires more configuration to use this than the newer interface present
@@ -155,6 +164,7 @@ beneath the main win_perf_counters entry, `[[inputs.win_perf_counters]]`.
 
 Following this are 3 required key/value pairs and three optional parameters and
 their usage.
+Following this are 3 required key/value pairs and three optional parameters and their usage.
 
 #### ObjectName
 
@@ -177,6 +187,15 @@ Example: `Instances = ["C:","D:","E:"]`
 This will return only for the instances C:, D: and E: where relevant. To get all
 instances of a Counter, use `["*"]` only.  By default any results containing
 `_Total` are stripped, unless this is specified as the wanted instance.
+The instances key (this is an array) declares the instances of a counter you would like returned,
+it can be one or more values.
+
+Example: `Instances = ["C:","D:","E:"]`
+
+This will return only for the instances
+C:, D: and E: where relevant. To get all instances of a Counter, use `["*"]` only.
+By default any results containing `_Total` are stripped,
+unless this is specified as the wanted instance.
 Alternatively see the option `IncludeTotal` below.
 
 It is also possible to set partial wildcards, eg. `["chrome*"]`, if the
@@ -231,6 +250,13 @@ Note: Time based counters (i.e. _% Processor Time_) are reported in hundredths
 of nanoseconds.
 
 Example: `UseRawValues = true`
+This key is optional. If it is not set it will be `win_perf_counters`.
+In InfluxDB this is the key underneath which the returned data is stored.
+So for ordering your data in a good manner,
+this is a good key to set with a value when you want your IIS and Disk results stored
+separately from Processor results.
+
+Example: `Measurement = "win_disk"``
 
 #### IncludeTotal
 
