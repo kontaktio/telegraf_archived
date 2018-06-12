@@ -2851,6 +2851,13 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 ### New Serializers
 
 - [splunkmetric](/plugins/serializers/splunkmetric/README.md) - Contributed by @ronnocol
+## v1.8 [unreleased]
+
+### Release Notes
+
+### New Inputs
+
+- [tengine](./plugins/inputs/tengine/README.md) - Contirbuted by @ertaoxu
 
 ### Features
 
@@ -2984,6 +2991,12 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 - [#4293](https://github.com/influxdata/telegraf/issues/4293): Fix minmax and basicstats aggregators to use uint64.
 - [#4290](https://github.com/influxdata/telegraf/issues/4290): Document swap input plugin.
 - [#4316](https://github.com/influxdata/telegraf/issues/4316): Fix incorrect precision being applied to metric in http_listener.
+
+## v1.7.1 [unreleased]
+
+### Bugfixes
+
+- [#4277](https://github.com/influxdata/telegraf/pull/4277): Treat sigterm as a clean shutdown signal.
 
 ## v1.7 [2018-06-12]
 
