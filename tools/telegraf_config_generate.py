@@ -21,12 +21,12 @@ class Options(object):
         parser.add_argument("--influxdb-username", dest="influxdb_username", required=True)
         parser.add_argument("--influxdb-password", dest="influxdb_password", required=True)
         parser.add_argument("--config-file", dest="config_file")
-        parser.add_argument("--api-url", dest="api_url", default="https://api.kontakt.io/")
+        parser.add_argument("--api-url", dest="api_url", default="https://testapi.kontakt.io/")
         parser.add_argument("--api-venue-id", dest="api_venue_id", default=None)
         parser.add_argument("--data-collection-interval", dest="data_collection_interval", default="30s")
         parser.add_argument("--debug", dest="debug", default=False, type=bool)
         parser.add_argument("--log-file", dest="log_file", default="~/telegraf.log")
-        parser.add_argument("--mqtt-url", dest="mqtt_url", default="ssl://ovs.kontakt.io:8083")
+        parser.add_argument("--mqtt-url", dest="mqtt_url", default="ssl://testrtls.kontakt.io:8083")
         parser.add_argument("--telemetry-types", dest="telemetry_types", nargs='+', default = ['sensor'])
         parser.add_argument("--streams-per-telegraf", dest="streams_per_telegraf", type=int, default=250)
 
@@ -46,6 +46,9 @@ class Options(object):
 
     def get_api_url(self):
         return self.args['api_url']
+
+    def get_api_venue_id(self):
+        return self.args['api_venue_id']
 
     def get_data_collection_interval(self):
         return self.args['data_collection_interval']
@@ -89,7 +92,7 @@ company_id = api_client.get_company_id()
 influx_client.create_database(company_id)
 influx_client.create_user(company_id, DEFAULT_INFLUX_PASSWORD, company_id)
 
-unique_ids = api_client.get_telemetry_unique_ids()
+unique_ids = api_client.get_telemetry_unique_ids(api_venue_id=options.get_api_venue_id())
 
 topics = ['/stream/%s/%s' % elem for elem in 
     itertools.product(unique_ids, options.get_telemetry_types())]
@@ -127,9 +130,21 @@ cfg.append_key_value('tag_key', 'topic')
 cfg.append_key_value('threshold', 30)
 
 cfg.append_section_name('processors.lastcalc', True)
+cfg.append_key_value('field_name', 'lastSingleClick')
+cfg.append_key_value('out_field_name', 'singleClick')
+cfg.append_key_value('tag_key', 'trackingId')
+cfg.append_key_value('threshold', 30)
+
+cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastDoubleTap')
 cfg.append_key_value('out_field_name', 'doubleTap')
 cfg.append_key_value('tag_key', 'topic')
+cfg.append_key_value('threshold', 30)
+
+cfg.append_section_name('processors.lastcalc', True)
+cfg.append_key_value('field_name', 'lastDoubleTap')
+cfg.append_key_value('out_field_name', 'doubleTap')
+cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('threshold', 30)
 
 cfg.append_section_name('processors.lastcalc', True)
@@ -138,9 +153,23 @@ cfg.append_key_value('out_field_name', 'threshold')
 cfg.append_key_value('tag_key', 'topic')
 cfg.append_key_value('threshold', 30)
 
+cfg.append_section_name('processors.lastcalc', True)
+cfg.append_key_value('field_name', 'lastThreshold')
+cfg.append_key_value('out_field_name', 'threshold')
+cfg.append_key_value('tag_key', 'trackingId')
+cfg.append_key_value('threshold', 30)
+
+cfg.append_section_name('processors.tagrename', True)
+cfg.append_section_name('processors.tagrename.renames', inner=True)
+cfg.append_key_value('topic', 'trackingId')
+
 cfg.append_section_name('processors.regex', True)
-cfg.append_section_name('processors.regex.tags', True, inner=True)
+cfg.append_section_name('processors.regex.tags', True)
 cfg.append_key_value('key', 'topic')
+cfg.append_key_value('pattern', '^\\\\/stream\\\\/([a-zA-Z0-9]+)\\\\/[a-z]+$')
+cfg.append_key_value('replacement', '${1}')
+cfg.append_section_name('processors.regex.tags', True)
+cfg.append_key_value('key', 'trackingId')
 cfg.append_key_value('pattern', '^\\\\/stream\\\\/([a-zA-Z0-9]+)\\\\/[a-z]+$')
 cfg.append_key_value('replacement', '${1}')
 
@@ -165,4 +194,3 @@ for topic_chunk in topic_chunks:
     f.write(current.to_string())
     f.close()
     idx = idx + 1
-    
