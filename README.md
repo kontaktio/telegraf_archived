@@ -37,6 +37,7 @@ View the [changelog](/CHANGELOG.md) for the latest updates and changes by versio
 
 Binary downloads are available from the [InfluxData downloads](https://www.influxdata.com/downloads)
 page or from each [GitHub Releases](https://github.com/influxdata/telegraf/releases) page.
+Telegraf requires golang version 1.9 or newer, the Makefile requires GNU make.
 
 ### Package Repository
 
