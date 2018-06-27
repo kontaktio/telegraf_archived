@@ -29,6 +29,7 @@ class ApiClient:
         response = requests.get(self._api_url + self.GET_MANAGER_ME_PATH, headers=self._get_headers()).json()
         company_id = str(response['company']['id'])
         print "Received companyId %s" % company_id
+        return company_id
 
 
     def _filter_telemetry_not_compatible(self, collection):
