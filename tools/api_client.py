@@ -21,11 +21,14 @@ class ApiClient:
 
         result = self._get_collection(self.GET_DEVICES_PATH, params, 'devices')
         self._filter_telemetry_not_compatible(result)
-        return [r['uniqueId'] for r in result]
+        unique_ids = [r['uniqueId'] for r in result]
+        print "Received uniqueIds: %s" % str(unique_ids)
+        return unique_ids
 
     def get_company_id(self):
         response = requests.get(self._api_url + self.GET_MANAGER_ME_PATH, headers=self._get_headers()).json()
-        return str(response['company']['id'])
+        company_id = str(response['company']['id'])
+        print "Received companyId %s" % company_id
 
 
     def _filter_telemetry_not_compatible(self, collection):

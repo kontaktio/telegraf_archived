@@ -34,17 +34,21 @@ END
             password=password)
 
     def create_database(self, database_name):
+        print "Creating database %s" % database_name
         self._client.create_database(database_name)
         
     def create_user(self, user_name, password, database_name=None):
+        print "Creating user %s" % user_name
         self._client.create_user(user_name, password)
         if database_name is not None:
             self._client.grant_privilege(self.READ_PRIVILEGE, database_name, user_name)
 
     def create_retention_policy(self, database_name, policy_name, duration):
+        print "Creating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
         self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
 
     def create_continuous_query(self, database_name, aggregation_time, retention_policy, resample_time):
         q = self.CONTINUOUS_QUERY_FMT.format(aggregation_time, retention_policy, resample_time, database_name)
+        print "Executing query %s" % q
         self._client.query(q, database=database_name)
     
