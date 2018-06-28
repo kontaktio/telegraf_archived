@@ -4,8 +4,8 @@ from influxdb import InfluxDBClient
 class InfluxClient:
     READ_PRIVILEGE = 'read'
     CONTINUOUS_QUERY_FMT = """
-CREATE CONTINUOUS QUERY "telemetry_{0}_cq" ON "{3}"
-RESAMPLE EVERY {2}
+CREATE CONTINUOUS QUERY "telemetry_{0}_cq" ON "{4}"
+RESAMPLE EVERY {3}
 BEGIN
     SELECT 
         mean("batteryLevel") AS "batteryLevel", 
@@ -22,7 +22,7 @@ BEGIN
     INTO 
         "{1}"."telemetry_{0}"
     FROM 
-       "{1}"."telemetry"
+       "{2}"."telemetry"
     GROUP BY time({0}), *
 END
 """
@@ -47,8 +47,8 @@ END
         print "Creating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
         self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
 
-    def create_continuous_query(self, database_name, aggregation_time, retention_policy, resample_time):
-        q = self.CONTINUOUS_QUERY_FMT.format(aggregation_time, retention_policy, resample_time, database_name)
+    def create_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time):
+        q = self.CONTINUOUS_QUERY_FMT.format(aggregation_time, retention_policy, source_retention_policy, resample_time, database_name)
         print "Executing query %s" % q
         self._client.query(q, database=database_name)
     
