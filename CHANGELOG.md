@@ -3002,6 +3002,7 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 - [#4334](https://github.com/influxdata/telegraf/pull/4334): Fix syslog timestamp parsing with single digit day of month.
 - [#2910](https://github.com/influxdata/telegraf/issues/2910): Handle mysql input variations in the user_statistics collecting.
 - [#4293](https://github.com/influxdata/telegraf/issues/4293): Fix minmax and basicstats aggregators to use uint64.
+- [#4290](https://github.com/influxdata/telegraf/issues/4290): Document swap input plugin.
 
 ## v1.7 [2018-06-12]
 
