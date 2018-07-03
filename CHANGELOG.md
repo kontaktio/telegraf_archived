@@ -2993,6 +2993,7 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 - [#4316](https://github.com/influxdata/telegraf/issues/4316): Fix incorrect precision being applied to metric in http_listener.
 
 ## v1.7.1 [unreleased]
+## v1.7.1 [2018-07-03]
 
 ### Bugfixes
 
