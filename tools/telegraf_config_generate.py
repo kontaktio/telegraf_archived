@@ -91,12 +91,17 @@ influx_client = InfluxClient(options.get_influx_url(),
 company_id = api_client.get_company_id()
 influx_client.create_database(company_id)
 influx_client.create_user(company_id, DEFAULT_INFLUX_PASSWORD, company_id)
-influx_client.create_retention_policy(company_id, 'expire_in_24h_rp', '24h')
-influx_client.create_continuous_query(company_id, '5s', 'expire_in_24h_rp', 'expire_in_24h_rp', '1m')
-influx_client.create_retention_policy(company_id, 'expire_in_30d_rp', '30d')
-influx_client.create_continuous_query(company_id, '5m', 'expire_in_30d_rp', 'expire_in_24h_rp', '10m')
-influx_client.create_retention_policy(company_id, 'expire_in_1yr_rp', '365d')
-influx_client.create_continuous_query(company_id, '1h', 'expire_in_1yr_rp', 'expire_in_24h_rp', '1h')
+
+influx_client.create_retention_policy(company_id, 'stream_rp', '3h')
+
+influx_client.create_retention_policy(company_id, 'current_rp', '7d')
+influx_client.create_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s')
+
+influx_client.create_retention_policy(company_id, 'recent_rp', '30d')
+influx_client.create_continuous_query(company_id, '5m', 'recent_rp', 'stream_rp', '5m')
+
+influx_client.create_retention_policy(company_id, 'history_rp', '365d')
+influx_client.create_continuous_query(company_id, '1h', 'history_rp', 'stream_rp', '1h')
 
 unique_ids = api_client.get_telemetry_unique_ids(api_venue_id=options.get_api_venue_id())
 
@@ -127,7 +132,7 @@ cfg.append_key_value('username', options.get_influx_username())
 cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's') # default
 cfg.append_key_value('timeout', '5s') # default
-cfg.append_key_value('retention_policy', 'expire_in_24h_rp')
+cfg.append_key_value('retention_policy', 'stream_rp')
 
 cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastSingleClick')
