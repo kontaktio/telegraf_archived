@@ -184,8 +184,6 @@ func (m *MQTTConsumer) receiver() {
 			if err != nil {
 				m.acc.AddError(fmt.Errorf("E! MQTT Parse Error\nmessage: %s\nerror: %s",
 					string(msg.Payload()), err.Error()))
-			} else {
-				log.Printf("D! Incoming message: %s", string(msg.Payload()))
 			}
 
 			for _, metric := range metrics {
