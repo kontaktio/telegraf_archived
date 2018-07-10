@@ -1,7 +1,8 @@
 package lastcalc
 
 import (
-	"fmt"
+	"log"
+	"time"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/metric"
@@ -21,7 +22,14 @@ type LastCalc struct {
 	TagKey       string `toml:"tag_key"`
 	Threshold    int64  `toml:"threshold"`
 
-	cache map[string]float64
+	cache map[string]lastScanInfo
+}
+
+type lastScanInfo struct {
+	lastValue          float64
+	lastScanTime       time.Time
+	lastZeroTime       time.Time
+	lastZeroTimeExists bool
 }
 
 func New() *LastCalc {
@@ -32,7 +40,7 @@ func New() *LastCalc {
 }
 
 func (p *LastCalc) Reset() {
-	p.cache = make(map[string]float64)
+	p.cache = make(map[string]lastScanInfo)
 }
 
 func (p *LastCalc) SampleConfig() string {
@@ -51,21 +59,36 @@ func (p *LastCalc) Apply(in ...telegraf.Metric) []telegraf.Metric {
 			fieldVal, _ := mt.GetField(p.FieldName)
 			floatFieldVal, typeOk := fieldVal.(float64)
 			if !typeOk {
-				fmt.Println("Invalid type of field", p.FieldName)
+				log.Printf("E! [processors.lastcalc] Invalid type of field %s", p.FieldName)
 				return in //Wrong type
 			}
 
-			prevVal, exists := p.cache[tag]
-			p.cache[tag] = floatFieldVal
+			scanInfo, exists := p.cache[tag]
 			if !exists {
+				p.cache[tag] = lastScanInfo{floatFieldVal, mt.Time(), mt.Time(), false}
 				result[idx] = p.copyAndReplaceField(mt, 0)
 				continue
 			}
 
 			var newFieldValue int32
-			if prevVal-float64(p.Threshold) > floatFieldVal {
+
+			if scanInfo.lastValue-float64(p.Threshold) > floatFieldVal &&
+				mt.Time().Sub(scanInfo.lastZeroTime).Seconds() > float64(p.Threshold) {
+				log.Printf("D! [processors.lastcalc] TrackingId: %s, Last val: %d, New val: %d\n", tag, int32(scanInfo.lastValue), int32(floatFieldVal))
 				newFieldValue = 1
+				p.cache[tag] = lastScanInfo{
+					floatFieldVal,
+					mt.Time(),
+					mt.Time(),
+					true,
+				}
 			} else {
+				p.cache[tag] = lastScanInfo{
+					floatFieldVal,
+					mt.Time(),
+					scanInfo.lastZeroTime,
+					scanInfo.lastZeroTimeExists,
+				}
 				newFieldValue = 0
 			}
 			result[idx] = p.copyAndReplaceField(mt, newFieldValue)

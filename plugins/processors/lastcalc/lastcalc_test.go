@@ -13,32 +13,49 @@ const FieldToChange = "fieldToChange"
 const ChangedField = "changedField"
 const MetricName = "telemetry"
 
-var metric1, _ = metric.New(
-	MetricName,
-	map[string]string{"topic": "abcd"},
-	map[string]interface{}{
-		FieldToChange: float64(45),
-	},
-	time.Now().Add(time.Duration(-2)),
-)
+func TestNotEmit1WhenTimeDiffTooSmall(t *testing.T) {
+	lastc := *New()
+	lastc.FieldName = FieldToChange
+	lastc.OutFieldName = ChangedField
+	lastc.Threshold = 1
+	lastc.TagKey = "topic"
+	lastc.Reset()
 
-var metric2, _ = metric.New(
-	MetricName,
-	map[string]string{"topic": "abcd"},
-	map[string]interface{}{
-		FieldToChange: float64(2),
-	},
-	time.Now(),
-)
+	var metric1Time, _ = time.ParseDuration("0m")
+	var metric2Time, _ = time.ParseDuration("500ms")
 
-var metric3, _ = metric.New(
-	MetricName,
-	map[string]string{"topic": "abcd"},
-	map[string]interface{}{
-		FieldToChange: float64(2),
-	},
-	time.Now().Add(time.Duration(2)),
-)
+	var metric1, _ = metric.New(
+		MetricName,
+		map[string]string{"topic": "abcd"},
+		map[string]interface{}{
+			FieldToChange: float64(45),
+		},
+		time.Now().Add(metric1Time),
+	)
+
+	var metric2, _ = metric.New(
+		MetricName,
+		map[string]string{"topic": "abcd"},
+		map[string]interface{}{
+			FieldToChange: float64(2),
+		},
+		time.Now().Add(metric2Time),
+	)
+
+	var result = lastc.Apply([]telegraf.Metric{metric1}...)
+	require.Equal(t, 1, len(result))
+	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
+	require.True(t, changedFieldExists)
+	require.Equal(t, int64(0), changedFieldValue)
+	require.False(t, result[0].HasField(FieldToChange))
+
+	result = lastc.Apply([]telegraf.Metric{metric2}...)
+	require.Equal(t, 1, len(result))
+	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
+	require.True(t, changedFieldExists)
+	require.Equal(t, int64(0), changedFieldValue)
+	require.False(t, result[0].HasField(FieldToChange))
+}
 
 func TestCreate(t *testing.T) {
 	var lastc LastCalc
@@ -48,6 +65,37 @@ func TestCreate(t *testing.T) {
 	lastc.Threshold = 1
 	lastc.TagKey = "topic"
 	lastc.Reset()
+
+	var metric1Time, _ = time.ParseDuration("-1m")
+	var metric2Time, _ = time.ParseDuration("0m")
+	var metric3Time, _ = time.ParseDuration("1m")
+
+	var metric1, _ = metric.New(
+		MetricName,
+		map[string]string{"topic": "abcd"},
+		map[string]interface{}{
+			FieldToChange: float64(45),
+		},
+		time.Now().Add(metric1Time),
+	)
+
+	var metric2, _ = metric.New(
+		MetricName,
+		map[string]string{"topic": "abcd"},
+		map[string]interface{}{
+			FieldToChange: float64(2),
+		},
+		time.Now().Add(metric2Time),
+	)
+
+	var metric3, _ = metric.New(
+		MetricName,
+		map[string]string{"topic": "abcd"},
+		map[string]interface{}{
+			FieldToChange: float64(2),
+		},
+		time.Now().Add(metric3Time),
+	)
 
 	var result = lastc.Apply([]telegraf.Metric{metric1}...)
 	require.Equal(t, 1, len(result))
