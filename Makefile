@@ -23,8 +23,10 @@ all:
 
 deps:
 	go get -u github.com/golang/lint/golint
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
+#	go get -u github.com/golang/dep/cmd/dep
+#	dep ensure
+	go get github.com/sparrc/gdm
+	gdm restore --parallel=false
 
 telegraf:
 	go build -ldflags "$(LDFLAGS)" ./cmd/telegraf
