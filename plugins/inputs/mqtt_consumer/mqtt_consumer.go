@@ -220,6 +220,7 @@ func (m *MQTTConsumer) Gather(acc telegraf.Accumulator) error {
 
 func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	opts := mqtt.NewClientOptions()
+	opts.SetProtocolVersion(3)
 
 	opts.ConnectTimeout = m.ConnectionTimeout.Duration
 
