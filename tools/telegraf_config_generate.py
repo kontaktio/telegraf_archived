@@ -190,6 +190,8 @@ cfg.append_key_value('name_override', 'telemetry')
 cfg.append_section_name('inputs.mqtt_consumer', True)
 cfg.append_key_value('servers', [options.get_mqtt_url()])
 cfg.append_key_value('qos', 0) # default
+cfg.append_key_value('connection_timeout', '300s')
+cfg.append_key_value('persistent_session', False)
 cfg.append_key_value('username', 'telegraf') # default
 cfg.append_key_value('password', options.get_api_key())
 cfg.append_key_value('data_format', 'json') # default
