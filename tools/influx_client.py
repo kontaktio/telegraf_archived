@@ -27,9 +27,10 @@ BEGIN
 END
 """
 
-    def __init__(self, address, user_name, password):
+    def __init__(self, address, port, user_name, password):
         self._client = InfluxDBClient(
-            host=address.replace('http://', ''), 
+            host=address,
+            port=port,
             username=user_name, 
             password=password)
 
