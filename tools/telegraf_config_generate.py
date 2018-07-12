@@ -84,7 +84,8 @@ DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
 options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
-influx_client = InfluxClient(options.get_influx_url(), 
+influx_client = InfluxClient(options.get_influx_url(),
+    options.get_influx_port(),
     options.get_influx_username(), 
     options.get_influx_password())
 
