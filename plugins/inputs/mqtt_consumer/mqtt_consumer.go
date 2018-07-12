@@ -139,7 +139,7 @@ func (m *MQTTConsumer) connect() error {
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
 		err := token.Error()
 		log.Printf("D! MQTT Consumer, connection error - %v", err)
-
+		m.connected = false
 		return err
 	}
 
@@ -220,7 +220,6 @@ func (m *MQTTConsumer) Gather(acc telegraf.Accumulator) error {
 
 func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	opts := mqtt.NewClientOptions()
-	opts.SetProtocolVersion(3)
 
 	opts.ConnectTimeout = m.ConnectionTimeout.Duration
 
