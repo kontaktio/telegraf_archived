@@ -2994,6 +2994,7 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 
 ## v1.7.1 [unreleased]
 ## v1.7.2 [unreleased]
+## v1.7.2 [2018-07-18]
 
 ### Bugfixes
 
