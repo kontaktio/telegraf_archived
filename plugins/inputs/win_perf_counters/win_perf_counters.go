@@ -23,8 +23,6 @@ var sampleConfig = `
   ## agent, it will not be gathered.
   ## Settings:
   # PrintValid = false # Print All matching performance counters
-  # Whether request a timestamp along with the PerfCounter data or just use current time
-  # UsePerfCounterTime=true
   # If UseWildcardsExpansion params is set to true, wildcards (partial wildcards in instance names and wildcards in counters names) in configured counter paths will be expanded
   # and in case of localized Windows, counter paths will be also localized. It also returns instance indexes in instance names.
   # If false, wildcards (not partial) in instance names will still be expanded, but instance indexes will not be returned in instance names.
@@ -80,7 +78,6 @@ type Win_PerfCounters struct {
 	PrintValid bool
 	//deprecated: determined dynamically
 	PreVistaSupport         bool
-	UsePerfCounterTime      bool
 	Object                  []perfobject
 	CountersRefreshInterval internal.Duration
 	UseWildcardsExpansion   bool
@@ -108,12 +105,6 @@ type counter struct {
 	measurement   string
 	includeTotal  bool
 	counterHandle PDH_HCOUNTER
-}
-
-type instanceGrouping struct {
-	name       string
-	instance   string
-	objectname string
 }
 
 var sanitizedChars = strings.NewReplacer("/sec", "_persec", "/Sec", "_persec",
@@ -156,7 +147,7 @@ func (m *Win_PerfCounters) SampleConfig() string {
 func (m *Win_PerfCounters) AddItem(counterPath string, objectName string, instance string, counterName string, measurement string, includeTotal bool) error {
 	var err error
 	var counterHandle PDH_HCOUNTER
-	if !m.query.IsVistaOrNewer() {
+	if !m.query.AddEnglishCounterSupported() {
 		counterHandle, err = m.query.AddCounterToQuery(counterPath)
 		if err != nil {
 			return err
@@ -258,15 +249,18 @@ func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
 			m.counters = m.counters[:0]
 		}
 
-		if err = m.query.Open(); err != nil {
+		err = m.query.Open()
+		if err != nil {
 			return err
 		}
 
-		if err = m.ParseConfig(); err != nil {
+		err = m.ParseConfig()
+		if err != nil {
 			return err
 		}
 		//some counters need two data samples before computing a value
-		if err = m.query.CollectData(); err != nil {
+		err = m.query.CollectData()
+		if err != nil {
 			return err
 		}
 		m.lastRefreshed = time.Now()
@@ -274,31 +268,37 @@ func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
 		time.Sleep(time.Second)
 	}
 
-	var collectFields = make(map[instanceGrouping]map[string]interface{})
-
-	var timestamp time.Time
-	if m.UsePerfCounterTime && m.query.IsVistaOrNewer() {
-		timestamp, err = m.query.CollectDataWithTime()
-		if err != nil {
-			return err
-		}
-	} else {
-		timestamp = time.Now()
-		if err = m.query.CollectData(); err != nil {
-			return err
-		}
+	type InstanceGrouping struct {
+		name       string
+		instance   string
+		objectname string
 	}
 
+	var collectFields = make(map[InstanceGrouping]map[string]interface{})
+
+	err = m.query.CollectData()
+	if err != nil {
+		return err
+	}
 	// For iterate over the known metrics and get the samples.
 	for _, metric := range m.counters {
 		// collect
 		if m.UseWildcardsExpansion {
 			value, err := m.query.GetFormattedCounterValueDouble(metric.counterHandle)
 			if err == nil {
-				addCounterMeasurement(metric, metric.instance, value, collectFields)
+				measurement := sanitizedChars.Replace(metric.measurement)
+				if measurement == "" {
+					measurement = "win_perf_counters"
+				}
+
+				var instance = InstanceGrouping{measurement, metric.instance, metric.objectName}
+				if collectFields[instance] == nil {
+					collectFields[instance] = make(map[string]interface{})
+				}
+				collectFields[instance][sanitizedChars.Replace(metric.counter)] = float32(value)
 			} else {
-				//ignore invalid data  as some counters from process instances returns this sometimes
-				if !isKnownCounterDataError(err) {
+				//ignore invalid data from as some counters from process instances returns this sometimes
+				if phderr, ok := err.(*PdhError); ok && phderr.ErrorCode != PDH_INVALID_DATA && phderr.ErrorCode != PDH_CALC_NEGATIVE_VALUE {
 					return fmt.Errorf("error while getting value for counter %s: %v", metric.counterPath, err)
 				}
 			}
@@ -326,13 +326,17 @@ func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
 					}
 
 					if add {
-						addCounterMeasurement(metric, cValue.InstanceName, cValue.Value, collectFields)
+						measurement := sanitizedChars.Replace(metric.measurement)
+						if measurement == "" {
+							measurement = "win_perf_counters"
+						}
+						var instance = InstanceGrouping{measurement, cValue.InstanceName, metric.objectName}
+
+						if collectFields[instance] == nil {
+							collectFields[instance] = make(map[string]interface{})
+						}
+						collectFields[instance][sanitizedChars.Replace(metric.counter)] = float32(cValue.Value)
 					}
-				}
-			} else {
-				//ignore invalid data as some counters from process instances returns this sometimes
-				if !isKnownCounterDataError(err) {
-					return fmt.Errorf("error while getting value for counter %s: %v", metric.counterPath, err)
 				}
 			}
 		}
@@ -345,31 +349,10 @@ func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
 		if len(instance.instance) > 0 {
 			tags["instance"] = instance.instance
 		}
-		acc.AddFields(instance.name, fields, tags, timestamp)
+		acc.AddFields(instance.name, fields, tags)
 	}
 
 	return nil
-}
-
-func addCounterMeasurement(metric *counter, instanceName string, value float64, collectFields map[instanceGrouping]map[string]interface{}) {
-	measurement := sanitizedChars.Replace(metric.measurement)
-	if measurement == "" {
-		measurement = "win_perf_counters"
-	}
-	var instance = instanceGrouping{measurement, instanceName, metric.objectName}
-	if collectFields[instance] == nil {
-		collectFields[instance] = make(map[string]interface{})
-	}
-	collectFields[instance][sanitizedChars.Replace(metric.counter)] = float32(value)
-}
-
-func isKnownCounterDataError(err error) bool {
-	if pdhErr, ok := err.(*PdhError); ok && (pdhErr.ErrorCode == PDH_INVALID_DATA ||
-		pdhErr.ErrorCode == PDH_CALC_NEGATIVE_VALUE ||
-		pdhErr.ErrorCode == PDH_CSTATUS_INVALID_DATA) {
-		return true
-	}
-	return false
 }
 
 func init() {
