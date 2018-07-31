@@ -28,6 +28,7 @@ type MQTTConsumer struct {
 	Password          string
 	QoS               int               `toml:"qos"`
 	ConnectionTimeout internal.Duration `toml:"connection_timeout"`
+	IdleTimeout       internal.Duration `toml:"idle_timeout"`
 
 	parser parsers.Parser
 
@@ -48,6 +49,8 @@ type MQTTConsumer struct {
 	acc telegraf.Accumulator
 
 	connected bool
+
+	lastData time.Time
 }
 
 var sampleConfig = `
@@ -59,6 +62,9 @@ var sampleConfig = `
   qos = 0
   ## Connection timeout for initial connection in seconds
   connection_timeout = "30s"
+
+  ## Timeout when no data is received
+  idle_timeout = "60s"
 
   ## Topics to subscribe to
   topics = [
@@ -164,6 +170,7 @@ func (m *MQTTConsumer) onConnect(c mqtt.Client) {
 				strings.Join(m.Topics[:], ","), subscribeToken.Error()))
 		} else {
 			m.connected = true
+			go m.idleHandler()
 		}
 	}
 	return
@@ -182,6 +189,7 @@ func (m *MQTTConsumer) receiver() {
 		case <-m.done:
 			return
 		case msg := <-m.in:
+			m.lastData = time.Now()
 			topic := msg.Topic()
 			metrics, err := m.parser.Parse(msg.Payload())
 			if err != nil {
@@ -276,10 +284,28 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	return opts, nil
 }
 
+func (m *MQTTConsumer) idleHandler() {
+	m.lastData = time.Now()
+	for {
+		if !m.connected {
+			return
+		}
+
+		now := time.Now()
+		if m.lastData.Add(m.IdleTimeout.Duration).Before(now) {
+			log.Printf("W! mqtt_consumer detected idle period of %.0f seconds", m.IdleTimeout.Duration.Seconds())
+			m.connected = false
+			m.connect()
+		}
+		time.Sleep(2 * time.Second)
+	}
+}
+
 func init() {
 	inputs.Add("mqtt_consumer", func() telegraf.Input {
 		return &MQTTConsumer{
 			ConnectionTimeout: defaultConnectionTimeout,
+			IdleTimeout:       defaultIdleTimeout,
 		}
 	})
 }
