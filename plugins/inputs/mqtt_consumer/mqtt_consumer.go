@@ -287,17 +287,21 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 func (m *MQTTConsumer) idleHandler() {
 	m.lastData = time.Now()
 	for {
-		if !m.connected {
+		select {
+		case <-m.done:
 			return
+		default:
+			{
+				now := time.Now()
+				if m.lastData.Add(m.IdleTimeout.Duration).Before(now) {
+					log.Printf("W! mqtt_consumer detected idle period of %.0f seconds", m.IdleTimeout.Duration.Seconds())
+					m.connected = false
+					m.connect()
+					return
+				}
+				time.Sleep(2 * time.Second)
+			}
 		}
-
-		now := time.Now()
-		if m.lastData.Add(m.IdleTimeout.Duration).Before(now) {
-			log.Printf("W! mqtt_consumer detected idle period of %.0f seconds", m.IdleTimeout.Duration.Seconds())
-			m.connected = false
-			m.connect()
-		}
-		time.Sleep(2 * time.Second)
 	}
 }
 
