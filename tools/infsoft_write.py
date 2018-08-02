@@ -6,6 +6,7 @@ import hashlib
 import struct
 from datetime import datetime, timedelta
 from uuid import UUID
+import json
 
 API_KEY_PARAM = 'api_key'
 LOCATION_ID_PARAM = 'location_id'
@@ -13,12 +14,14 @@ INFSOFT_URL = 'https://api.infsoft.com'
 INFSOFT_BLE_SCAN_PATH = '/v1/locatornode-scan/ble'
 
 class InfsoftWriter(Handler):
-    def __init__(self):
+    def __init__(self, agent):
         self._api_key = ''
         self._location_id = 0
         self._interval = timedelta(seconds=0)
         self._last_flush = datetime.now()
         self._points = {}
+        self._tx_power = 0
+        self._agent = agent
 
     def info(self):
         response = udf_pb2.Response()
@@ -28,6 +31,7 @@ class InfsoftWriter(Handler):
         response.info.options['apikey'].valueTypes.append(udf_pb2.STRING)
         response.info.options['locationid'].valueTypes.append(udf_pb2.INT)
         response.info.options['interval'].valueTypes.append(udf_pb2.INT)
+        response.info.options['txpower'].valueTypes.append(udf_pb2.INT)
 
         return response
 
@@ -39,8 +43,14 @@ class InfsoftWriter(Handler):
                 self._location_id = opt.values[0].intValue
             elif opt.name == 'interval':
                 self._interval = opt.values[0].intValue
+            elif opt.name == 'txpower':
+                self._tx_power = opt.values[0].intValue
 
-        print >> sys.stderr, 'ApiKey: %s, LocationId: %d, Interval: %s' % (self._api_key, self._location_id, str(self._interval))
+        print >> sys.stderr, 'ApiKey: %s, LocationId: %d, Interval: %s, TxPower: %d' % (
+            self._api_key, 
+            self._location_id, 
+            str(self._interval),
+            self._tx_power)
 
         success = True
         msg = ''
@@ -54,6 +64,9 @@ class InfsoftWriter(Handler):
         if self._interval == 0:
             success = False
             msg = msg + 'interval is required '
+        if self._tx_power == 0:
+            success = False
+            msg = msg + 'txpower is required '
 
         response = udf_pb2.Response()
         response.init.success = success
@@ -62,54 +75,75 @@ class InfsoftWriter(Handler):
         return response
 
 
-    def point(self, point):
-        print >> sys.stderr, str(point.fieldsString)
-        print >> sys.stderr, str(point.fieldsInt)
-        trackingId = point.fieldsString['trackingId']
-        sourceId = point.fieldsString['sourceId']
-        rssi = point.fieldsInt['rssi']
-        tx_power = point.fieldsInt['txPower']
+    def point(self, point):        
+        trackingId = point.tags['trackingId']
+        sourceId = point.tags['sourceId']
+        rssi = int(point.fieldsDouble['rssi'])
 
-        self._points[(trackingId, sourceId)] = (rssi, tx_power)
+        self._points[(trackingId, sourceId)] = rssi
         if datetime.now() - self._last_flush > timedelta(seconds=self._interval):
             self._emit_points()
             self._last_flush = datetime.now()
             self._points.clear()
 
+    def snapshot(self):
+        response = udf_pb2.Response()
+        response.snapshot.snapshot = ''
+        return response
+
     def _emit_points(self):
-        pass
+        print >> sys.stderr, ",".join([
+            "%s, %s -> %s" % (k, v, self._points[(k, v)]) for k, v in self._points
+        ])
+        scans = {}
+        for tracking_id, source_id in self._points:
+            if source_id not in scans:
+                scans[source_id] = []
+
+            rssi = self._points[(tracking_id, source_id)]
+            scans[source_id].append((tracking_id, rssi))
+
+        self._push_to_infsoft(scans)
+
 
     def _push_to_infsoft(self, scans):
         """
-        scans = {
-            "source_id": sourceid,
-            "items": [
-                (tracking_id, rssi, tx_power),
-                (tracking_id, rssi, tx_power)
-            ]
-        }
+        scans = 
+            {
+                sourceid: [
+                    (tracking_id, rssi),
+                    (tracking_id, rssi)
+                ],
+                sourceid2: [...]
+            }
         """
-        items = []
-        for tracking_id, rssi, tx_power in scans['items']:
-            proximity, major, minor, mac = self._extract_proximity_major_minor_mac(tracking_id)
-            items.append({
-                "ble_mac": mac,
-                "ble_proximityuuid": proximity,
-                "ble_major": major,
-                "ble_minor": minor,
-                "ble_txpower": tx_power,
-                "ble_databyte": 0,
-                "rssi": rssi
-            })
-        packet = {
-            "ln_eth_mac": self._extract_mac(scans['source_id']),
-            "items": items
-        }
+        packets = []
+        for source_id in scans:
+            items = []
+            for tracking_id, rssi in scans[source_id]:
+                proximity, major, minor, mac = self._extract_proximity_major_minor_mac(tracking_id)
+                items.append({
+                    "ble_mac": mac,
+                    "ble_proximityuuid": str(proximity),
+                    "ble_major": major,
+                    "ble_minor": minor,
+                    "ble_txpower": self._tx_power,
+                    "ble_databyte": 0,
+                    "rssi": rssi
+                })
+            packet = {
+                "ln_eth_mac": self._extract_mac(source_id),
+                "items": items
+            }
+            packets.append(packet)
 
-        requests.post(INFSOFT_URL + INFSOFT_BLE_SCAN_PATH, json=packet, params={
+        response = requests.post(INFSOFT_URL + INFSOFT_BLE_SCAN_PATH, data=json.dumps(packets), params={
             LOCATION_ID_PARAM: self._location_id,
             API_KEY_PARAM: self._api_key
+        }, headers = {
+            "Content-Type": "application/json"
         })
+        print >> sys.stderr, "Infsoft responded with code %d" % response.status_code
 
 
     def _extract_proximity_major_minor_mac(self, tracking_id):
@@ -120,13 +154,13 @@ class InfsoftWriter(Handler):
         return (proximity, major, minor, mac)
 
     def _extract_mac(self, value):
-        hashed = hashlib.md5(source_id)
+        hashed = hashlib.md5(value)
         mac_without_separators = hashed.hexdigest()[:12]
         return ':'.join([mac_without_separators[i:i+2] for i in range(0, 12, 2)])
 
 if __name__ == '__main__':
     agent = Agent()
-    handler = InfsoftWriter()
+    handler = InfsoftWriter(agent)
     agent.handler = handler
 
     print >> sys.stderr, "Starting Infsoft Writer"
