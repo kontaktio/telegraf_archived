@@ -1,0 +1,16 @@
+var apikey string
+var locationid int: 0
+var interval int: 10
+var database string
+
+stream
+    |from()
+        .measurement('telemetry')
+    @infsoftwriter()
+        .apikey(apikey)
+        .locationid(locationid)
+        .interval(interval)
+    |influxDBOut()
+        .database(database)
+        .measurement('location')
+        .tag('trackingId', 'values.trackingId')
