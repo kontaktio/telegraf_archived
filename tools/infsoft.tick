@@ -1,6 +1,7 @@
 var apikey string
 var locationid int: 0
 var interval int: 10
+var txpower int: -77
 var database string
 
 stream
