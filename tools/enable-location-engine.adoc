@@ -1,0 +1,84 @@
+= Location engine in BA
+
+== Steps in API:
+
+* Place gateways on map
+
+* To configure Infsoft's cloud access parameters, call `POST /venue/locationengine` with parameters:
+
+[cols=2*,options="header"]
+|===
+|ParamName
+|Description
+
+|`venueId`|ID of venue to enable LE in
+|`enabled`|Whether to enable LE
+|`infsoft.apiKey`|Api-Key provided by Infsoft
+|`infsoft.locationId`|ID of Infsoft's location to use
+|===
+
+* To synchronize placed Gateways with Infsoft's cloud, all `POST /venue/locationengine/sync` with parameter:
+
+[cols=2*,options="header"]
+|===
+|ParamName
+|Description
+
+|`venueId`|ID of venue to synchronize with Infsoft cloud
+|===
+
+== Steps in Telegraf
+
+* Execute Jenkins Job `Miscellaneous/telegraf-start-{ENVIRONMENT}` with Your apiKey and some label
+* **[To be automated]** - to start gathering realtime position of beacons, start telegraf with configuration:
+```
+[[inputs.http]]
+  urls = [
+    "https://api.infsoft.com/v1/devices-realtime/ble?api_key={{APIKEY}}&location_id={{LOCATION_ID}}"
+  ]
+  timeout = "5s"
+  data_format = "json"
+  tag_keys = [
+    "ble_proximityuuid"
+  ]
+
+[[processors.override]]
+  name_override="position"
+
+[[processors.trackingidresolver]]
+  tag_name = "ble_proximityuuid"
+  new_tag_name = "trackingId"
+
+[[outputs.file]]
+  files = ["stdout"]
+
+[[outputs.influxdb]]
+  urls=["http://{{INFLUX_ADDRESS:8086"]
+  database="{{COMPANY_ID}}"
+  username="{{ROOT_USERNAME}}"
+  password="{{ROOT_PASSWORD}}"
+  precision="s"
+  timeout="5s"
+  retention_policy="stream_rp"
+```
+
+== Steps in Kapacitor
+
+* **[To be automated]** - Copy infsoft_write.py file to some location accessible by `kapacitor` user, and grant read to it.
+* **[To be automated]** - Edit [udf] part of Kapacitor configuration (`/etc/kapacitor/kapacitor.conf`):
+```
+[udf.functions.infsoftwriter]
+  prog = '{{LOCATION_OF_PYTHON27}}'
+  args = ['-u', '{{INFSOFT_WRITE_FILE_LOCATION}} ']
+  timeout = '10s'
+```
+
+* **[To be automated]**, **[Optional - only when changed]** - Register infsoft.tick task template by calling
+```
+kapacitor define-template infsoft-tpl -tick {{LOCATION_OF_INFSOFT_TICK}}
+```
+* **[To be automated]** - Fill values in `kapacitor-task-def.json` file and call
+```
+kapacitor define infsoft_{{LABEL}} -template infsoft-tpl -vars kapacitor-task-def.json -dbrp {{DATABASE}}.{{RETENTION_POLICY}}
+```
+* **[To be automated]** - Call `kapacitor enable infsoft_{{LABEL}}` to start sending data to Infsoft cloud
