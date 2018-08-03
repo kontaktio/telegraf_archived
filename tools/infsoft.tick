@@ -1,8 +1,7 @@
 var apikey string
-var locationid int: 0
-var interval int: 10
-var txpower int: -77
-var database string
+var locationid int
+var interval = 10
+var txpower = -77
 
 stream
     |from()
@@ -11,7 +10,4 @@ stream
         .apikey(apikey)
         .locationid(locationid)
         .interval(interval)
-    |influxDBOut()
-        .database(database)
-        .measurement('location')
-        .tag('trackingId', 'values.trackingId')
+        .txpower(txpower)
