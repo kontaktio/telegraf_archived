@@ -53,7 +53,7 @@
   files = ["stdout"]
 
 [[outputs.influxdb]]
-  urls=["http://{{INFLUX_ADDRESS:8086"]
+  urls=["http://{{INFLUX_ADDRESS}}:8086"]
   database="{{COMPANY_ID}}"
   username="{{ROOT_USERNAME}}"
   password="{{ROOT_PASSWORD}}"
@@ -69,7 +69,7 @@
 ```
 [udf.functions.infsoftwriter]
   prog = '{{LOCATION_OF_PYTHON27}}'
-  args = ['-u', '{{INFSOFT_WRITE_FILE_LOCATION}} ']
+  args = ['-u', '{{INFSOFT_WRITE_PY_FILE_LOCATION}} ']
   timeout = '10s'
 ```
 
