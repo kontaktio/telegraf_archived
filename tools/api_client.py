@@ -3,8 +3,11 @@ import requests
 
 class ApiClient:
     ACCEPT = 'application/vnd.com.kontakt+json;version=10'
-    GET_DEVICES_PATH = '/device'
-    GET_MANAGER_ME_PATH = '/manager/me'
+    GET_DEVICES_PATH = '%s/device'
+    GET_VENUE_PATH = '%s/venue'
+    GET_VENUE_LOCATION_ENGINE_PATH = '%s/venue/locationengine/'
+    GET_MANAGER_ME_PATH = '%s/manager/me'
+    VENUE_ID_SELECTOR = 'id'
     MODELS_NOT_SUPPORTING_TLM = ['SMART_BEACON', 'CARD_BEACON', 'USB_BEACON', 'SENSOR_BEACON']
 
     def __init__(self, api_url, api_key):
@@ -25,12 +28,29 @@ class ApiClient:
         print "Received uniqueIds: %s" % str(unique_ids)
         return unique_ids
 
+    def get_location_engine_venues(self, api_venue_id=None):
+        if api_venue_id is not None:
+            return self._get_location_engine_configs([api_venue_id])
+        
+        venues = self._get_collection(self.GET_VENUE_PATH, {}, 'venues')
+        venue_ids = [v['id'] for v in venues]
+        return self._get_location_engine_configs(venue_ids)
+
     def get_company_id(self):
-        response = requests.get(self._api_url + self.GET_MANAGER_ME_PATH, headers=self._get_headers()).json()
+        response = requests.get(self.GET_MANAGER_ME_PATH % self._api_url, headers=self._get_headers()).json()
         company_id = str(response['company']['id'])
         print "Received companyId %s" % company_id
         return company_id
 
+    def _get_location_engine_configs(self, venue_ids):
+        result = {}
+        for venue_id in venue_ids:
+            url =  self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
+            response = requests.get(url, headers=self._get_headers(), params={"venueId": venue_id})
+            if response.status_code == 200:
+                result[venue_id] = response.json()
+
+        return result
 
     def _filter_telemetry_not_compatible(self, collection):
         return [b for b in collection if b['model'] not in self.MODELS_NOT_SUPPORTING_TLM]
@@ -46,7 +66,7 @@ class ApiClient:
         params['startIndex'] = 0
         params['maxResult'] = 500
         while True:
-            response = requests.get(self._api_url + path, headers=self._get_headers(), params=params).json()
+            response = requests.get(path % self._api_url, headers=self._get_headers(), params=params).json()
             for r in response[collection_name]:
                 result.append(r)
             if response['searchMeta']['nextResults'] == '':
