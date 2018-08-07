@@ -13,7 +13,7 @@ class Options(object):
 
     def __init__(self, args):
         parser = argparse.ArgumentParser(
-            description="Generate Telegraf config for K.io API Account",
+            description="Generate Streams Telegraf config for K.io API Account",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument("--api-key", dest="api_key", required=True)
         parser.add_argument("--influxdb-url", dest="influxdb_url", required=True)
@@ -204,7 +204,7 @@ for topic_chunk in topic_chunks:
     current = TelegrafConfigFormatter(cfg)
     current.append_key_value('topics', topic_chunk)
 
-    f = open("telegraf.conf.%d" % idx, "w")
+    f = open("telegraf.stream.conf.%d" % idx, "w")
     f.write(current.to_string())
     f.close()
     idx = idx + 1
