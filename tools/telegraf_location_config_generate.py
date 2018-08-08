@@ -10,7 +10,8 @@ from telegraf_config import TelegrafConfigFormatter
 from kapacitor_client import KapacitorClient
 
 INFSOFT_REALTIME_ENDPOINT = 'https://api.infsoft.com/v1/devices-realtime/ble'
-KAPACITOR_TASK_NAME = "location_%s"
+KAPACITOR_POSITION_TASK_NAME = "position_%s"
+KAPACITOR_LOCATION_TASK_NAME = "location_%s"
 
 class Options(object): 
     CONFIG_FILE_SECTION = 'default'
@@ -88,6 +89,13 @@ api_client = ApiClient(options.get_api_url(), options.get_api_key())
 company_id = api_client.get_company_id()
 kapacitor_client = KapacitorClient(options.get_kapacitor_url(), company_id, 'stream_rp')
 
+location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
+kapacitor_location_task = kapacitor_client.get_task_info(location_task_name)
+if 'error' in kapacitor_location_task:
+    result = kapacitor_client.create_task(location_task_name, 'location-tpl')
+    if len(result['error']) > 0: 
+        raise(Exception(result['error']))
+
 location_engine_configs = api_client.get_location_engine_venues(options.get_api_venue_id())
 if len(location_engine_configs) == 0:
     print 'None of selected account venues has Location Engine configured!'
@@ -147,7 +155,7 @@ for venue_id, location_engine_config in location_engine_configs.iteritems():
         
     idx = idx + 1
 
-    task_name = KAPACITOR_TASK_NAME % venue_id
+    task_name = KAPACITOR_POSITION_TASK_NAME % venue_id
     kapacitor_task = kapacitor_client.get_task_info(task_name)
     if 'error' in kapacitor_task:
         result = kapacitor_client.create_task(task_name, 'infsoft-tpl',
