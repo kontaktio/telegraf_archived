@@ -1,6 +1,9 @@
 var period_time = 10s
 var every_time = 5s
 
+var database String
+var retention_policy = 'current_rp'
+
 stream
     |from()
         .measurement('telemetry')
@@ -10,4 +13,6 @@ stream
         .align()
     @locationEngine()
     |influxDBOut()
+        .database(database)
+        .retentionPolicy(retention_policy)
         .measurement('locations')
