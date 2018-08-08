@@ -22,7 +22,7 @@ class Options(object):
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('--api-key', dest='api_key', required=True)
         parser.add_argument('--kapacitor-url', dest='kapacitor_url', required=True)
-        parser.add_argument('--kapacitor-user', dest='kapacitor_user', default='kontaktio')
+        parser.add_argument('--kapacitor-user', dest='kapacitor_user', required=True)
         parser.add_argument('--kapacitor-pass', dest='kapacitor_pass', required=True)
         parser.add_argument('--influxdb-url', dest='influxdb_url', required=True)
         parser.add_argument('--influxdb-port', dest='influxdb_port', default=8086, type=int)
