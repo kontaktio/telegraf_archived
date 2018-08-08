@@ -22,7 +22,7 @@ class Options(object):
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('--api-key', dest='api_key', required=True)
         parser.add_argument('--kapacitor-url', dest='kapacitor_url', required=True)
-        parser.add_argument('--kapacitor-user', dest='kapacitor_user', required=True)
+        parser.add_argument('--kapacitor-user', dest='kapacitor_user', default='kontaktio')
         parser.add_argument('--kapacitor-pass', dest='kapacitor_pass', required=True)
         parser.add_argument('--influxdb-url', dest='influxdb_url', required=True)
         parser.add_argument('--influxdb-port', dest='influxdb_port', default=8086, type=int)
@@ -100,7 +100,12 @@ kapacitor_client = KapacitorClient(options, company_id, 'stream_rp')
 location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
 kapacitor_location_task = kapacitor_client.get_task_info(location_task_name)
 if 'error' in kapacitor_location_task:
-    result = kapacitor_client.create_task(location_task_name, 'location-tpl', {'database': company_id})
+    result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
+        'database': {
+            'value': company_id,
+            'type': 'string'
+        }
+    })
     if len(result['error']) > 0: 
         raise(Exception(result['error']))
 
