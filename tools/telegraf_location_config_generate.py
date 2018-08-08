@@ -100,7 +100,7 @@ kapacitor_client = KapacitorClient(options, company_id, 'stream_rp')
 location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
 kapacitor_location_task = kapacitor_client.get_task_info(location_task_name)
 if 'error' in kapacitor_location_task:
-    result = kapacitor_client.create_task(location_task_name, 'location-tpl')
+    result = kapacitor_client.create_task(location_task_name, 'location-tpl', {'database': company_id})
     if len(result['error']) > 0: 
         raise(Exception(result['error']))
 
