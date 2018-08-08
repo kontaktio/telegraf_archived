@@ -1,5 +1,0 @@
-{
-    "apikey": {"type": "string", "value": "{{INFSOFT_API_KEY}}"},
-    "locationid": {"type": "int", "value": "{{INFSOFT_LOCATION_ID}}"},
-    "txpower": {"type": "int", "value": "{{BEACONS_TX_POWER}}"}
-}

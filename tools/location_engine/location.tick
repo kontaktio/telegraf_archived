@@ -1,0 +1,13 @@
+var period_time = 10s
+var every_time = 5s
+
+stream
+    |from()
+        .measurement('telemetry')
+    |window()
+        .period(period_time)
+        .every(every_time)
+        .align()
+    @locationEngine()
+    |influxDBOut()
+        .measurement('locations')
