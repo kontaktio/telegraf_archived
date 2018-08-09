@@ -30,7 +30,7 @@
 == Steps in Telegraf
 
 * Execute Jenkins Job `Miscellaneous/telegraf-start-{ENVIRONMENT}` with Your apiKey and some label
-* **[To be automated]** - to start gathering realtime position of beacons, start telegraf with configuration:
+* **[Automated - left here just for info]** - to start gathering realtime position of beacons, start telegraf with configuration:
 ```
 [[inputs.http]]
   urls = [
@@ -64,8 +64,8 @@
 
 == Steps in Kapacitor
 
-* **[To be automated]** - Copy infsoft_write.py file to some location accessible by `kapacitor` user, and grant read to it.
-* **[To be automated]** - Edit [udf] part of Kapacitor configuration (`/etc/kapacitor/kapacitor.conf`):
+* **[Only on script/kapacitor change]** - Copy infsoft_write.py file to some location accessible by `kapacitor` user, and grant read to it.
+* **[Only on kapacitor change]** - Edit [udf] part of Kapacitor configuration (`/etc/kapacitor/kapacitor.conf`):
 ```
 [udf.functions.infsoftwriter]
   prog = '{{LOCATION_OF_PYTHON27}}'
@@ -73,12 +73,12 @@
   timeout = '10s'
 ```
 
-* **[To be automated]**, **[Optional - only when changed]** - Register infsoft.tick task template by calling
+* **[Only on script/kapacitor change]** - Register infsoft.tick task template by calling
 ```
 kapacitor define-template infsoft-tpl -tick {{LOCATION_OF_INFSOFT_TICK}}
 ```
-* **[To be automated]** - Fill values in `kapacitor-task-def.json` file and call
+* **[Automated - left here just for info]** - Fill values in `kapacitor-task-def.json` file and call
 ```
 kapacitor define infsoft_{{LABEL}} -template infsoft-tpl -vars kapacitor-task-def.json -dbrp {{DATABASE}}.{{RETENTION_POLICY}}
 ```
-* **[To be automated]** - Call `kapacitor enable infsoft_{{LABEL}}` to start sending data to Infsoft cloud
+* **[Automated - left here just for info]** - Call `kapacitor enable infsoft_{{LABEL}}` to start sending data to Infsoft cloud
