@@ -27,6 +27,10 @@ BEGIN
 END
 """
 
+    REMOVE_CONTINUOUS_QUERY_FMT = """
+DROP CONTINUOUS QUERY "telemetry_{0}_cq" ON "{1}"
+    """
+
     def __init__(self, address, port, user_name, password):
         self._client = InfluxDBClient(
             host=address.replace('http://', ''),
@@ -48,8 +52,21 @@ END
         print "Creating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
         self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
 
-    def create_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time):
-        q = self.CONTINUOUS_QUERY_FMT.format(aggregation_time, retention_policy, source_retention_policy, resample_time, database_name)
-        print "Executing query %s" % q
-        self._client.query(q, database=database_name)
+    def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time):
+        self._execute_query(self.REMOVE_CONTINUOUS_QUERY_FMT.format(
+            aggregation_time,
+            database_name), 
+            database_name)
+        
+        self._execute_query(self.CONTINUOUS_QUERY_FMT.format(
+            aggregation_time, 
+            retention_policy, 
+            source_retention_policy, 
+            resample_time, 
+            database_name), 
+            database_name)
+
+    def _execute_query(self, query, database_name):
+        print "Executing query %s" % query
+        self._client.query(query, database=database_name)
     
