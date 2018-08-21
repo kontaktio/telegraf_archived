@@ -24,7 +24,7 @@ BEGIN
         "{1}"."telemetry_{0}"
     FROM 
        "{2}"."telemetry"
-    GROUP BY time({0}), trackingId
+    GROUP BY time({0}), *
 END
 """
 
