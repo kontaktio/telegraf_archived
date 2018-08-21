@@ -18,7 +18,8 @@ BEGIN
         mean("temperature") AS "temperature", 
         mean("x") AS "x", 
         mean("y") AS "y", 
-        mean("z") AS "z"
+        mean("z") AS "z",
+        max("dataLogger") AS "dataLogger"
     INTO 
         "{1}"."telemetry_{0}"
     FROM 
