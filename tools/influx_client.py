@@ -19,12 +19,12 @@ BEGIN
         mean("x") AS "x", 
         mean("y") AS "y", 
         mean("z") AS "z",
-        max("dataLogger") AS "dataLogger"
+        max("history") AS "history"
     INTO 
         "{1}"."telemetry_{0}"
     FROM 
        "{2}"."telemetry"
-    GROUP BY time({0}), trackingId
+    GROUP BY time({0}), *
 END
 """
 
