@@ -16,6 +16,7 @@ const (
 	testMsgNeg      = "cpu_load_short,host=server01 value=-23422.0 1422568543702900257\n"
 	testMsgGraphite = "cpu.load.short.graphite 23422 1454780029"
 	testMsgJSON     = "{\"a\": 5, \"b\": {\"c\": 6}}\n"
+	testEmptyJSON   = "{}\n"
 	invalidMsg      = "cpu_load_short,host=server01 1422568543702900257\n"
 )
 
@@ -185,6 +186,22 @@ func TestRunParserAndGatherJSON(t *testing.T) {
 			"a":   float64(5),
 			"b_c": float64(6),
 		})
+}
+
+func TestRunParserOnEmptyJSONObject(t *testing.T) {
+	n, in := newTestMQTTConsumer()
+	acc := testutil.Accumulator{}
+	n.acc = &acc
+	defer close(n.done)
+
+	n.parser, _ = parsers.NewJSONParser("empty_json_test", []string{}, nil)
+	go n.receiver()
+	in <- mqttMsg(testEmptyJSON)
+
+	n.Gather(&acc)
+
+	acc.Wait(1)
+	acc.AssertDoesNotContainMeasurement(t, "empty_json_test")
 }
 
 func mqttMsg(val string) mqtt.Message {

@@ -189,9 +189,14 @@ func (m *MQTTConsumer) receiver() {
 		case <-m.done:
 			return
 		case msg := <-m.in:
-			m.lastData = time.Now()
 			topic := msg.Topic()
 			metrics, err := m.parser.Parse(msg.Payload())
+			for _, metric := range metrics {
+				if len(metric.TagList()) > 0 || len(metric.FieldList()) > 0 {
+					m.lastData = time.Now()
+					break
+				}
+			}
 			if err != nil {
 				m.acc.AddError(fmt.Errorf("E! MQTT Parse Error\nmessage: %s\nerror: %s",
 					string(msg.Payload()), err.Error()))
