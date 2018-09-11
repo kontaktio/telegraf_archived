@@ -31,5 +31,8 @@ class KapacitorClient():
         result = requests.post(self.TASKS % self._address, json=payload, auth=self._auth())
         return result.json()
 
+    def remove_task(self, id):
+        result = requests.delete(self.TASK % (self._address, id), auth=self._auth())
+
     def _auth(self):
         return (self._username, self._password)
