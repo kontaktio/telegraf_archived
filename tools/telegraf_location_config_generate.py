@@ -98,16 +98,15 @@ company_id = api_client.get_company_id()
 kapacitor_client = KapacitorClient(options, company_id, 'stream_rp')
 
 location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
-kapacitor_location_task = kapacitor_client.get_task_info(location_task_name)
-if 'error' in kapacitor_location_task:
-    result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
-        'database': {
-            'value': company_id,
-            'type': 'string'
-        }
-    })
-    if len(result['error']) > 0: 
-        raise(Exception(result['error']))
+kapacitor_client.remove_task(location_task_name)
+result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
+    'database': {
+        'value': company_id,
+        'type': 'string'
+    }
+})
+if len(result['error']) > 0: 
+    raise(Exception(result['error']))
 
 location_engine_configs = api_client.get_location_engine_venues(options.get_api_venue_id())
 if len(location_engine_configs) == 0:
@@ -169,13 +168,12 @@ for venue_id, location_engine_config in location_engine_configs.iteritems():
     idx = idx + 1
 
     task_name = KAPACITOR_POSITION_TASK_NAME % venue_id
-    kapacitor_task = kapacitor_client.get_task_info(task_name)
-    if 'error' in kapacitor_task:
-        result = kapacitor_client.create_task(task_name, 'infsoft-tpl',
-        {
-            'apikey': { 'value': infsoft_apikey, 'type': 'string' },
-            'locationid': { 'value':  infsoft_locationid, 'type': 'int' },
-            'txpower': { 'value': options.get_tx_power(), 'type': 'int' }
-        })
-        if len(result['error']) > 0: 
-            raise(Exception(result['error']))
+    kapacitor_client.remove_task(task_name)
+    result = kapacitor_client.create_task(task_name, 'infsoft-tpl',
+    {
+        'apikey': { 'value': infsoft_apikey, 'type': 'string' },
+        'locationid': { 'value':  infsoft_locationid, 'type': 'int' },
+        'txpower': { 'value': options.get_tx_power(), 'type': 'int' }
+    })
+    if len(result['error']) > 0: 
+        raise(Exception(result['error']))
