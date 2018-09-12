@@ -3,7 +3,7 @@ from influxdb import InfluxDBClient
 
 class InfluxClient:
     READ_PRIVILEGE = 'read'
-    CONTINUOUS_QUERY_FMT = """
+    TELEMETRY_CQ_FMT = """
 CREATE CONTINUOUS QUERY "telemetry_{0}_cq" ON "{4}"
 RESAMPLE EVERY {3}
 BEGIN
@@ -28,8 +28,22 @@ BEGIN
 END
 """
 
-    REMOVE_CONTINUOUS_QUERY_FMT = """
-DROP CONTINUOUS QUERY "telemetry_{0}_cq" ON "{1}"
+    LOCATION_CQ_FMT = """
+CREATE CONTINUOUS QUERY "locations_{0}_cq" ON "{4}"
+RESAMPLE EVERY {3}
+BEGIN
+    SELECT 
+        mean("rssi") AS "rssi"         
+    INTO 
+        "{1}"."locations_{0}"
+    FROM 
+       "{2}"."locations"
+    GROUP BY time({0}), *
+END
+"""
+
+    REMOVE_CQ_FMT = """
+DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
     """
 
     def __init__(self, address, port, user_name, password):
@@ -54,17 +68,32 @@ DROP CONTINUOUS QUERY "telemetry_{0}_cq" ON "{1}"
         self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
 
     def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time):
-        self._execute_query(self.REMOVE_CONTINUOUS_QUERY_FMT.format(
+        self._execute_query(self.REMOVE_CQ_FMT.format(
+            'telemetry',
             aggregation_time,
             database_name), 
             database_name)
-        
-        self._execute_query(self.CONTINUOUS_QUERY_FMT.format(
+
+        self._execute_query(self.REMOVE_CQ_FMT.format(
+            'locations',
+            aggregation_time,
+            database_name),
+            database_name)
+
+        self._execute_query(self.TELEMETRY_CQ_FMT.format(
             aggregation_time, 
             retention_policy, 
             source_retention_policy, 
             resample_time, 
             database_name), 
+            database_name)
+
+        self._execute_query(self.LOCATION_CQ_FMT.format(
+            aggregation_time,
+            retention_policy,
+            source_retention_policy,
+            resample_time,
+            database_name),
             database_name)
 
     def _execute_query(self, query, database_name):
