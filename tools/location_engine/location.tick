@@ -2,7 +2,7 @@ var period_time = 10s
 var every_time = 5s
 
 var database String
-var retention_policy = 'current_rp'
+var retention_policy = 'stream_rp'
 
 stream
     |from()
