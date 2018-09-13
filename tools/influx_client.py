@@ -30,10 +30,13 @@ END
 
     LOCATION_CQ_FMT = """
 CREATE CONTINUOUS QUERY "locations_{0}_cq" ON "{4}"
-RESAMPLE EVERY {3}
+RESAMPLE EVERY {3} FOR {5}
 BEGIN
     SELECT 
-        mean("rssi") AS "rssi"         
+        mean("rssi") AS "rssi",
+        COUNT("rssi") AS "scans",
+        MODE("fSourceId") AS "fSourceId",
+        MODE("fTrackingId") AS "fTrackingId"
     INTO 
         "{1}"."locations_{0}"
     FROM 
@@ -67,7 +70,7 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
         print "Creating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
         self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
 
-    def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time):
+    def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time, resample_for):
         self._execute_query(self.REMOVE_CQ_FMT.format(
             'telemetry',
             aggregation_time,
@@ -93,7 +96,8 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
             retention_policy,
             source_retention_policy,
             resample_time,
-            database_name),
+            database_name,
+            resample_for),
             database_name)
 
     def _execute_query(self, query, database_name):
