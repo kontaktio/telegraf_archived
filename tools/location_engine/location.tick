@@ -1,7 +1,7 @@
 var period_time = 10s
 var every_time = 5s
 
-var database String
+var database string
 var retention_policy = 'stream_rp'
 
 stream
