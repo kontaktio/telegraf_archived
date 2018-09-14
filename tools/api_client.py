@@ -17,7 +17,8 @@ class ApiClient:
     def get_telemetry_unique_ids(self, api_venue_id=None):
         params = {
             'access': 'OWNER',
-            'deviceType': 'BEACON'
+            'deviceType': 'BEACON',
+            'maxResult': 500
         }
         if api_venue_id is not None:
             params['q'] = 'venue.id==%s' % api_venue_id
