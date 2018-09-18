@@ -104,6 +104,8 @@ influx_client.recreate_continuous_query(company_id, '5m', 'recent_rp', 'stream_r
 influx_client.create_retention_policy(company_id, 'history_rp', '365d')
 influx_client.recreate_continuous_query(company_id, '1h', 'history_rp', 'stream_rp', '1h', '1h')
 
+influx_client.create_retention_policy(company_id, 'temporary_history_rp', '365d')
+
 unique_ids = api_client.get_telemetry_unique_ids(api_venue_id=options.get_api_venue_id())
 
 topics = ['/stream/%s/%s' % elem for elem in 
