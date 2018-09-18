@@ -1,5 +1,6 @@
 {
   "family": "%LABEL%",
+  "taskRoleArn": "arn:aws:iam::712852996757:role/telegraf-role",
   "containerDefinitions": [
     {
       "image": "712852996757.dkr.ecr.us-east-1.amazonaws.com/telegraf-deployment:latest",
