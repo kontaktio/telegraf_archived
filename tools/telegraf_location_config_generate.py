@@ -31,7 +31,9 @@ class Options(object):
         parser.add_argument('--config-file', dest='config_file')
         parser.add_argument('--api-url', dest='api_url', default='https://testapi.kontakt.io/')
         parser.add_argument('--api-venue-id', dest='api_venue_id', default=None)
-        parser.add_argument('--data-collection-interval', dest='data_collection_interval', default='30s')
+        parser.add_argument('--data-collection-interval', dest='data_collection_interval', default='5s')
+        parser.add_argument('--flush-interval', dest='flush_interval', default='5s')
+        parser.add_argument('--flush-jitter', dest='flush_jitter', default='5s')
         parser.add_argument('--debug', dest='debug', default=False, type=bool)
         parser.add_argument('--log-file', dest='log_file', default='~/telegraf.log')
         parser.add_argument('--tx-power', dest='tx_power', type=int, default=-77)
@@ -58,6 +60,12 @@ class Options(object):
 
     def get_data_collection_interval(self):
         return self.args['data_collection_interval']
+
+    def get_flush_interval(self):
+        return self.args['flush_interval']
+
+    def get_flush_jitter(self):
+        return self.args['flush_jitter']
 
     def get_debug(self):
         return self.args['debug']
@@ -122,8 +130,8 @@ cfg.append_key_value('round_interval', True) # default
 cfg.append_key_value('metric_buffer_limit', 1000) # default
 cfg.append_key_value('flush_buffer_when_full', True) # default
 cfg.append_key_value('collection_jitter', '0s') # default
-cfg.append_key_value('flush_interval', '10s') # default
-cfg.append_key_value('flush_jitter', '0s') # default
+cfg.append_key_value('flush_interval', options.get_flush_interval()) # default
+cfg.append_key_value('flush_jitter', options.get_flush_jitter()) # default
 cfg.append_key_value('debug', options.get_debug())
 cfg.append_key_value('quiet', False)
 cfg.append_key_value('logfile', options.get_log_file())
