@@ -11,6 +11,8 @@ stream
         .period(period_time)
         .every(every_time)
         .align()
+    |default()
+        .field('rssi', -128.0)
     @locationEngine()
     |eval(lambda: string("sourceId"))
         .as('fSourceId')
