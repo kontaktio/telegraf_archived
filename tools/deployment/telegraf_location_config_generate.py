@@ -148,6 +148,13 @@ cfg.append_key_value('retention_policy', 'current_rp')
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'position')
 
+cfg.append_section_name('processors.tagremove', True)
+cfg.append_key_value('remove', ['host', 'url'])
+
+cfg.append_section_name('processors.fieldremove', True)
+cfg.append_key_value('remove', ['area_id', 'ble_battery', 'ble_databyte', 'ble_major', 
+    'ble_minor', 'ble_txpower', 'ble_vendor', 'revision', 'ts_utc', 'uid'])
+
 cfg.append_section_name('processors.trackingidresolver', True)
 cfg.append_key_value('tag_name', 'ble_proximityuuid')
 cfg.append_key_value('new_tag_name', 'trackingId')
