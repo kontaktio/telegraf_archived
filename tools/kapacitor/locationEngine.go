@@ -60,7 +60,7 @@ func (o *locationHandler) BeginBatch(begin *agent.BeginBatch) error {
 // Add point to map
 func (o *locationHandler) Point(p *agent.Point) error {
 	trackingId := p.Tags["trackingId"]
-	sourceId := p.Tags["sourceId"]
+	sourceId := p.FieldsString["sourceId"]
 	location := o.window.entries[trackingId]
 	rssi, ok := p.FieldsDouble["rssi"]
 	if ok {
@@ -120,6 +120,7 @@ func (w *locationWindow) getPoints() []*agent.Point {
 
 	for k, entry := range w.entries {
 		point := entry.point
+		point.FieldsString = nil
 		point.FieldsInt = nil
 		point.FieldsBool = nil
 		point.FieldsDouble = map[string]float64{"rssi": entry.rssi}
