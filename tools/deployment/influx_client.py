@@ -19,7 +19,8 @@ BEGIN
         mean("x") AS "x", 
         mean("y") AS "y", 
         mean("z") AS "z",
-        max("history") AS "history"
+        max("history") AS "history",
+        MODE("sourceId") AS "sourceId"
     INTO 
         "{1}"."telemetry_{0}"
     FROM 

@@ -75,14 +75,16 @@ func TestParseValidJSON(t *testing.T) {
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{}, metrics[0].Tags())
 
-	// Test that strings without TagKeys defined are ignored
+	// Test that strings without TagKeys defined are not ignored ANYMORE!
 	metrics, err = parser.Parse([]byte(validJSONTags))
 	assert.NoError(t, err)
 	assert.Len(t, metrics, 1)
 	assert.Equal(t, "json_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"mytag":    "foobar",
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{}, metrics[0].Tags())
 
@@ -122,13 +124,15 @@ func TestParseLineValidJSON(t *testing.T) {
 	}, metric.Fields())
 	assert.Equal(t, map[string]string{}, metric.Tags())
 
-	// Test that strings without TagKeys defined are ignored
+	// Test that strings without TagKeys defined are not ignored anymore
 	metric, err = parser.ParseLine(validJSONTags)
 	assert.NoError(t, err)
 	assert.Equal(t, "json_test", metric.Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"mytag":    "foobar",
+		"othertag": "baz",
 	}, metric.Fields())
 	assert.Equal(t, map[string]string{}, metric.Tags())
 }
@@ -147,7 +151,7 @@ func TestParseInvalidJSON(t *testing.T) {
 }
 
 func TestParseWithTagKeys(t *testing.T) {
-	// Test that strings not matching tag keys are ignored
+	// Test that strings not matching tag keys are not ignored ANYMORE
 	parser := JSONParser{
 		MetricName: "json_test",
 		TagKeys:    []string{"wrongtagkey"},
@@ -157,8 +161,10 @@ func TestParseWithTagKeys(t *testing.T) {
 	assert.Len(t, metrics, 1)
 	assert.Equal(t, "json_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"mytag":    "foobar",
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{}, metrics[0].Tags())
 
@@ -172,8 +178,9 @@ func TestParseWithTagKeys(t *testing.T) {
 	assert.Len(t, metrics, 1)
 	assert.Equal(t, "json_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{
 		"mytag": "foobar",
@@ -199,7 +206,7 @@ func TestParseWithTagKeys(t *testing.T) {
 }
 
 func TestParseLineWithTagKeys(t *testing.T) {
-	// Test that strings not matching tag keys are ignored
+	// Test that strings not matching tag keys are not ignored ANYMORE
 	parser := JSONParser{
 		MetricName: "json_test",
 		TagKeys:    []string{"wrongtagkey"},
@@ -208,8 +215,10 @@ func TestParseLineWithTagKeys(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "json_test", metric.Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"mytag":    "foobar",
+		"othertag": "baz",
 	}, metric.Fields())
 	assert.Equal(t, map[string]string{}, metric.Tags())
 
@@ -222,8 +231,9 @@ func TestParseLineWithTagKeys(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "json_test", metric.Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"othertag": "baz",
 	}, metric.Fields())
 	assert.Equal(t, map[string]string{
 		"mytag": "foobar",
@@ -273,8 +283,9 @@ func TestParseValidJSONDefaultTags(t *testing.T) {
 	assert.Len(t, metrics, 1)
 	assert.Equal(t, "json_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{
 		"t4g":   "default",
@@ -309,8 +320,9 @@ func TestParseValidJSONDefaultTagsOverride(t *testing.T) {
 	assert.Len(t, metrics, 1)
 	assert.Equal(t, "json_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{
 		"mytag": "foobar",
@@ -363,15 +375,19 @@ func TestParseArrayWithTagKeys(t *testing.T) {
 	assert.Len(t, metrics, 2)
 	assert.Equal(t, "json_array_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"mytag":    "foo",
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{}, metrics[0].Tags())
 
 	assert.Equal(t, "json_array_test", metrics[1].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(7),
-		"b_c": float64(8),
+		"a":        float64(7),
+		"b_c":      float64(8),
+		"mytag":    "bar",
+		"othertag": "baz",
 	}, metrics[1].Fields())
 	assert.Equal(t, map[string]string{}, metrics[1].Tags())
 
@@ -385,8 +401,9 @@ func TestParseArrayWithTagKeys(t *testing.T) {
 	assert.Len(t, metrics, 2)
 	assert.Equal(t, "json_array_test", metrics[0].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(5),
-		"b_c": float64(6),
+		"a":        float64(5),
+		"b_c":      float64(6),
+		"othertag": "baz",
 	}, metrics[0].Fields())
 	assert.Equal(t, map[string]string{
 		"mytag": "foo",
@@ -394,8 +411,9 @@ func TestParseArrayWithTagKeys(t *testing.T) {
 
 	assert.Equal(t, "json_array_test", metrics[1].Name())
 	assert.Equal(t, map[string]interface{}{
-		"a":   float64(7),
-		"b_c": float64(8),
+		"a":        float64(7),
+		"b_c":      float64(8),
+		"othertag": "baz",
 	}, metrics[1].Fields())
 	assert.Equal(t, map[string]string{
 		"mytag": "bar",

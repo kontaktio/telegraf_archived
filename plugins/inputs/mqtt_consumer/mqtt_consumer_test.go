@@ -15,7 +15,7 @@ const (
 	testMsg         = "cpu_load_short,host=server01 value=23422.0 1422568543702900257\n"
 	testMsgNeg      = "cpu_load_short,host=server01 value=-23422.0 1422568543702900257\n"
 	testMsgGraphite = "cpu.load.short.graphite 23422 1454780029"
-	testMsgJSON     = "{\"a\": 5, \"b\": {\"c\": 6}}\n"
+	testMsgJSON     = "{\"str\": \"foo\", \"a\": 5, \"b\": {\"c\": 6}}\n"
 	testEmptyJSON   = "{}\n"
 	invalidMsg      = "cpu_load_short,host=server01 1422568543702900257\n"
 )
@@ -185,6 +185,7 @@ func TestRunParserAndGatherJSON(t *testing.T) {
 		map[string]interface{}{
 			"a":   float64(5),
 			"b_c": float64(6),
+			"str": "foo",
 		})
 }
 

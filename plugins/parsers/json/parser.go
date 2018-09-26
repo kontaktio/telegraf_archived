@@ -85,16 +85,6 @@ func (p *JSONParser) switchFieldToTag(tags map[string]string, fields map[string]
 			log.Printf("E! [parsers.json] Unrecognized type %T", value)
 		}
 	}
-
-	//remove any additional string/bool values from fields
-	for k := range fields {
-		switch fields[k].(type) {
-		case string:
-			delete(fields, k)
-		case bool:
-			delete(fields, k)
-		}
-	}
 	return tags, fields
 }
 
