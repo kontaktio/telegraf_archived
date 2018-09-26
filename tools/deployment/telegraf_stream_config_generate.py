@@ -185,6 +185,9 @@ cfg.append_section_name('processors.tagrename', True)
 cfg.append_section_name('processors.tagrename.renames', inner=True)
 cfg.append_key_value('topic', 'trackingId')
 
+cfg.append_section_name('processors.tagremove', True)
+cfg.append_key_value('remove', ['host'])
+
 cfg.append_section_name('processors.regex', True)
 cfg.append_section_name('processors.regex.tags', True)
 cfg.append_key_value('key', 'topic')
