@@ -58,6 +58,7 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 
 			if !exists || (lastValue == floatField) {
 				result[idx] = p.copyAndReplaceField(mt, 0)
+				p.cache[tag] = floatField
 				continue
 			}
 
@@ -71,6 +72,7 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 				p.cache[tag] = floatField
 				continue
 			}
+
 			result[idx] = p.copyAndReplaceField(mt, 0)
 		} else {
 			result[idx] = mt
