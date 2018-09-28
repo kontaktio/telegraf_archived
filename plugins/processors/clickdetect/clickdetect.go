@@ -56,7 +56,6 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 
 			lastValue, exists := p.cache[tag]
 
-			p.cache[tag] = floatField
 			if !exists || (lastValue == floatField) {
 				result[idx] = p.copyAndReplaceField(mt, 0)
 				continue
@@ -64,10 +63,12 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 
 			if floatField > lastValue {
 				result[idx] = p.copyAndReplaceField(mt, int32(floatField-lastValue))
+				p.cache[tag] = floatField
 				continue
 			} else if floatField < 10 && lastValue > 250 {
 				diff := 256 - lastValue + floatField
 				result[idx] = p.copyAndReplaceField(mt, int32(diff))
+				p.cache[tag] = floatField
 				continue
 			}
 			result[idx] = p.copyAndReplaceField(mt, 0)
