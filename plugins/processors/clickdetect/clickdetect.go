@@ -63,11 +63,11 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 			}
 
 			if floatField > lastValue {
-				result[idx] = p.copyAndReplaceField(mt, floatField-lastValue)
+				result[idx] = p.copyAndReplaceField(mt, int32(floatField-lastValue))
 				continue
 			} else if floatField < 10 && lastValue > 250 {
 				diff := 256 - lastValue + floatField
-				result[idx] = p.copyAndReplaceField(mt, diff)
+				result[idx] = p.copyAndReplaceField(mt, int32(diff))
 				continue
 			}
 			result[idx] = p.copyAndReplaceField(mt, 0)
@@ -78,7 +78,7 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 	return result
 }
 
-func (p *ClickDetect) copyAndReplaceField(mt telegraf.Metric, newValue float64) telegraf.Metric {
+func (p *ClickDetect) copyAndReplaceField(mt telegraf.Metric, newValue int32) telegraf.Metric {
 	newMetric, _ := metric.New(
 		mt.Name(),
 		mt.Tags(),
