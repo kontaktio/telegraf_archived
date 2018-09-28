@@ -7,15 +7,36 @@ import (
 	"github.com/influxdata/kapacitor/udf/agent"
 )
 
+const cRssiThreshold = 3
+
 // Location handler template
 type locationHandler struct {
-	window *locationWindow
-	begin  *agent.BeginBatch
-	agent  *agent.Agent
+	window  *locationWindow
+	begin   *agent.BeginBatch
+	agent   *agent.Agent
+	history *locationWindow
+}
+
+//map of tracking id's
+type locationWindow struct {
+	entries map[string]*locationReference
+}
+
+type locationReference struct {
+	rssi     float64
+	sourceID string
+	point    *agent.Point
+}
+
+func (o *locationReference) Clone() *locationReference {
+	obj := &locationReference{rssi: o.rssi, sourceID: o.sourceID, point: o.point}
+	return obj
 }
 
 func newlocationHandler(agent *agent.Agent) *locationHandler {
-	return &locationHandler{agent: agent, window: &locationWindow{}}
+	historyWindow := &locationWindow{}
+	historyWindow.reset()
+	return &locationHandler{agent: agent, window: &locationWindow{}, history: historyWindow}
 }
 
 // Return the InfoResponse. Describing the properties of this UDF agent.
@@ -39,13 +60,18 @@ func (o *locationHandler) Init(r *agent.InitRequest) (*agent.InitResponse, error
 
 // Create a snapshot of the running window of the process.
 func (o *locationHandler) Snapshot() (*agent.SnapshotResponse, error) {
-	return &agent.SnapshotResponse{}, nil
+
+	return &agent.SnapshotResponse{
+		Snapshot: nil,
+	}, nil
 }
 
 // Restore a previous snapshot.
 func (o *locationHandler) Restore(req *agent.RestoreRequest) (*agent.RestoreResponse, error) {
+
 	return &agent.RestoreResponse{
 		Success: true,
+		Error:   "",
 	}, nil
 }
 
@@ -62,19 +88,53 @@ func (o *locationHandler) Point(p *agent.Point) error {
 	trackingId := p.Tags["trackingId"]
 	sourceId := p.FieldsString["sourceId"]
 	location := o.window.entries[trackingId]
-	rssi, ok := p.FieldsDouble["rssi"]
+	newRssi, ok := p.FieldsDouble["rssi"]
 	if ok {
 		if location == nil {
-			o.window.entries[trackingId] = &locationReference{rssi: rssi, sourceID: sourceId, point: p}
-		} else if location.rssi <= rssi {
-			o.window.entries[trackingId] = &locationReference{rssi: rssi, sourceID: sourceId, point: p}
+
+			o.window.entries[trackingId] = &locationReference{rssi: newRssi, sourceID: sourceId, point: p}
+		} else if location.rssi < newRssi {
+
+			o.window.entries[trackingId] = &locationReference{rssi: newRssi, sourceID: sourceId, point: p}
+		} else {
+
 		}
 
-	} else {
-		log.Print("Field wihout rssi received")
 	}
 
 	return nil
+}
+
+func adjustZonesBasedOnHistor(o *locationHandler) {
+	//create new history data
+	newHistory := &locationWindow{}
+	newHistory.reset()
+	currentEntries := o.window.entries
+	historyEntries := o.history.entries
+
+	for k, entry := range currentEntries {
+		//save current data as new historical data
+		newHistory.entries[k] = currentEntries[k].Clone()
+
+		//for each sourceId in current data compare with history data
+		//If new point has different source id and is not stronger that 3 dbm
+		//than use historical zone data with new timestamp. Else use current one.
+		historyEntry, exists := historyEntries[k]
+
+		if (exists) &&
+			(historyEntry.sourceID != entry.sourceID) &&
+			(historyEntry.rssi >= entry.rssi-cRssiThreshold) {
+
+			currentEntries[k].rssi = historyEntry.rssi
+			currentEntries[k].sourceID = historyEntry.sourceID
+		} else {
+			//entry not in history
+			continue
+		}
+
+	}
+
+	o.history = newHistory
 }
 
 // Finish batch and get calculated points
@@ -87,6 +147,9 @@ func (o *locationHandler) EndBatch(end *agent.EndBatch) error {
 			Begin: o.begin,
 		},
 	}
+
+	adjustZonesBasedOnHistor(o)
+
 	entries := o.window.getPoints()
 	for _, location := range entries {
 		o.agent.Responses <- &agent.Response{
@@ -95,6 +158,7 @@ func (o *locationHandler) EndBatch(end *agent.EndBatch) error {
 			},
 		}
 	}
+
 	log.Printf("LocationEngine batch completed with %d points", len(entries))
 	o.agent.Responses <- &agent.Response{
 		Message: &agent.Response_End{
@@ -109,10 +173,6 @@ func (o *locationHandler) Stop() {
 	close(o.agent.Responses)
 }
 
-type locationWindow struct {
-	entries map[string]*locationReference
-}
-
 // create database entries from points
 func (w *locationWindow) getPoints() []*agent.Point {
 	entries := len(w.entries)
@@ -120,21 +180,15 @@ func (w *locationWindow) getPoints() []*agent.Point {
 
 	for k, entry := range w.entries {
 		point := entry.point
-		point.FieldsString = nil
 		point.FieldsInt = nil
 		point.FieldsBool = nil
 		point.FieldsDouble = map[string]float64{"rssi": entry.rssi}
+		point.FieldsString = map[string]string{"fTrackingId": k, "fSourceId": entry.sourceID}
 		point.Tags = map[string]string{"trackingId": k, "sourceId": entry.sourceID}
 		points = append(points, point)
 	}
 
 	return points
-}
-
-type locationReference struct {
-	rssi     float64
-	sourceID string
-	point    *agent.Point
 }
 
 func (w *locationWindow) reset() {
