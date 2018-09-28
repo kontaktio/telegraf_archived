@@ -149,13 +149,11 @@ cfg.append_section_name('processors.clickdetect', True)
 cfg.append_key_value('field_name', 'clickId')
 cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('tag_key', 'topic')
-cfg.append_key_value('threshold', 30)
 
 cfg.append_section_name('processors.clickdetect', True)
 cfg.append_key_value('field_name', 'clickId')
 cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('tag_key', 'trackingId')
-cfg.append_key_value('threshold', 30)
 
 cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastDoubleTap')
