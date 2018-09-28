@@ -145,14 +145,14 @@ cfg.append_key_value('precision', 's') # default
 cfg.append_key_value('timeout', '5s') # default
 cfg.append_key_value('retention_policy', 'stream_rp')
 
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastSingleClick')
+cfg.append_section_name('processors.clickdetect', True)
+cfg.append_key_value('field_name', 'clickId')
 cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('tag_key', 'topic')
 cfg.append_key_value('threshold', 30)
 
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastSingleClick')
+cfg.append_section_name('processors.clickdetect', True)
+cfg.append_key_value('field_name', 'clickId')
 cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('threshold', 30)

@@ -1,6 +1,7 @@
 package all
 
 import (
+	_ "github.com/influxdata/telegraf/plugins/processors/clickdetect"
 	_ "github.com/influxdata/telegraf/plugins/processors/converter"
 	_ "github.com/influxdata/telegraf/plugins/processors/fieldremove"
 	_ "github.com/influxdata/telegraf/plugins/processors/lastcalc"
