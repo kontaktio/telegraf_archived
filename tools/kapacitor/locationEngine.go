@@ -86,7 +86,10 @@ func (o *locationHandler) BeginBatch(begin *agent.BeginBatch) error {
 // Add point to map
 func (o *locationHandler) Point(p *agent.Point) error {
 	trackingId := p.Tags["trackingId"]
-	sourceId := p.FieldsString["sourceId"]
+	sourceId, exists := p.FieldsString["sourceId"]
+	if !exists {
+		sourceId = p.Tags["sourceId"]
+	}
 	location := o.window.entries[trackingId]
 	newRssi, ok := p.FieldsDouble["rssi"]
 	if ok {
