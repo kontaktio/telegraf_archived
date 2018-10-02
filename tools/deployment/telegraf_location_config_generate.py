@@ -182,13 +182,5 @@ for venue_id, location_engine_config in location_engine_configs.iteritems():
         
     idx = idx + 1
 
-    task_name = KAPACITOR_POSITION_TASK_NAME % venue_id
-    kapacitor_client.remove_task(task_name)
-    result = kapacitor_client.create_task(task_name, 'infsoft-tpl',
-    {
-        'apikey': { 'value': infsoft_apikey, 'type': 'string' },
-        'locationid': { 'value':  infsoft_locationid, 'type': 'int' },
-        'txpower': { 'value': options.get_tx_power(), 'type': 'int' }
-    })
     if len(result['error']) > 0: 
         raise(Exception(result['error']))
