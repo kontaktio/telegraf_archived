@@ -16,6 +16,7 @@ BEGIN
         sum("threshold") AS "threshold", 
         sum("doubleTap") AS "doubleTap", 
         mean("temperature") AS "temperature", 
+        mean("humidity") as "humidity",
         mean("x") AS "x", 
         mean("y") AS "y", 
         mean("z") AS "z",
