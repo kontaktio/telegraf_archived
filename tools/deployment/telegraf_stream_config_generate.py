@@ -104,7 +104,7 @@ influx_client.create_user(company_id, DEFAULT_INFLUX_PASSWORD, company_id)
 influx_client.create_retention_policy(company_id, 'stream_rp', '3h')
 
 influx_client.create_retention_policy(company_id, 'current_rp', '7d')
-influx_client.recreate_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s', '20s')
+influx_client.recreate_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s', '40s')
 
 influx_client.create_retention_policy(company_id, 'recent_rp', '30d')
 influx_client.recreate_continuous_query(company_id, '5m', 'recent_rp', 'stream_rp', '5m', '5m')
