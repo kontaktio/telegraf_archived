@@ -3,12 +3,9 @@ package mqtt_consumer
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/eclipse/paho.mqtt.golang"
+	"github.com/influxdata/telegraf/testutil"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -20,17 +17,13 @@ const (
 	invalidMsg      = "cpu_load_short,host=server01 1422568543702900257\n"
 )
 
-func newTestMQTTConsumer() (*MQTTConsumer, chan mqtt.Message) {
-	in := make(chan mqtt.Message, 100)
+func newTestMQTTConsumer() *MQTTConsumer {
 	n := &MQTTConsumer{
 		Topics:    []string{"telegraf"},
 		Servers:   []string{"localhost:1883"},
-		in:        in,
-		done:      make(chan struct{}),
-		connected: true,
 	}
 
-	return n, in
+	return n
 }
 
 // Test that default client has random ID
@@ -77,116 +70,6 @@ func TestPersistentClientIDFail(t *testing.T) {
 	acc := testutil.Accumulator{}
 	err := m1.Start(&acc)
 	assert.Error(t, err)
-}
-
-func TestRunParser(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewInfluxParser()
-	go n.receiver()
-	in <- mqttMsg(testMsgNeg)
-	acc.Wait(1)
-
-	if a := acc.NFields(); a != 1 {
-		t.Errorf("got %v, expected %v", a, 1)
-	}
-}
-
-func TestRunParserNegativeNumber(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewInfluxParser()
-	go n.receiver()
-	in <- mqttMsg(testMsg)
-	acc.Wait(1)
-
-	if a := acc.NFields(); a != 1 {
-		t.Errorf("got %v, expected %v", a, 1)
-	}
-}
-
-// Test that the parser ignores invalid messages
-func TestRunParserInvalidMsg(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewInfluxParser()
-	go n.receiver()
-	in <- mqttMsg(invalidMsg)
-	acc.WaitError(1)
-
-	if a := acc.NFields(); a != 0 {
-		t.Errorf("got %v, expected %v", a, 0)
-	}
-	assert.Contains(t, acc.Errors[0].Error(), "MQTT Parse Error")
-}
-
-// Test that the parser parses line format messages into metrics
-func TestRunParserAndGather(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewInfluxParser()
-	go n.receiver()
-	in <- mqttMsg(testMsg)
-	acc.Wait(1)
-
-	n.Gather(&acc)
-
-	acc.AssertContainsFields(t, "cpu_load_short",
-		map[string]interface{}{"value": float64(23422)})
-}
-
-// Test that the parser parses graphite format messages into metrics
-func TestRunParserAndGatherGraphite(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewGraphiteParser("_", []string{}, nil)
-	go n.receiver()
-	in <- mqttMsg(testMsgGraphite)
-
-	n.Gather(&acc)
-	acc.Wait(1)
-
-	acc.AssertContainsFields(t, "cpu_load_short_graphite",
-		map[string]interface{}{"value": float64(23422)})
-}
-
-// Test that the parser parses json format messages into metrics
-func TestRunParserAndGatherJSON(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewJSONParser("nats_json_test", []string{}, nil)
-	go n.receiver()
-	in <- mqttMsg(testMsgJSON)
-
-	n.Gather(&acc)
-
-	acc.Wait(1)
-
-	acc.AssertContainsFields(t, "nats_json_test",
-		map[string]interface{}{
-			"a":   float64(5),
-			"b_c": float64(6),
-			"str": "foo",
-		})
 }
 
 func TestRunParserOnEmptyJSONObject(t *testing.T) {
