@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD024 -->
 # Changelog
+## v1.9 [2018-11-20]
 
 ## v1.25.0 [2022-12-12]
 
