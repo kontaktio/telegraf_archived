@@ -1,5 +1,11 @@
 <!-- markdownlint-disable MD024 -->
 # Changelog
+## v1.9.1 [unreleased]
+
+### Bugfixes
+
+- [#5006](https://github.com/influxdata/telegraf/issues/5006): Fix boolean handling in splunkmetric serializer.
+
 ## v1.9 [2018-11-20]
 
 ## v1.25.0 [2022-12-12]
@@ -2771,6 +2777,7 @@ See [EXTERNAL_PLUGINS.md](/EXTERNAL_PLUGINS.md) for a full list of external plug
 ## v1.8.3 [2018-10-30]
 
 ### Bug Fixes
+### Bugfixes
 
 - [#4873](https://github.com/influxdata/telegraf/pull/4873): Add DN attributes as tags in x509_cert input to avoid series overwrite.
 - [#4921](https://github.com/influxdata/telegraf/issues/4921): Prevent connection leak by closing unused connections in amqp output.
