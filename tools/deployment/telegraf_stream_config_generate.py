@@ -29,7 +29,7 @@ class Options(object):
         parser.add_argument("--debug", dest="debug", default=False, type=bool)
         parser.add_argument("--log-file", dest="log_file", default="~/telegraf.log")
         parser.add_argument("--mqtt-url", dest="mqtt_url", default="ssl://testrtls.kontakt.io:8083")
-        parser.add_argument("--telemetry-types", dest="telemetry_types", nargs='+', default = ['sensor'])
+        parser.add_argument("--telemetry-types", dest="telemetry_types", nargs='+', default = ['all'])
         parser.add_argument("--streams-per-telegraf", dest="streams_per_telegraf", type=int, default=250)
 
         self.args = vars(parser.parse_args(args=args))
