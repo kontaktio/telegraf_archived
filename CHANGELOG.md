@@ -2,6 +2,7 @@
 # Changelog
 ## v1.9.1 [unreleased]
 ## v1.9.2 [unreleased]
+## v1.9.2 [2019-01-08]
 
 ### Bugfixes
 
