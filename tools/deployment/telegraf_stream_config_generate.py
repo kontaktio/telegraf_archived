@@ -219,7 +219,7 @@ cfg.append_key_value('persistent_session', False)
 cfg.append_key_value('username', 'telegraf') # default
 cfg.append_key_value('password', options.get_api_key())
 cfg.append_key_value('data_format', 'json') # default
-cfg.append_key_value('tag_keys', [])
+cfg.append_key_value('tag_keys', ['trackingId'])
 
 idx = 0
 
