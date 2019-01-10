@@ -53,7 +53,7 @@ RESAMPLE EVERY {3}
 BEGIN
     SELECT 
         mean("coord_latitude") AS "coord_latitude",
-        mean("coord_longitude") AS "coord_latitude"        
+        mean("coord_longitude") AS "coord_longitude"        
     INTO 
         "{1}"."positions_{0}"
     FROM 
