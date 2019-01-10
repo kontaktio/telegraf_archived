@@ -47,6 +47,21 @@ BEGIN
 END
 """
 
+    POSTIION_CQ_FMT = """
+CREATE CONTINUOUS QUERY "positions_{0}_cq" ON "{4}"
+RESAMPLE EVERY {3} 
+BEGIN
+    SELECT 
+        mean("coord_latitude") AS "coord_latitude",
+        mean("coord_longitude") AS "coord_latitude"        
+    INTO 
+        "{1}"."positions_{0}"
+    FROM 
+       current_rp.position
+    GROUP BY time({0}), trackingId
+END
+"""
+
     REMOVE_CQ_FMT = """
 DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
     """
@@ -85,6 +100,12 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
             database_name),
             database_name)
 
+        self._execute_query(self.REMOVE_CQ_FMT.format(
+            'positions',
+            aggregation_time,
+            database_name),
+            database_name)
+
         self._execute_query(self.TELEMETRY_CQ_FMT.format(
             aggregation_time, 
             retention_policy, 
@@ -100,6 +121,14 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
             resample_time,
             database_name,
             resample_for),
+            database_name)
+
+        self._execute_query(self.POSTIION_CQ_FMT.format(
+            aggregation_time,
+            retention_policy,
+            source_retention_policy,
+            resample_time,
+            database_name),
             database_name)
 
     def _execute_query(self, query, database_name):
