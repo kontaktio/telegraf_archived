@@ -3,6 +3,7 @@
 ## v1.9.1 [unreleased]
 ## v1.9.2 [unreleased]
 ## v1.9.3 [unreleased]
+## v1.9.3 [2019-01-22]
 
 #### Bugfixes
 
