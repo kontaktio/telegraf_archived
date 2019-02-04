@@ -1,5 +1,4 @@
 import requests
-import json
 
 class KapacitorClient():
     TASKS = '%s/kapacitor/v1/tasks'

@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 REGION=us-east-1
 TASKDEF=taskdef-test.json
 INFLUX_CREDENTIALS=influx-credentials.json
