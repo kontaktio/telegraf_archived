@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 REGION=eu-west-1
 TASKDEF=taskdef-prod.json
 CREDENTIALS=influx-credentials-prod.json

@@ -1,0 +1,11 @@
+var database string
+
+batch
+    |query('SELECT MODE(fSourceId) as "sourceId" FROM ' + database + ' .current_rp.locations_10s')
+        .every(1m)
+        .period(1m)
+        .align()
+        .groupBy('trackingId')
+    |httpPost()
+        .endpoint('dwellTime')
+        .timeout(15s)

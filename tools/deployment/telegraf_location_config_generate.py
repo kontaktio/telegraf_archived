@@ -1,11 +1,8 @@
 import argparse
 import ConfigParser
 import sys
-import itertools
 
-from utils import chunks
 from api_client import ApiClient
-from influx_client import InfluxClient
 from telegraf_config import TelegrafConfigFormatter
 from kapacitor_client import KapacitorClient
 
@@ -96,6 +93,7 @@ class Options(object):
 
     def get_tx_power(self):
         return self.args['tx_power']
+
 
 DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
