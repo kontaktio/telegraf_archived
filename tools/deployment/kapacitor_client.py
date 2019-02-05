@@ -17,10 +17,10 @@ class KapacitorClient():
     def get_task_info(self, task_id):
         return requests.get(self.TASK % (self._address, task_id), auth=self._auth()).json()
 
-    def create_task(self, id, template, parameters={}):
+    def create_task(self, id, template, parameters={}, task_type='stream'):
         payload = {
             'id': id,
-            'type': 'stream',
+            'type': task_type,
             'dbrps': [{'db': self._database, 'rp': self._retention_policy}],
             'vars': parameters,
             'template-id': template,
