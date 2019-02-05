@@ -58,7 +58,7 @@ options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
 
 company_id = api_client.get_company_id()
-kapacitor_client = KapacitorClient(options, company_id, 'stream_rp')
+kapacitor_client = KapacitorClient(options, company_id, 'current_rp')
 
 dwell_time_task_name = DWELL_TIME_TASK_NAME % company_id
 kapacitor_client.remove_task(dwell_time_task_name)
@@ -67,6 +67,6 @@ result = kapacitor_client.create_task(dwell_time_task_name, 'dwellTime-tpl', {
         'value': company_id,
         'type': 'string'
     }
-})
+}, 'batch')
 if len(result['error']) > 0:
     raise(Exception(result['error']))
