@@ -1,4 +1,4 @@
-# How to setup a Dwell Time report
+## How to setup a Dwell Time report
 
 1. Configure kapacitor.conf
     Add section for dwellTime http endpoint. Fill correct values for url and security header.
