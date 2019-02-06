@@ -1,4 +1,4 @@
-FROM golang:1.10
+FROM golang:1.10.2-alpine
 
 COPY generate_and_start_telegrafs_test.sh /generate_and_start_telegrafs.sh
 RUN chmod +x /generate_and_start_telegrafs.sh
