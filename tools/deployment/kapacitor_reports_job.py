@@ -21,8 +21,6 @@ class Options(object):
         parser.add_argument('--kapacitor-pass', dest='kapacitor_pass', required=True)
         parser.add_argument('--config-file', dest='config_file')
         parser.add_argument('--api-url', dest='api_url', default='https://testapi.kontakt.io/')
-        parser.add_argument('--debug', dest='debug', default=False, type=bool)
-        parser.add_argument('--log-file', dest='log_file', default='~/telegraf.log')
 
         self.args = vars(parser.parse_args(args=args))
         if self.args['config_file'] is not None:
@@ -40,9 +38,6 @@ class Options(object):
 
     def get_api_url(self):
         return self.args['api_url']
-
-    def get_log_file(self):
-        return self.args['log_file']
 
     def get_kapacitor_url(self):
         return self.args['kapacitor_url']
