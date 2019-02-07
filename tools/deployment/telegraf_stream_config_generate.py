@@ -8,6 +8,7 @@ from api_client import ApiClient
 from influx_client import InfluxClient
 from telegraf_config import TelegrafConfigFormatter
 
+
 class Options(object): 
     CONFIG_FILE_SECTION = 'default'
 
@@ -23,11 +24,6 @@ class Options(object):
         parser.add_argument("--config-file", dest="config_file")
         parser.add_argument("--api-url", dest="api_url", default="https://testapi.kontakt.io/")
         parser.add_argument("--api-venue-id", dest="api_venue_id", default=None)
-        parser.add_argument("--data-collection-interval", dest="data_collection_interval", default="30s")
-        parser.add_argument('--flush-interval', dest='flush_interval', default='5s')
-        parser.add_argument('--flush-jitter', dest='flush_jitter', default='5s')
-        parser.add_argument("--debug", dest="debug", default=False, type=bool)
-        parser.add_argument("--log-file", dest="log_file", default="~/telegraf.log")
         parser.add_argument("--mqtt-url", dest="mqtt_url", default="ssl://testrtls.kontakt.io:8083")
         parser.add_argument("--telemetry-types", dest="telemetry_types", nargs='+', default = ['all'])
         parser.add_argument("--streams-per-telegraf", dest="streams_per_telegraf", type=int, default=250)
@@ -52,21 +48,6 @@ class Options(object):
     def get_api_venue_id(self):
         return self.args['api_venue_id']
 
-    def get_data_collection_interval(self):
-        return self.args['data_collection_interval']
-
-    def get_flush_interval(self):
-        return self.args['flush_interval']
-
-    def get_flush_jitter(self):
-        return self.args['flush_jitter']
-
-    def get_debug(self):
-        return self.args['debug']
-
-    def get_log_file(self):
-        return self.args['log_file']
-
     def get_influx_url(self):
         return self.args['influxdb_url']
 
@@ -88,6 +69,8 @@ class Options(object):
     def get_streams_per_telegraf(self):
         return self.args['streams_per_telegraf']
 
+
+# TODO Remove from VCS
 DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
 options = Options(sys.argv[1:])
@@ -125,24 +108,24 @@ cfg = TelegrafConfigFormatter()
 
 cfg.append_section_name('global_tags')
 cfg.append_section_name('agent')
-cfg.append_key_value('interval', options.get_data_collection_interval())
-cfg.append_key_value('round_interval', True) # default
-cfg.append_key_value('metric_buffer_limit', 1000) # default
-cfg.append_key_value('flush_buffer_when_full', True) # default
-cfg.append_key_value('collection_jitter', '0s') # default
-cfg.append_key_value('flush_interval', options.get_flush_interval()) # default
-cfg.append_key_value('flush_jitter', options.get_flush_jitter()) # default
-cfg.append_key_value('debug', options.get_debug())
+cfg.append_key_value('interval', '5s')
+cfg.append_key_value('round_interval', False)
+cfg.append_key_value('metric_buffer_limit', 1000)
+cfg.append_key_value('flush_buffer_when_full', True)
+cfg.append_key_value('collection_jitter', '0s')
+cfg.append_key_value('flush_interval', '5s')
+cfg.append_key_value('flush_jitter', 0)
+cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
-cfg.append_key_value('logfile', options.get_log_file())
+cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
 
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ["%s:%d" % (options.get_influx_url(), options.get_influx_port())])
 cfg.append_key_value('database', company_id)
 cfg.append_key_value('username', options.get_influx_username())
 cfg.append_key_value('password', options.get_influx_password())
-cfg.append_key_value('precision', 's') # default
-cfg.append_key_value('timeout', '5s') # default
+cfg.append_key_value('precision', 's')
+cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'stream_rp')
 
 cfg.append_section_name('processors.lastcalc', True)

@@ -10,6 +10,7 @@ INFSOFT_REALTIME_ENDPOINT = 'https://api.infsoft.com/v1/devices-realtime/ble'
 KAPACITOR_POSITION_TASK_NAME = "position_%s"
 KAPACITOR_LOCATION_TASK_NAME = "location_%s"
 
+
 class Options(object): 
     CONFIG_FILE_SECTION = 'default'
 
@@ -28,11 +29,6 @@ class Options(object):
         parser.add_argument('--config-file', dest='config_file')
         parser.add_argument('--api-url', dest='api_url', default='https://testapi.kontakt.io/')
         parser.add_argument('--api-venue-id', dest='api_venue_id', default=None)
-        parser.add_argument('--data-collection-interval', dest='data_collection_interval', default='5s')
-        parser.add_argument('--flush-interval', dest='flush_interval', default='5s')
-        parser.add_argument('--flush-jitter', dest='flush_jitter', default='5s')
-        parser.add_argument('--debug', dest='debug', default=False, type=bool)
-        parser.add_argument('--log-file', dest='log_file', default='~/telegraf.log')
         parser.add_argument('--tx-power', dest='tx_power', type=int, default=-77)
 
         self.args = vars(parser.parse_args(args=args))
@@ -54,21 +50,6 @@ class Options(object):
 
     def get_api_venue_id(self):
         return self.args['api_venue_id']
-
-    def get_data_collection_interval(self):
-        return self.args['data_collection_interval']
-
-    def get_flush_interval(self):
-        return self.args['flush_interval']
-
-    def get_flush_jitter(self):
-        return self.args['flush_jitter']
-
-    def get_debug(self):
-        return self.args['debug']
-
-    def get_log_file(self):
-        return self.args['log_file']
 
     def get_influx_url(self):
         return self.args['influxdb_url']
@@ -94,8 +75,6 @@ class Options(object):
     def get_tx_power(self):
         return self.args['tx_power']
 
-
-DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
 options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
@@ -123,16 +102,16 @@ cfg = TelegrafConfigFormatter()
 
 cfg.append_section_name('global_tags')
 cfg.append_section_name('agent')
-cfg.append_key_value('interval', options.get_data_collection_interval())
-cfg.append_key_value('round_interval', True) # default
-cfg.append_key_value('metric_buffer_limit', 1000) # default
-cfg.append_key_value('flush_buffer_when_full', True) # default
-cfg.append_key_value('collection_jitter', '0s') # default
-cfg.append_key_value('flush_interval', options.get_flush_interval()) # default
-cfg.append_key_value('flush_jitter', options.get_flush_jitter()) # default
-cfg.append_key_value('debug', options.get_debug())
+cfg.append_key_value('interval', '5s')
+cfg.append_key_value('round_interval', True)
+cfg.append_key_value('metric_buffer_limit', 1000)
+cfg.append_key_value('flush_buffer_when_full', True)
+cfg.append_key_value('collection_jitter', '0s')
+cfg.append_key_value('flush_interval', '10s')
+cfg.append_key_value('flush_jitter', '2s')
+cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
-cfg.append_key_value('logfile', options.get_log_file())
+cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
 
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ['%s:%d' % (options.get_influx_url(), options.get_influx_port())])
