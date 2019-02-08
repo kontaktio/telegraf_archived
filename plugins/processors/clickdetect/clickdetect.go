@@ -42,61 +42,41 @@ func (p *ClickDetect) Description() string {
 }
 
 func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
-	result := make([]telegraf.Metric, len(in))
-	for idx, mt := range in {
+
+	for _, mt := range in {
 		if mt.HasTag(p.TagKey) && mt.HasField(p.FieldName) {
 			tag, _ := mt.GetTag(p.TagKey)
 			fieldVal, _ := mt.GetField(p.FieldName)
-			floatField, typeOk := fieldVal.(float64)
+			currentValue, typeOk := fieldVal.(float64)
 
 			if !typeOk {
 				log.Printf("E! [processors.clickdetect] Invalid type of field %s", p.FieldName)
-				return in //Wrong type
+				continue //Wrong type
 			}
 
 			lastValue, exists := p.cache[tag]
 
-			if !exists || (lastValue == floatField) {
-				result[idx] = p.copyAndReplaceField(mt, 0)
-				p.cache[tag] = floatField
+			if !exists || (lastValue == currentValue) {
+				mt.AddField(p.OutFieldName, 0)
+				p.cache[tag] = currentValue
 				continue
 			}
 
-			if floatField > lastValue {
-				result[idx] = p.copyAndReplaceField(mt, int32(floatField-lastValue))
-				p.cache[tag] = floatField
+			if currentValue > lastValue {
+				mt.AddField(p.OutFieldName, int32(currentValue-lastValue))
+				p.cache[tag] = currentValue
 				continue
-			} else if floatField < 10 && lastValue > 250 {
-				diff := 256 - lastValue + floatField
-				result[idx] = p.copyAndReplaceField(mt, int32(diff))
-				p.cache[tag] = floatField
+			} else if currentValue < 10 && lastValue > 250 {
+				diff := 256 - lastValue + currentValue
+				mt.AddField(p.OutFieldName, int32(diff))
+				p.cache[tag] = currentValue
 				continue
 			}
 
-			result[idx] = p.copyAndReplaceField(mt, 0)
-		} else {
-			result[idx] = mt
+			mt.AddField(p.OutFieldName, 0)
 		}
 	}
-	return result
-}
-
-func (p *ClickDetect) copyAndReplaceField(mt telegraf.Metric, newValue int32) telegraf.Metric {
-	newMetric, _ := metric.New(
-		mt.Name(),
-		mt.Tags(),
-		make(map[string]interface{}),
-		mt.Time())
-
-	for k, v := range mt.Fields() {
-		if k != p.FieldName {
-			newMetric.AddField(k, v)
-		} else {
-			newMetric.AddField(p.OutFieldName, newValue)
-		}
-	}
-
-	return newMetric
+	return in
 }
 
 func init() {
