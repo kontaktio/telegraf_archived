@@ -9,18 +9,14 @@ import (
 )
 
 const (
-	testMsg         = "cpu_load_short,host=server01 value=23422.0 1422568543702900257\n"
-	testMsgNeg      = "cpu_load_short,host=server01 value=-23422.0 1422568543702900257\n"
-	testMsgGraphite = "cpu.load.short.graphite 23422 1454780029"
-	testMsgJSON     = "{\"str\": \"foo\", \"a\": 5, \"b\": {\"c\": 6}}\n"
-	testEmptyJSON   = "{}\n"
-	invalidMsg      = "cpu_load_short,host=server01 1422568543702900257\n"
+	testMsg    = "cpu_load_short,host=server01 value=23422.0 1422568543702900257\n"
+	invalidMsg = "cpu_load_short,host=server01 1422568543702900257\n"
 )
 
 func newTestMQTTConsumer() *MQTTConsumer {
 	n := &MQTTConsumer{
-		Topics:    []string{"telegraf"},
-		Servers:   []string{"localhost:1883"},
+		Topics:  []string{"telegraf"},
+		Servers: []string{"localhost:1883"},
 	}
 
 	return n
@@ -70,22 +66,6 @@ func TestPersistentClientIDFail(t *testing.T) {
 	acc := testutil.Accumulator{}
 	err := m1.Start(&acc)
 	assert.Error(t, err)
-}
-
-func TestRunParserOnEmptyJSONObject(t *testing.T) {
-	n, in := newTestMQTTConsumer()
-	acc := testutil.Accumulator{}
-	n.acc = &acc
-	defer close(n.done)
-
-	n.parser, _ = parsers.NewJSONParser("empty_json_test", []string{}, nil)
-	go n.receiver()
-	in <- mqttMsg(testEmptyJSON)
-
-	n.Gather(&acc)
-
-	acc.Wait(1)
-	acc.AssertDoesNotContainMeasurement(t, "empty_json_test")
 }
 
 func mqttMsg(val string) mqtt.Message {

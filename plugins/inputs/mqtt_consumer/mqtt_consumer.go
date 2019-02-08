@@ -33,22 +33,19 @@ const (
 	Connected
 )
 
-var defaultIdleTimeout = internal.Duration{Duration: time.Minute}
-
 type MQTTConsumer struct {
-	Servers           []string
-	Topics            []string
-	Username          string
-	Password          string
-	QoS               int               `toml:"qos"`
-	ConnectionTimeout internal.Duration `toml:"connection_timeout"`
-	IdleTimeout       internal.Duration `toml:"idle_timeout"`
+	Servers                []string
+	Topics                 []string
+	Username               string
+	Password               string
+	QoS                    int               `toml:"qos"`
+	ConnectionTimeout      internal.Duration `toml:"connection_timeout"`
+	MaxUndeliveredMessages int               `toml:"max_undelivered_messages"`
 
 	parser parsers.Parser
 
 	// Legacy metric buffer support; deprecated in v0.10.3
-	MetricBuffer           int
-	MaxUndeliveredMessages int
+	MetricBuffer int
 
 	PersistentSession bool
 	ClientID          string `toml:"client_id"`
@@ -63,8 +60,6 @@ type MQTTConsumer struct {
 
 	ctx    context.Context
 	cancel context.CancelFunc
-
-	lastData time.Time
 }
 
 var sampleConfig = `
@@ -83,9 +78,6 @@ var sampleConfig = `
 
   ## Connection timeout for initial connection in seconds
   connection_timeout = "30s"
-
-  ## Timeout when no data is received
-  idle_timeout = "60s"
 
   ## Maximum messages to read from the broker that have not been written by an
   ## output.  For best throughput set based on the number of metrics within
@@ -197,10 +189,8 @@ func (m *MQTTConsumer) connect() error {
 		if subscribeToken.Error() != nil {
 			m.acc.AddError(fmt.Errorf("subscription error: topics: %s: %v",
 				strings.Join(m.Topics[:], ","), subscribeToken.Error()))
-		} else {
-			m.subscribed = true
-			go m.idleHandler()
 		}
+		m.subscribed = true
 	}
 
 	return nil
@@ -238,12 +228,6 @@ func (m *MQTTConsumer) recvMessage(c mqtt.Client, msg mqtt.Message) {
 
 func (m *MQTTConsumer) onMessage(acc telegraf.TrackingAccumulator, msg mqtt.Message) error {
 	metrics, err := m.parser.Parse(msg.Payload())
-	for _, metric := range metrics {
-		if len(metric.TagList()) > 0 || len(metric.FieldList()) > 0 {
-			m.lastData = time.Now()
-			break
-		}
-	}
 	if err != nil {
 		return err
 	}
@@ -325,36 +309,17 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 		opts.AddBroker(server)
 	}
 	opts.SetAutoReconnect(false)
-	opts.SetKeepAlive(time.Duration(0))
+	opts.SetKeepAlive(time.Second * 60)
 	opts.SetCleanSession(!m.PersistentSession)
 	opts.SetConnectionLostHandler(m.onConnectionLost)
 
 	return opts, nil
 }
 
-func (m *MQTTConsumer) idleHandler() {
-	m.lastData = time.Now()
-	for {
-		if m.state != Connected {
-			return
-		}
-
-		now := time.Now()
-		if m.lastData.Add(m.IdleTimeout.Duration).Before(now) {
-			log.Printf("W! mqtt_consumer detected idle period of %.0f seconds", m.IdleTimeout.Duration.Seconds())
-			m.state = Disconnected
-			m.connect()
-			return
-		}
-		time.Sleep(2 * time.Second)
-	}
-}
-
 func init() {
 	inputs.Add("mqtt_consumer", func() telegraf.Input {
 		return &MQTTConsumer{
 			ConnectionTimeout:      defaultConnectionTimeout,
-			IdleTimeout:            defaultIdleTimeout,
 			MaxUndeliveredMessages: defaultMaxUndeliveredMessages,
 			state: Disconnected,
 		}
