@@ -15,6 +15,10 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+The DNS plugin gathers dns query times in miliseconds - like [Dig](https://en.wikipedia.org/wiki/Dig_\(command\))
+
+### Configuration:
+```toml
 # Query given DNS server and gives statistics
 [[inputs.dns_query]]
   ## servers to query
@@ -28,6 +32,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Query record type.
   ## Possible values: A, AAAA, CNAME, MX, NS, PTR, TXT, SOA, SPF, SRV.
+  ## Posible values: A, AAAA, CNAME, MX, NS, PTR, TXT, SOA, SPF, SRV.
   # record_type = "A"
 
   ## Dns server port.
@@ -38,6 +43,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Metrics
+### Metrics:
 
 - dns_query
   - tags:
@@ -80,4 +86,12 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```shell
 dns_query,domain=google.com,rcode=NOERROR,record_type=A,result=success,server=127.0.0.1 rcode_value=0i,result_code=0i,query_time_ms=0.13746 1550020750001000000
+  - fields:
+    - query_time_ms (float)
+    - result_code (int, success = 0, timeout = 1, error = 2)
+
+### Example Output:
+
+```
+dns_query,domain=mjasion.pl,record_type=A,server=8.8.8.8 query_time_ms=67.189842 1456082743585760680
 ```

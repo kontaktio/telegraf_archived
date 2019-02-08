@@ -14,6 +14,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # Read metrics of phpfpm, via HTTP status page or socket
 [[inputs.phpfpm]]
   ## An array of addresses to gather stats about. Specify an ip or hostname
@@ -54,6 +57,7 @@ When using `unixsocket`, you have to ensure that telegraf runs on same
 host, and socket path is accessible to telegraf user.
 
 ## Metrics
+### Metrics:
 
 - phpfpm
   - tags:
@@ -74,6 +78,9 @@ host, and socket path is accessible to telegraf user.
 ## Example Output
 
 ```shell
+# Example Output
+
+```
 phpfpm,pool=www accepted_conn=13i,active_processes=2i,idle_processes=1i,listen_queue=0i,listen_queue_len=0i,max_active_processes=2i,max_children_reached=0i,max_listen_queue=0i,slow_requests=0i,total_processes=3i 1453011293083331187
 phpfpm,pool=www2 accepted_conn=12i,active_processes=1i,idle_processes=2i,listen_queue=0i,listen_queue_len=0i,max_active_processes=2i,max_children_reached=0i,max_listen_queue=0i,slow_requests=0i,total_processes=3i 1453011293083691422
 phpfpm,pool=www3 accepted_conn=11i,active_processes=1i,idle_processes=2i,listen_queue=0i,listen_queue_len=0i,max_active_processes=2i,max_children_reached=0i,max_listen_queue=0i,slow_requests=0i,total_processes=3i 1453011293083691658

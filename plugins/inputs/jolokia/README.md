@@ -14,6 +14,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+# Telegraf plugin: Jolokia
+
+**Deprecated in version 1.5:** Please use the [jolokia2](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2) plugin.
+
+#### Configuration
+
+```toml
 # Read JMX metrics through Jolokia
 [[inputs.jolokia]]
   ## This is the context root used to compose the jolokia url
@@ -82,3 +89,13 @@ Jolokia plugin produces one measure for each metric configured,
 adding Server's `jolokia_name`, `jolokia_host` and `jolokia_port` as tags.
 
 [jolokia2]: /plugins/inputs/jolokia2
+#### Description
+
+The Jolokia plugin collects JVM metrics exposed as MBean's attributes through
+jolokia REST endpoint. All metrics are collected for each server configured.
+
+See: https://jolokia.org/
+
+# Measurements:
+Jolokia plugin produces one measure for each metric configured,
+adding Server's `jolokia_name`, `jolokia_host` and `jolokia_port` as tags.

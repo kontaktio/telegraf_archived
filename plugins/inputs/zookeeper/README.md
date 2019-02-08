@@ -21,6 +21,14 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+## Zookeeper Input Plugin
+
+The zookeeper plugin collects variables outputted from the 'mntr' command
+[Zookeeper Admin](https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html).
+
+### Configuration
+
+```toml
 # Reads 'mntr' stats from one or many zookeeper servers
 [[inputs.zookeeper]]
   ## An array of address to gather stats about. Specify an ip or hostname
@@ -41,6 +49,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Optional TLS Config
   # enable_tls = false
+  ## Optional TLS Config
+  # enable_ssl = true
   # tls_ca = "/etc/telegraf/ca.pem"
   # tls_cert = "/etc/telegraf/cert.pem"
   # tls_key = "/etc/telegraf/key.pem"
@@ -49,6 +59,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Metrics
+### Metrics:
 
 Exact field names are based on Zookeeper response and may vary between
 configuration, platform, and version.
@@ -81,6 +92,9 @@ configuration, platform, and version.
 
 If you have any issues please check the direct Zookeeper output using netcat:
 
+### Debugging:
+
+If you have any issues please check the direct Zookeeper output using netcat:
 ```sh
 $ echo mntr | nc localhost 2181
 zk_version      3.4.9-3--1, built on Thu, 01 Jun 2017 16:26:44 -0700
@@ -103,5 +117,8 @@ zk_max_file_descriptor_count    4096
 ## Example Output
 
 ```shell
+### Example Output
+
+```
 zookeeper,server=localhost,port=2181,state=standalone ephemerals_count=0i,approximate_data_size=10044i,open_file_descriptor_count=44i,max_latency=0i,packets_received=7i,outstanding_requests=0i,znode_count=129i,max_file_descriptor_count=4096i,version="3.4.9-3--1",avg_latency=0i,packets_sent=6i,num_alive_connections=1i,watch_count=0i,min_latency=0i 1522351112000000000
 ```

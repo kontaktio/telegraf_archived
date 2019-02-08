@@ -19,6 +19,16 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Collect Kafka topics and consumers status from Burrow HTTP API.
+# Telegraf Plugin: Burrow
+
+Collect Kafka topic, consumer and partition status
+via [Burrow](https://github.com/linkedin/Burrow) HTTP [API](https://github.com/linkedin/Burrow/wiki/HTTP-Endpoint).
+
+Supported Burrow version: `1.x`
+
+### Configuration
+
+```
 [[inputs.burrow]]
   ## Burrow API endpoints in format "schema://host:port".
   ## Default is "http://localhost:8000".
@@ -62,6 +72,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Group/Partition Status mappings
+### Group/Partition Status mappings
 
 * `OK` = 1
 * `NOT_FOUND` = 2
@@ -94,6 +105,27 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 * `burrow_topic` (one event per topic offset)
   * offset (int64)
+### Fields
+
+* `burrow_group` (one event per each consumer group)
+  - status (string, see Partition Status mappings)
+  - status_code (int, `1..6`, see Partition status mappings)
+  - partition_count (int, `number of partitions`)
+  - offset (int64, `total offset of all partitions`)
+  - total_lag (int64, `totallag`)
+  - lag (int64, `maxlag.current_lag || 0`)
+  - timestamp (int64, `end.timestamp`)
+
+* `burrow_partition` (one event per each topic partition)
+  - status (string, see Partition Status mappings)
+  - status_code (int, `1..6`, see Partition status mappings)
+  - lag (int64, `current_lag || 0`)
+  - offset (int64, `end.timestamp`)
+  - timestamp (int64, `end.timestamp`)
+
+* `burrow_topic` (one event per topic offset)
+  - offset (int64)
+
 
 ### Tags
 
@@ -112,3 +144,17 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   * cluster (string)
   * topic (string)
   * partition (int)
+  - cluster (string)
+  - group (string)
+
+* `burrow_partition`
+  - cluster (string)
+  - group (string)
+  - topic (string)
+  - partition (int)
+  - owner (string)
+
+* `burrow_topic`
+  - cluster (string)
+  - topic (string)
+  - partition (int)

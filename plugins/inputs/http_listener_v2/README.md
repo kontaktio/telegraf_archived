@@ -24,6 +24,17 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Generic HTTP write listener
+HTTP.  Metrics may be sent in any supported [data format][data_format].
+
+**Note:** The plugin previously known as `http_listener` has been renamed
+`influxdb_listener`.  If you would like Telegraf to act as a proxy/relay for
+InfluxDB it is recommended to use [`influxdb_listener`][influxdb_listener].
+
+### Configuration:
+
+This is a sample configuration for the plugin.
+
+```toml
 [[inputs.http_listener_v2]]
   ## Address and port to host HTTP listener on
   service_address = ":8080"
@@ -33,6 +44,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Save path as http_listener_v2_path tag if set to true
   # path_tag = false
+  ## Path to listen to.
+  # path = "/telegraf"
 
   ## HTTP methods to accept.
   # methods = ["POST", "PUT"]
@@ -103,6 +116,20 @@ Send query params:
 
 ```shell
 curl -i -XGET 'http://localhost:8080/telegraf?host=server01&value=0.42'
+### Metrics:
+
+Metrics are created from the request body and are dependant on the value of `data_format`.
+
+### Troubleshooting:
+
+**Send Line Protocol**
+```
+curl -i -XPOST 'http://localhost:8080/telegraf' --data-binary 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
+```
+
+**Send JSON**
+```
+curl -i -XPOST 'http://localhost:8080/telegraf' --data-binary '{"value1": 42, "value2": 42}'
 ```
 
 [data_format]: /docs/DATA_FORMATS_INPUT.md

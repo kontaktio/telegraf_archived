@@ -57,6 +57,19 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Use TLS but skip chain & host verification
   # insecure_skip_verify = false
 
+### Configuration:
+
+```toml
+[[inputs.nats_consumer]]
+  ## urls of NATS servers
+  servers = ["nats://localhost:4222"]
+  ## Use Transport Layer Security
+  secure = false
+  ## subject(s) to consume
+  subjects = ["telegraf"]
+  ## name a queue group
+  queue_group = "telegraf_consumers"
+
   ## Sets the limits for pending msgs and bytes for each subscription
   ## These shouldn't need to be adjusted except in very high throughput scenarios
   # pending_message_limit = 65536

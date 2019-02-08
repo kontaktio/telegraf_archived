@@ -1,4 +1,5 @@
 # PostgreSQL Extensible Input Plugin
+# PostgreSQL plugin
 
 This postgresql plugin provides metrics for your postgres database. It has been
 designed to parse SQL queries in the plugin section of your `telegraf.conf`.
@@ -31,6 +32,14 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   #   host=localhost port=5432 user=pqgotest password=... sslmode=... dbname=app_production
   #
   # All connection parameters are optional.
+```
+[[inputs.postgresql_extensible]]
+  # specify address via a url matching:
+  # postgres://[pqgotest[:password]]@localhost[/dbname]?sslmode=...
+  # or a simple string:
+  #   host=localhost user=pqotest password=... sslmode=... dbname=app_production
+  #
+  # All connection parameters are optional.  
   # Without the dbname parameter, the driver will default to a database
   # with the same name as the user. This dbname is just for instantiating a
   # connection with the server and doesn't restrict the databases we are trying
@@ -50,6 +59,24 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # Define the toml config where the sql queries are stored
   # The script option can be used to specify the .sql file path.
   # If script and sqlquery options specified at same time, sqlquery will be used
+  # A list of databases to pull metrics about. If not specified, metrics for all
+  # databases are gathered.
+  # databases = ["app_production", "testing"]
+  #
+  # Define the toml config where the sql queries are stored
+  # New queries can be added, if the withdbname is set to true and there is no
+  # databases defined in the 'databases field', the sql query is ended by a 'is
+  # not null' in order to make the query succeed.
+  # Be careful that the sqlquery must contain the where clause with a part of
+  # the filtering, the plugin will add a 'IN (dbname list)' clause if the
+  # withdbname is set to true
+  # Example :
+  # The sqlquery : "SELECT * FROM pg_stat_database where datname" become
+  # "SELECT * FROM pg_stat_database where datname IN ('postgres', 'pgbench')"
+  # because the databases variable was set to ['postgres', 'pgbench' ] and the
+  # withdbname was true.
+  # Be careful that if the withdbname is set to false you don't have to define
+  # the where clause (aka with the dbname)
   #
   # the tagvalue field is used to define custom tags (separated by comas).
   # the query is expected to return columns which match the names of the
@@ -74,6 +101,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
     tagvalue=""
   [[inputs.postgresql_extensible.query]]
     script="your_sql-filepath.sql"
+    sqlquery="SELECT * FROM pg_stat_bgwriter"
     version=901
     withdbname=false
     tagvalue=""
@@ -95,6 +123,12 @@ using postgresql extensions ([pg_stat_statements][1], [pg_proctab][2] or
  correctly your connection)
 
 ```toml
+using postgreql extensions ([pg_stat_statements](http://www.postgresql.org/docs/current/static/pgstatstatements.html), [pg_proctab](https://github.com/markwkm/pg_proctab) or [powa](http://dalibo.github.io/powa/))
+
+# Sample Queries :
+- telegraf.conf postgresql_extensible queries (assuming that you have configured
+ correctly your connection)
+```
 [[inputs.postgresql_extensible.query]]
   sqlquery="SELECT * FROM pg_stat_database"
   version=901
@@ -150,6 +184,9 @@ using postgresql extensions ([pg_stat_statements][1], [pg_proctab][2] or
 postgresql.conf :
 
 ```sql
+# Postgresql Side
+postgresql.conf :
+```
 shared_preload_libraries = 'pg_stat_statements,pg_stat_kcache'
 ```
 
@@ -158,6 +195,7 @@ Please follow the requirements to setup those extensions.
 In the database (can be a specific monitoring db)
 
 ```sql
+```
 create extension pg_stat_statements;
 create extension pg_stat_kcache;
 create extension pg_proctab;
@@ -172,6 +210,13 @@ create extension pg_proctab;
 
 * Blocking sessions
 
+(assuming that the extension is installed on the OS Layer)
+
+ - pg_stat_kcache is available on the postgresql.org yum repo
+ - pg_proctab is available at : https://github.com/markwkm/pg_proctab
+
+ ## Views
+ - Blocking sessions
 ```sql
 CREATE OR REPLACE VIEW public.blocking_procs AS
  SELECT a.datname AS db,
@@ -198,6 +243,7 @@ CREATE OR REPLACE VIEW public.blocking_procs AS
 
 * Sessions Statistics
 
+  - Sessions Statistics
 ```sql
 CREATE OR REPLACE VIEW public.sessions AS
  WITH proctab AS (

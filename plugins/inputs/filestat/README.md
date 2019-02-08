@@ -14,6 +14,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+# filestat Input Plugin
+
+The filestat plugin gathers metrics about file existence, size, and other stats.
+
+### Configuration:
+
+```toml
 # Read stats about given file(s)
 [[inputs.filestat]]
   ## Files to gather stats about.
@@ -41,6 +48,22 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ### Example
 
 ```shell
+### Measurements & Fields:
+
+- filestat
+    - exists (int, 0 | 1)
+    - size_bytes (int, bytes)
+    - modification_time (int, unix time nanoseconds)
+    - md5 (optional, string)
+
+### Tags:
+
+- All measurements have the following tags:
+    - file (the path the to file, as specified in the config)
+
+### Example Output:
+
+```
 $ telegraf --config /etc/telegraf/telegraf.conf --input-filter filestat --test
 * Plugin: filestat, Collection 1
 > filestat,file=/tmp/foo/bar,host=tyrion exists=0i 1507218518192154351

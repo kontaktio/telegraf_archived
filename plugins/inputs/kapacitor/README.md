@@ -15,6 +15,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read Kapacitor-formatted JSON metrics from one or more HTTP endpoints
+# Kapacitor Plugin
+
+The Kapacitor plugin will collect metrics from the given Kapacitor instances.
+
+### Configuration:
+
+```toml
 [[inputs.kapacitor]]
   ## Multiple URLs from which to read Kapacitor-formatted JSON
   ## Default is "http://localhost:9092/kapacitor/v1/debug/vars".
@@ -397,6 +404,70 @@ these values.
 $ telegraf --config /etc/telegraf.conf --input-filter kapacitor --test
 * Plugin: inputs.kapacitor, Collection 1
 > kapacitor_memstats,host=hostname.local,kap_version=1.1.0~rc2,url=http://localhost:9092/kapacitor/v1/debug/vars alloc_bytes=6974808i,buck_hash_sys_bytes=1452609i,frees=207281i,gc_sys_bytes=802816i,gc_cpu_fraction=0.00004693548939673313,heap_alloc_bytes=6974808i,heap_idle_bytes=6742016i,heap_in_use_bytes=9183232i,heap_objects=23216i,heap_released_bytes=0i,heap_sys_bytes=15925248i,last_gc_ns=1478791460012676997i,lookups=88i,mallocs=230497i,mcache_in_use_bytes=9600i,mcache_sys_bytes=16384i,mspan_in_use_bytes=98560i,mspan_sys_bytes=131072i,next_gc_ns=11467528i,num_gc=8i,other_sys_bytes=2236087i,pause_total_ns=2994110i,stack_in_use_bytes=1900544i,stack_sys_bytes=1900544i,sys_bytes=22464760i,total_alloc_bytes=35023600i 1478791462000000000
+### Measurements & Fields
+
+- kapacitor
+    - num_enabled_tasks, integer
+    - num_subscriptions, integer
+    - num_tasks, integer
+- kapacitor_edges
+    - collected, integer
+    - emitted, integer
+- kapacitor_ingress
+    - points_received, integer
+- kapacitor_memstats
+    - alloc_bytes, integer
+    - buck_hash_sys_bytes, integer
+    - frees, integer
+    - gcc_pu_fraction, float
+    - gc_sys_bytes, integer
+    - heap_alloc_bytes, integer
+    - heap_idle_bytes, integer
+    - heap_inuse_bytes, integer
+    - heap_objects, integer
+    - heap_released_bytes, integer
+    - heap_sys_bytes, integer
+    - last_gc_ns, integer
+    - lookups, integer
+    - mallocs, integer
+    - mcache_in_use_bytes, integer
+    - mcache_sys_bytes, integer
+    - mspan_in_use_bytes, integer
+    - mspan_sys_bytes, integer
+    - next_gc_ns, integer
+    - num_gc, integer
+    - other_sys_bytes, integer
+    - pause_total_ns, integer
+    - stack_in_use_bytes, integer
+    - stack_sys_bytes, integer
+    - sys_bytes, integer
+    - total_alloc_bytes, integer
+- kapacitor_nodes
+    - alerts_triggered, integer
+    - avg_exec_time_ns, integer
+    - batches_queried, integer
+    - crits_triggered, integer
+    - eval_errors, integer
+    - fields_defaulted, integer
+    - infos_triggered, integer
+    - oks_triggered, integer
+    - points_queried, integer
+    - points_written, integer
+    - query_errors, integer
+    - tags_defaulted, integer
+    - warns_triggered, integer
+    - write_errors, integer
+
+*Note:* The Kapacitor variables `host`, `cluster_id`, and `server_id`
+are currently not recorded due to the potential high cardinality of
+these values.
+
+### Example Output:
+
+```
+$ telegraf --config /etc/telegraf.conf --input-filter kapacitor --test
+* Plugin: inputs.kapacitor, Collection 1
+> kapacitor_memstats,host=hostname.local,kap_version=1.1.0~rc2,url=http://localhost:9092/kapacitor/v1/debug/vars alloc_bytes=6974808i,buck_hash_sys_bytes=1452609i,frees=207281i,gc_sys_bytes=802816i,gcc_pu_fraction=0.00004693548939673313,heap_alloc_bytes=6974808i,heap_idle_bytes=6742016i,heap_in_use_bytes=9183232i,heap_objects=23216i,heap_released_bytes=0i,heap_sys_bytes=15925248i,last_gc_ns=1478791460012676997i,lookups=88i,mallocs=230497i,mcache_in_use_bytes=9600i,mcache_sys_bytes=16384i,mspan_in_use_bytes=98560i,mspan_sys_bytes=131072i,next_gc_ns=11467528i,num_gc=8i,other_sys_bytes=2236087i,pause_total_ns=2994110i,stack_in_use_bytes=1900544i,stack_sys_bytes=1900544i,sys_bytes=22464760i,total_alloc_bytes=35023600i 1478791462000000000
 > kapacitor,host=hostname.local,kap_version=1.1.0~rc2,url=http://localhost:9092/kapacitor/v1/debug/vars num_enabled_tasks=5i,num_subscriptions=5i,num_tasks=5i 1478791462000000000
 > kapacitor_edges,child=stream0,host=hostname.local,parent=stream,task=deadman-test,type=stream collected=0,emitted=0 1478791462000000000
 > kapacitor_ingress,database=_internal,host=hostname.local,measurement=shard,retention_policy=monitor,task_master=main points_received=120 1478791462000000000

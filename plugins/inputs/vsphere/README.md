@@ -33,6 +33,26 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 -# Read metrics from one or many vCenters
 [[inputs.vsphere]]
   ## List of vCenter URLs to be monitored. These three lines must be uncommented
+The VMware vSphere plugin uses the vSphere API to gather metrics from multiple vCenter servers.
+ 
+* Clusters
+* Hosts
+* VMs
+* Datastores
+
+## Configuration
+
+NOTE: To disable collection of a specific resource type, simply exclude all metrics using the XX_metric_exclude. 
+For example, to disable collection of VMs, add this:
+
+```
+vm_metric_exclude = [ "*" ]
+```
+
+```
+# Read metrics from one or many vCenters
+[[inputs.vsphere]]
+    ## List of vCenter URLs to be monitored. These three lines must be uncommented
   ## and edited for the plugin to work.
   vcenters = [ "https://vcenter.local/sdk" ]
   username = "user@corp.local"
@@ -67,6 +87,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
     "net.droppedTx.summation",
     "net.usage.average",
     "power.power.average",
+    "power.power.average",    
     "virtualDisk.numberReadAveraged.average",
     "virtualDisk.numberWriteAveraged.average",
     "virtualDisk.read.average",
@@ -85,6 +106,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Typical host metrics (if omitted or empty, all metrics are collected)
   # host_include = [ "/*/host/**"] # Inventory path to hosts to collect (by default all are collected)
   # host_exclude [] # Inventory paths to exclude
+  ## Hosts 
+  ## Typical host metrics (if omitted or empty, all metrics are collected)
   host_metric_include = [
     "cpu.coreUtilization.average",
     "cpu.costop.summation",
@@ -177,12 +200,44 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # max_query_objects = 256
 
   ## number of metrics to retrieve per query for non-realtime resources (clusters and datastores)
+  # host_metric_exclude = [] ## Nothing excluded by default
+  # host_instances = true ## true by default
+
+  ## Clusters 
+  # cluster_metric_include = [] ## if omitted or empty, all metrics are collected
+  # cluster_metric_exclude = [] ## Nothing excluded by default
+  # cluster_instances = true ## true by default
+
+  ## Datastores 
+  # datastore_metric_include = [] ## if omitted or empty, all metrics are collected
+  # datastore_metric_exclude = [] ## Nothing excluded by default
+  # datastore_instances = false ## false by default for Datastores only
+
+  ## Datacenters
+  datacenter_metric_include = [] ## if omitted or empty, all metrics are collected
+  datacenter_metric_exclude = [ "*" ] ## Datacenters are not collected by default.
+  # datacenter_instances = false ## false by default for Datastores only
+
+  ## Plugin Settings  
+  ## separator character to use for measurement and field names (default: "_")
+  # separator = "_"
+
+  ## number of objects to retreive per query for realtime resources (vms and hosts)
+  ## set to 64 for vCenter 5.5 and 6.0 (default: 256)
+  # max_query_objects = 256
+
+  ## number of metrics to retreive per query for non-realtime resources (clusters and datastores)
   ## set to 64 for vCenter 5.5 and 6.0 (default: 256)
   # max_query_metrics = 256
 
   ## number of go routines to use for collection and discovery of objects and metrics
   # collect_concurrency = 1
   # discover_concurrency = 1
+
+  ## whether or not to force discovery of new objects on initial gather call before collecting metrics
+  ## when true for large environments this may cause errors for time elapsed while collecting metrics
+  ## when false (default) the first collection cycle may result in no or limited metrics while objects are discovered
+  # force_discover_on_init = false
 
   ## the interval before (re)discovering objects subject to metrics collection (default: 300s)
   # object_discovery_interval = "300s"
@@ -252,6 +307,17 @@ Any modification should be reflected in this plugin by modifying the parameter
 
 ```toml
   ## number of objects to retrieve per query for realtime resources (vms and hosts)
+``` 
+
+### Objects and Metrics Per Query
+
+By default, in vCenter's configuration a limit is set to the number of entities that are included in a performance chart query. Default settings for vCenter 6.5 and above is 256. Prior versions of vCenter have this set to 64. 
+A vCenter administrator can change this setting, see this [VMware KB article](https://kb.vmware.com/s/article/2107096) for more information.
+
+Any modification should be reflected in this plugin by modifying the parameter `max_query_objects`
+
+```
+  ## number of objects to retreive per query for realtime resources (vms and hosts)
   ## set to 64 for vCenter 5.5 and 6.0 (default: 256)
   # max_query_objects = 256
 ```
@@ -267,6 +333,13 @@ For setting up concurrency, modify `collect_concurrency` and
 `discover_concurrency` parameters.
 
 ```toml
+On large vCenter setups it may be prudent to have multiple concurrent go routines collect performance metrics
+in order to avoid potential errors for time elapsed during a collection cycle. This should never be greater than 8,
+though the default of 1 (no concurrency) should be sufficient for most configurations.
+
+For setting up concurrency, modify `collect_concurrency` and `discover_concurrency` parameters.
+
+```
   ## number of go routines to use for collection and discovery of objects and metrics
   # collect_concurrency = 1
   # discover_concurrency = 1
@@ -545,6 +618,75 @@ For a detailed list of commonly available metrics, please refer to
 ## Example Output
 
 ```shell
+## Measurements &amp; Fields
+
+- Cluster Stats
+	- Cluster services: CPU, memory, failover
+	- CPU: total, usage
+	- Memory: consumed, total, vmmemctl
+	- VM operations: # changes, clone, create, deploy, destroy, power, reboot, reconfigure, register, reset, shutdown, standby, vmotion
+- Host Stats:
+	- CPU: total, usage, cost, mhz
+	- Datastore: iops, latency, read/write bytes, # reads/writes
+	- Disk: commands, latency, kernel reads/writes, # reads/writes, queues
+	- Memory: total, usage, active, latency, swap, shared, vmmemctl
+	- Network: broadcast, bytes, dropped, errors, multicast, packets, usage
+	- Power: energy, usage, capacity
+	- Res CPU: active, max, running
+	- Storage Adapter: commands, latency, # reads/writes
+	- Storage Path: commands, latency, # reads/writes
+	- System Resources: cpu active, cpu max, cpu running, cpu usage, mem allocated, mem consumed, mem shared, swap
+	- System: uptime
+	- Flash Module: active VMDKs 
+- VM Stats:
+	- CPU: demand, usage, readiness, cost, mhz
+	- Datastore: latency, # reads/writes
+	- Disk: commands, latency, # reads/writes, provisioned, usage
+	- Memory: granted, usage, active, swap, vmmemctl
+	- Network: broadcast, bytes, dropped, multicast, packets, usage
+	- Power: energy, usage
+	- Res CPU: active, max, running
+	- System: operating system uptime, uptime
+	- Virtual Disk: seeks, # reads/writes, latency, load 
+- Datastore stats:
+	- Disk: Capacity, provisioned, used  
+
+For a detailed list of commonly available metrics, please refer to [METRICS.md](METRICS.md)
+	
+## Tags
+
+- all metrics
+	- vcenter (vcenter url)
+- all host metrics
+	- cluster (vcenter cluster)
+- all vm metrics
+	- cluster (vcenter cluster)
+	- esxhost (name of ESXi host)
+	- guest (guest operating system id)
+- cpu stats for Host and VM
+	- cpu (cpu core - not all CPU fields will have this tag)
+- datastore stats for Host and VM
+	- datastore (id of datastore)
+- disk stats for Host and VM
+	- disk (name of disk)
+- disk.used.capacity for Datastore
+	- disk (type of disk)
+- net stats for Host and VM
+	- interface (name of network interface)
+- storageAdapter stats for Host
+	- adapter (name of storage adapter)
+- storagePath stats for Host 
+	- path (id of storage path)
+- sys.resource* stats for Host
+	- resource (resource type)
+- vflashModule stats for Host
+	- module (name of flash module)
+- virtualDisk stats for VM
+	- disk (name of virtual disk)
+
+## Sample output
+
+```
 vsphere_vm_cpu,esxhostname=DC0_H0,guest=other,host=host.example.com,moid=vm-35,os=Mac,source=DC0_H0_VM0,vcenter=localhost:8989,vmname=DC0_H0_VM0 run_summation=2608i,ready_summation=129i,usage_average=5.01,used_summation=2134i,demand_average=326i 1535660299000000000
 vsphere_vm_net,esxhostname=DC0_H0,guest=other,host=host.example.com,moid=vm-35,os=Mac,source=DC0_H0_VM0,vcenter=localhost:8989,vmname=DC0_H0_VM0 bytesRx_average=321i,bytesTx_average=335i 1535660299000000000
 vsphere_vm_virtualDisk,esxhostname=DC0_H0,guest=other,host=host.example.com,moid=vm-35,os=Mac,source=DC0_H0_VM0,vcenter=localhost:8989,vmname=DC0_H0_VM0 write_average=144i,read_average=4i 1535660299000000000

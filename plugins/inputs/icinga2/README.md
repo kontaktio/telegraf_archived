@@ -26,6 +26,17 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # server = "https://localhost:5665"
   
   ## Required Icinga2 object type ("services" or "hosts")
+[here](https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api)
+
+### Configuration:
+
+```toml
+# Description
+[[inputs.icinga2]]
+  ## Required Icinga2 server address (default: "https://localhost:5665")
+  # server = "https://localhost:5665"
+  
+  ## Required Icinga2 object type ("services" or "hosts, default "services")
   # object_type = "services"
 
   ## Credentials for basic HTTP authentication
@@ -63,6 +74,25 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Sample Queries
 
 ```sql
+### Measurements & Fields:
+
+- All measurements have the following fields:
+    - name (string)
+    - state_code (int)
+
+### Tags:
+
+- All measurements have the following tags:
+    - check_command
+    - display_name
+    - state
+    - source
+    - port
+    - scheme
+
+### Sample Queries:
+
+```
 SELECT * FROM "icinga2_services" WHERE state_code = 0 AND time > now() - 24h // Service with OK status
 SELECT * FROM "icinga2_services" WHERE state_code = 1 AND time > now() - 24h // Service with WARNING status
 SELECT * FROM "icinga2_services" WHERE state_code = 2 AND time > now() - 24h // Service with CRITICAL status
@@ -72,6 +102,9 @@ SELECT * FROM "icinga2_services" WHERE state_code = 3 AND time > now() - 24h // 
 ## Example Output
 
 ```text
+### Example Output:
+
+```
 $ ./telegraf -config telegraf.conf -input-filter icinga2 -test
 icinga2_hosts,display_name=router-fr.eqx.fr,check_command=hostalive-custom,host=test-vm,source=localhost,port=5665,scheme=https,state=ok name="router-fr.eqx.fr",state=0 1492021603000000000
 ```

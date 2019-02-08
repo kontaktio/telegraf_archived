@@ -17,6 +17,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # Read metrics about system load & uptime
 [[inputs.system]]
   # no configuration
@@ -48,6 +51,26 @@ same requirements for `n_users` apply.
 ## Example Output
 
 ```shell
+#### Permissions:
+
+The `n_users` field requires read access to `/var/run/utmp`, and may require
+the `telegraf` user to be added to the `utmp` group on some systems.
+
+### Metrics:
+
+- system
+  - fields:
+	- load1 (float)
+	- load15 (float)
+	- load5 (float)
+	- n_users (integer)
+	- n_cpus (integer)
+	- uptime (integer, seconds)
+	- uptime_format (string)
+
+### Example Output:
+
+```
 system,host=tyrion load1=3.72,load5=2.4,load15=2.1,n_users=3i,n_cpus=4i 1483964144000000000
 system,host=tyrion uptime=1249632i 1483964144000000000
 system,host=tyrion uptime_format="14 days, 11:07" 1483964144000000000

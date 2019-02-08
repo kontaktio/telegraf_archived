@@ -15,6 +15,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # A plugin to collect stats from the Unbound DNS resolver
 [[inputs.unbound]]
   ## Address of server to connect to, read from unbound conf default, optionally ':port'
@@ -31,11 +34,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # config_file = "/etc/unbound/unbound.conf"
 
   ## The default timeout of 1s can be overridden with:
+  ## The default timeout of 1s can be overriden with:
   # timeout = "1s"
 
   ## When set to true, thread metrics are tagged with the thread id.
   ##
   ## The default is false for backwards compatibility, and will be changed to
+  ## The default is false for backwards compatibility, and will be change to
   ## true in a future version.  It is recommended to set to true on new
   ## deployments.
   thread_as_tag = false
@@ -50,6 +55,12 @@ to alter the group membership, set facls, or use sudo.
 
 **Group membership (Recommended)**:
 
+#### Permissions:
+
+It's important to note that this plugin references unbound-control, which may require additional permissions to execute successfully.
+Depending on the user/group permissions of the telegraf user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
+
+**Group membership (Recommended)**:
 ```bash
 $ groups telegraf
 telegraf : telegraf
@@ -76,6 +87,10 @@ $ visudo
 Cmnd_Alias UNBOUNDCTL = /usr/sbin/unbound-control
 telegraf  ALL=(ALL) NOPASSWD: UNBOUNDCTL
 Defaults!UNBOUNDCTL !logfile, !syslog, !pam_session
+```bash
+$ visudo
+# Add the following line:
+telegraf ALL=(ALL) NOPASSWD: /usr/sbin/unbound-control
 ```
 
 Please use the solution you see as most appropriate.
@@ -88,6 +103,13 @@ will never be collected, extended statistics can also be imported
 ("extended-statistics: yes" in unbound configuration).  In the output, the dots
 in the unbound-control stat name are replaced by underscores(see
 <https://www.unbound.net/documentation/unbound-control.html> for details).
+### Metrics:
+
+This is the full list of stats provided by unbound-control and potentially collected
+depending of your unbound configuration.  Histogram related statistics will never be collected,
+extended statistics can also be imported ("extended-statistics: yes" in unbound configuration).
+In the output, the dots in the unbound-control stat name are replaced by underscores(see
+https://www.unbound.net/documentation/unbound-control.html for details).
 
 Shown metrics are with `thread_as_tag` enabled.
 
@@ -165,6 +187,8 @@ Shown metrics are with `thread_as_tag` enabled.
 ## Example Output
 
 ```shell
+### Example Output:
+```
 unbound,host=localhost total_requestlist_avg=0,total_requestlist_exceeded=0,total_requestlist_overwritten=0,total_requestlist_current_user=0,total_recursion_time_avg=0.029186,total_tcpusage=0,total_num_queries=51,total_num_queries_ip_ratelimited=0,total_num_recursivereplies=6,total_requestlist_max=0,time_now=1522804978.784814,time_elapsed=310.435217,total_num_cachemiss=6,total_num_zero_ttl=0,time_up=310.435217,total_num_cachehits=45,total_num_prefetch=0,total_requestlist_current_all=0,total_recursion_time_median=0.016384 1522804979000000000
 unbound_threads,host=localhost,thread=0 num_queries_ip_ratelimited=0,requestlist_current_user=0,recursion_time_avg=0.029186,num_prefetch=0,requestlist_overwritten=0,requestlist_exceeded=0,requestlist_current_all=0,tcpusage=0,num_cachehits=37,num_cachemiss=6,num_recursivereplies=6,requestlist_avg=0,num_queries=43,num_zero_ttl=0,requestlist_max=0,recursion_time_median=0.032768 1522804979000000000
 unbound_threads,host=localhost,thread=1 num_zero_ttl=0,recursion_time_avg=0,num_queries_ip_ratelimited=0,num_cachehits=8,num_prefetch=0,requestlist_exceeded=0,recursion_time_median=0,tcpusage=0,num_cachemiss=0,num_recursivereplies=0,requestlist_max=0,requestlist_overwritten=0,requestlist_current_user=0,num_queries=8,requestlist_avg=0,requestlist_current_all=0 1522804979000000000

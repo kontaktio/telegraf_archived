@@ -17,6 +17,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Collect bond interface status, slaves statuses and failures count
+### Configuration:
+
+```toml
 [[inputs.bond]]
   ## Sets 'proc' directory path
   ## If not specified, then default is /proc
@@ -37,6 +40,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Metrics
+```
+
+### Measurements & Fields:
 
 - bond
   - active_slave (for active-backup mode)
@@ -73,6 +79,21 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ## Tags
 
+### Description:
+
+```
+active_slave
+  Currently active slave interface for active-backup mode.
+
+status
+  Status of bond interface or bonds's slave interface (down = 0, up = 1).
+
+failures
+  Amount of failures for bond's slave interface.
+```
+
+### Tags:
+
 - bond
   - bond
 
@@ -89,6 +110,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 Configuration:
 
 ```toml
+### Example output:
+
+Configuration:
+
+```
 [[inputs.bond]]
   ## Sets 'proc' directory path
   ## If not specified, then default is /proc
@@ -104,6 +130,7 @@ Run:
 
 ```bash
 ```shell
+```
 telegraf --config telegraf.conf --input-filter bond --test
 ```
 
@@ -111,6 +138,7 @@ Output:
 
 ```bash
 ```shell
+```
 * Plugin: inputs.bond, Collection 1
 > bond,bond=bond1,host=local active_slave="eth0",status=1i 1509704525000000000
 > bond_slave,bond=bond1,interface=eth0,host=local status=1i,failures=0i 1509704525000000000
@@ -120,4 +148,7 @@ Output:
 > bond_slave,bond=bond0,interface=eth1,host=local status=1i,failures=0i 1509704525000000000
 > bond_slave,bond=bond0,interface=eth2,host=local status=1i,failures=0i 1509704525000000000
 > bond_slave,bond=bond0,host=local count=2i 1509704525000000000
+> bond,bond=bond0,host=isvetlov-mac.local status=1i 1509704525000000000
+> bond_slave,bond=bond0,interface=eth1,host=local status=1i,failures=0i 1509704525000000000
+> bond_slave,bond=bond0,interface=eth2,host=local status=1i,failures=0i 1509704525000000000
 ```

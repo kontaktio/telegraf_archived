@@ -22,6 +22,12 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+The docker plugin uses the [Official Docker Client](https://github.com/moby/moby/tree/master/client)
+to gather stats from the [Engine API](https://docs.docker.com/engine/api/v1.24/).
+
+### Configuration:
+
+```toml
 # Read metrics about docker containers
 [[inputs.docker]]
   ## Docker Endpoint
@@ -80,6 +86,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Please note that this setting has no effect if 'total' is set to 'false'
   # total_include = ["cpu", "blkio", "network"]
 
+  ## Whether to report for each container per-device blkio (8:0, 8:1...) and
+  ## network (eth0, eth1, ...) stats or not
+  perdevice = true
+
+  ## Whether to report for each container total blkio and network stats or not
+  total = false
+
   ## docker labels to include and exclude as tags.  Globs accepted.
   ## Note that an empty array for both will include all labels as tags
   docker_label_include = []
@@ -112,6 +125,16 @@ relevant if the telegraf configuration can be changed by untrusted users.
 [4]: https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface
 
 ### Docker Daemon Permissions
+#### Environment Configuration
+
+When using the `"ENV"` endpoint, the connection is configured using the
+[cli Docker environment variables](https://godoc.org/github.com/moby/moby/client#NewEnvClient).
+
+#### Security
+
+Giving telegraf access to the Docker daemon expands the [attack surface](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface) that could result in an attacker gaining root access to a machine. This is especially relevant if the telegraf configuration can be changed by untrusted users.
+
+#### Docker Daemon Permissions
 
 Typically, telegraf must be given permission to access the docker daemon unix
 socket when using the default endpoint. This can be done by adding the
@@ -119,6 +142,7 @@ socket when using the default endpoint. This can be done by adding the
 `docker` unix group with the following command:
 
 ```shell
+```
 sudo usermod -aG docker telegraf
 ```
 
@@ -128,6 +152,7 @@ option `-v /var/run/docker.sock:/var/run/docker.sock` or adding the following
 lines to the telegraf container definition in a docker compose file:
 
 ```yaml
+```
 volumes:
   - /var/run/docker.sock:/var/run/docker.sock
 ```
@@ -171,6 +196,15 @@ to selected ones, e.g.
 ```
 
 ## Metrics
+#### Kubernetes Labels
+
+Kubernetes may add many labels to your containers, if they are not needed you
+may prefer to exclude them:
+```
+  docker_label_exclude = ["annotation.kubernetes*"]
+```
+
+### Metrics:
 
 - docker
   - tags:
@@ -189,11 +223,13 @@ to selected ones, e.g.
     - n_listener_events
     - memory_total
     - pool_blocksize (requires devicemapper storage driver) (deprecated see: `docker_devicemapper`)
+    - pool_blocksize (requires devicemapper storage driver)
 
 The `docker_data` and `docker_metadata` measurements are available only for
 some storage drivers such as devicemapper.
 
 - docker_data (deprecated see: `docker_devicemapper`)
+- docker_data
   - tags:
     - unit
     - engine_host
@@ -204,6 +240,7 @@ some storage drivers such as devicemapper.
     - used
 
 - docker_metadata (deprecated see: `docker_devicemapper`)
+- docker_metadata
   - tags:
     - unit
     - engine_host
@@ -241,6 +278,7 @@ the new `docker_devicemapper` measurement
     - container_version
   - fields:
     - total_pgmajfault
+    - total_pgmafault
     - cache
     - mapped_file
     - total_inactive_file
@@ -352,6 +390,8 @@ status if configured.
   - fields:
     - health_status (string)
     - failing_streak (integer)
+  	- health_status (string)
+  	- failing_streak (integer)
 
 - docker_container_status
   - tags:
@@ -382,6 +422,9 @@ status if configured.
 ## Example Output
 
 ```shell
+### Example Output:
+
+```
 docker,engine_host=debian-stretch-docker,server_version=17.09.0-ce n_containers=6i,n_containers_paused=0i,n_containers_running=1i,n_containers_stopped=5i,n_cpus=2i,n_goroutines=41i,n_images=2i,n_listener_events=0i,n_used_file_descriptors=27i 1524002041000000000
 docker,engine_host=debian-stretch-docker,server_version=17.09.0-ce,unit=bytes memory_total=2101661696i 1524002041000000000
 docker_container_mem,container_image=telegraf,container_name=zen_ritchie,container_status=running,container_version=unknown,engine_host=debian-stretch-docker,server_version=17.09.0-ce active_anon=8327168i,active_file=2314240i,cache=27402240i,container_id="adc4ba9593871bf2ab95f3ffde70d1b638b897bb225d21c2c9c84226a10a8cf4",hierarchical_memory_limit=9223372036854771712i,inactive_anon=0i,inactive_file=25088000i,limit=2101661696i,mapped_file=20582400i,max_usage=36646912i,pgfault=4193i,pgmajfault=214i,pgpgin=9243i,pgpgout=520i,rss=8327168i,rss_huge=0i,total_active_anon=8327168i,total_active_file=2314240i,total_cache=27402240i,total_inactive_anon=0i,total_inactive_file=25088000i,total_mapped_file=20582400i,total_pgfault=4193i,total_pgmajfault=214i,total_pgpgin=9243i,total_pgpgout=520i,total_rss=8327168i,total_rss_huge=0i,total_unevictable=0i,total_writeback=0i,unevictable=0i,usage=36528128i,usage_percent=0.4342225020025297,writeback=0i 1524002042000000000

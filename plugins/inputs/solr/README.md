@@ -24,6 +24,18 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read stats from one or more Solr servers or cores
+# Solr input plugin
+
+The [solr](http://lucene.apache.org/solr/) plugin collects stats via the
+[MBean Request Handler](https://cwiki.apache.org/confluence/display/solr/MBean+Request+Handler)
+
+More about [performance statistics](https://cwiki.apache.org/confluence/display/solr/Performance+Statistics+Reference)
+
+Tested from 3.5 to 7.*
+
+### Configuration:
+
+```
 [[inputs.solr]]
   ## specify a list of one or more Solr servers
   servers = ["http://localhost:8983"]
@@ -39,6 +51,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Example output of gathered metrics
 
 ```shell
+```
+
+### Example output of gathered metrics:
+
+```
 ➜  ~ telegraf -config telegraf.conf -input-filter solr -test
 * Plugin: solr, Collection 1
 > solr_core,core=main,handler=searcher,host=testhost deleted_docs=17616645i,max_docs=261848363i,num_docs=244231718i 1478214949000000000

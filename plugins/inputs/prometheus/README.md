@@ -15,6 +15,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # Read metrics from one or many prometheus clients
 [[inputs.prometheus]]
   ## An array of urls to scrape metrics from.
@@ -124,6 +127,16 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Optional custom HTTP headers
   # headers = {"X-Special-Header" = "Special-Value"}
+  ## Scrape Kubernetes pods for the following prometheus annotations:
+  ## - prometheus.io/scrape: Enable scraping for this pod
+  ## - prometheus.io/scheme: If the metrics endpoint is secured then you will need to
+  ##     set this to `https` & most likely set the tls config.
+  ## - prometheus.io/path: If the metrics path is not /metrics, define it with this annotation.
+  ## - prometheus.io/port: If port is not 9102 use this annotation
+  # monitor_kubernetes_pods = true
+
+  ## Use bearer token for authorization
+  # bearer_token = /path/to/bearer/token
 
   ## Specify timeout duration for slower prometheus clients (default is 3s)
   # response_timeout = "3s"
@@ -193,6 +206,23 @@ Enabling this option will allow the plugin to scrape for prometheus annotation
 on Kubernetes pods. Currently, you can run this plugin in your kubernetes
 cluster, or we use the kubeconfig file to determine where to monitor.  Currently
 the following annotation are supported:
+`urls` can contain a unix socket as well. If a different path is required (default is `/metrics` for both http[s] and unix) for a unix socket, add `path` as a query parameter as follows: `unix:///var/run/prometheus.sock?path=/custom/metrics`
+
+#### Kubernetes Service Discovery
+
+URLs listed in the `kubernetes_services` parameter will be expanded
+by looking up all A records assigned to the hostname as described in
+[Kubernetes DNS service discovery](https://kubernetes.io/docs/concepts/services-networking/service/#dns).
+
+This method can be used to locate all
+[Kubernetes headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services).
+
+#### Kubernetes scraping
+
+Enabling this option will allow the plugin to scrape for prometheus annotation on Kubernetes
+pods. Currently, you can run this plugin in your kubernetes cluster, or we use the kubeconfig
+file to determine where to monitor.
+Currently the following annotation are supported:
 
 * `prometheus.io/scrape` Enable scraping for this pod.
 * `prometheus.io/scheme` If the metrics endpoint is secured then you will need to set this to `https` & most likely set the tls config. (default 'http')
@@ -290,6 +320,7 @@ For full list of available fields and their type see struct CatalogService in
 <https://github.com/hashicorp/consul/blob/master/api/catalog.go>
 
 ### Bearer Token
+#### Bearer Token
 
 If set, the file specified by the `bearer_token` parameter will be read on
 each interval and its contents will be appended to the Bearer string in the
@@ -314,6 +345,25 @@ Steps to monitor Caddy with Telegraf's Prometheus input plugin:
 > For more details, please read the [Caddy Prometheus documentation](https://github.com/miekg/caddy-prometheus/blob/master/README.md).
 
 ## Metrics
+### Usage for Caddy HTTP server
+
+If you want to monitor Caddy, you need to use Caddy with its Prometheus plugin:
+
+* Download Caddy+Prometheus plugin [here](https://caddyserver.com/download/linux/amd64?plugins=http.prometheus)
+* Add the `prometheus` directive in your `CaddyFile`
+* Restart Caddy
+* Configure Telegraf to fetch metrics on it:
+
+```
+[[inputs.prometheus]]
+#   ## An array of urls to scrape metrics from.
+  urls = ["http://localhost:9180/metrics"]
+```
+
+> This is the default URL where Caddy Prometheus plugin will send data.
+> For more details, please read the [Caddy Prometheus documentation](https://github.com/miekg/caddy-prometheus/blob/master/README.md).
+
+### Metrics:
 
 Measurement names are based on the Metric Family and tags are created for each
 label.  The value is added to a field named based on the metric type.
@@ -327,6 +377,10 @@ tag is also added indicating the discovered ip address.
 ### Source
 
 ```shell
+### Example Output:
+
+**Source**
+```
 # HELP go_gc_duration_seconds A summary of the GC invocation durations.
 # TYPE go_gc_duration_seconds summary
 go_gc_duration_seconds{quantile="0"} 7.4545e-05
@@ -350,6 +404,8 @@ cpu_usage_user{cpu="cpu3"} 1.5045135406226022
 ### Output
 
 ```shell
+**Output**
+```
 go_gc_duration_seconds,url=http://example.org:9273/metrics 1=0.001336611,count=14,sum=0.004527551,0=0.000057965,0.25=0.000083812,0.5=0.000286537,0.75=0.000365303 1505776733000000000
 go_goroutines,url=http://example.org:9273/metrics gauge=21 1505776695000000000
 cpu_usage_user,cpu=cpu0,url=http://example.org:9273/metrics gauge=1.513622603430151 1505776751000000000

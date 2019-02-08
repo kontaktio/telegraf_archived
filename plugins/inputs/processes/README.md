@@ -20,6 +20,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # Get the number of processes and group them by status
 [[inputs.processes]]
   # no configuration
@@ -35,6 +38,14 @@ retrieve process information from the specified location.
 
 - processes
   - fields:
+Another possible configuration is to define an alternative path for resolving the /proc location.
+Using the environment variable `HOST_PROC` the plugin will retrieve process information from the specified location.
+
+`docker run -v /proc:/rootfs/proc:ro -e HOST_PROC=/rootfs/proc`
+
+### Measurements & Fields:
+
+- processes
     - blocked (aka disk sleep or uninterruptible sleep)
     - running
     - sleeping
@@ -49,12 +60,16 @@ retrieve process information from the specified location.
     - total_threads (linux only)
 
 ## Process State Mappings
+    - total_threads (linux only)
+
+### Process State Mappings
 
 Different OSes use slightly different State codes for their processes, these
 state codes are documented in `man ps`, and I will give a mapping of what major
 OS state codes correspond to in telegraf metrics:
 
 ```sh
+```
 Linux  FreeBSD  Darwin  meaning
   R       R       R     running
   S       S       S     sleeping
@@ -70,4 +85,14 @@ Linux  FreeBSD  Darwin  meaning
 
 ```shell
 processes blocked=8i,running=1i,sleeping=265i,stopped=0i,total=274i,zombie=0i,dead=0i,paging=0i,total_threads=687i 1457478636980905042
+### Tags:
+
+None
+
+### Example Output:
+
+```
+$ telegraf --config ~/ws/telegraf.conf --input-filter processes --test
+* Plugin: processes, Collection 1
+> processes blocked=8i,running=1i,sleeping=265i,stopped=0i,total=274i,zombie=0i,dead=0i,paging=0i,total_threads=687i 1457478636980905042
 ```

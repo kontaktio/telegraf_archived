@@ -18,6 +18,15 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+# sensors Input Plugin
+
+Collect [lm-sensors](https://en.wikipedia.org/wiki/Lm_sensors) metrics - requires the lm-sensors
+package installed.
+
+This plugin collects sensor metrics with the `sensors` executable from the lm-sensor package.
+
+### Configuration:
+```
 # Monitor sensors, requires lm-sensors package
 [[inputs.sensors]]
   ## Remove numbers from field names.
@@ -43,6 +52,19 @@ Fields are created dynamically depending on the sensors. All fields are float.
 ### Default
 
 ```shell
+### Measurements & Fields:
+Fields are created dynamicaly depending on the sensors. All fields are float.
+
+### Tags:
+
+- All measurements have the following tags:
+    - chip
+    - feature
+
+### Example Output:
+
+#### Default
+```
 $ telegraf --config telegraf.conf --input-filter sensors --test
 * Plugin: sensors, Collection 1
 > sensors,chip=power_meter-acpi-0,feature=power1 power_average=0,power_average_interval=300 1466751326000000000
@@ -55,6 +77,8 @@ $ telegraf --config telegraf.conf --input-filter sensors --test
 ### With remove_numbers=false
 
 ```shell
+#### With remove_numbers=false
+```
 * Plugin: sensors, Collection 1
 > sensors,chip=power_meter-acpi-0,feature=power1 power1_average=0,power1_average_interval=300 1466753424000000000
 > sensors,chip=k10temp-pci-00c3,feature=temp1 temp1_crit=70,temp1_crit_hyst=65,temp1_input=29.125,temp1_max=70 1466753424000000000

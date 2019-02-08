@@ -1,4 +1,5 @@
 # Temperature Input Plugin
+# Temp Input plugin
 
 The temp input plugin gather metrics on system temperature.  This plugin is
 meant to be multi platform and uses platform specific collection methods.
@@ -23,6 +24,13 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Metrics
+### Configuration:
+
+```
+[[inputs.temp]]
+```
+
+### Metrics:
 
 - temp
   - tags:
@@ -42,6 +50,9 @@ wmic /namespace:\\root\wmi PATH MSAcpi_ThermalZoneTemperature
 ## Example Output
 
 ```shell
+### Example Output:
+
+```
 temp,sensor=coretemp_physicalid0_crit temp=100 1531298763000000000
 temp,sensor=coretemp_physicalid0_critalarm temp=0 1531298763000000000
 temp,sensor=coretemp_physicalid0_input temp=100 1531298763000000000

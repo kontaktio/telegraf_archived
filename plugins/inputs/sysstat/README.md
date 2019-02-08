@@ -18,6 +18,15 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+Collect [sysstat](https://github.com/sysstat/sysstat) metrics - requires the sysstat
+package installed.
+
+This plugin collects system metrics with the sysstat collector utility `sadc` and parses
+the created binary data file with the `sadf` utility.
+
+### Configuration:
+
+```toml
 # Sysstat metrics collector
 [[inputs.sysstat]]
   ## Path to the sadc command.
@@ -31,11 +40,22 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Path to the sadf command, if it is not in PATH
   # sadf_path = "/usr/bin/sadf"
 
+  ## On Debian and Arch Linux the default path is /usr/lib/sa/sadc whereas
+  ## on RHEL and CentOS the default path is /usr/lib64/sa/sadc
+  sadc_path = "/usr/lib/sa/sadc" # required
+  #
+  #
+  ## Path to the sadf command, if it is not in PATH
+  # sadf_path = "/usr/bin/sadf"
+  #
+  #
   ## Activities is a list of activities, that are passed as argument to the
   ## sadc collector utility (e.g: DISK, SNMP etc...)
   ## The more activities that are added, the more data is collected.
   # activities = ["DISK"]
 
+  #
+  #
   ## Group metrics to measurements.
   ##
   ## If group is false each metric will be prefixed with a description
@@ -44,6 +64,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## If Group is true, corresponding metrics are grouped to a single measurement.
   # group = true
 
+  #
+  #
   ## Options for the sadf command. The values on the left represent the sadf options and
   ## the values on the right their description (wich are used for grouping and prefixing metrics).
   ##
@@ -66,6 +88,24 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # -H = "hugepages"        # only available for newer linux distributions
   # "-I ALL" = "interrupts" # requires INT activity
 
+	-C = "cpu"
+	-B = "paging"
+	-b = "io"
+	-d = "disk"             # requires DISK activity
+	"-n ALL" = "network"
+	"-P ALL" = "per_cpu"
+	-q = "queue"
+	-R = "mem"
+	-r = "mem_util"
+	-S = "swap_util"
+	-u = "cpu_util"
+	-v = "inode"
+	-W = "swap"
+	-w = "task"
+  #	-H = "hugepages"        # only available for newer linux distributions
+  #	"-I ALL" = "interrupts" # requires INT activity
+  #
+  #
   ## Device tags can be used to add additional tags for devices. For example the configuration below
   ## adds a tag vg with value rootvg for all metrics with sda devices.
   # [[inputs.sysstat.device_tags.sda]]
@@ -137,6 +177,66 @@ And more if you define some `device_tags`.
 
 With the configuration below:
 
+### Measurements & Fields:
+#### If group=true
+- cpu
+    - pct_idle (float)
+    - pct_iowait (float)
+    - pct_nice (float)
+    - pct_steal (float)
+    - pct_system (float)
+    - pct_user (float)
+
+- disk
+    - avgqu-sz (float)
+    - avgrq-sz (float)
+    - await (float)
+    - pct_util (float)
+    - rd_sec_pers (float)
+    - svctm (float)
+    - tps (float)
+
+And much more, depending on the options you configure.
+
+#### If group=false
+- cpu_pct_idle
+    - value (float)
+- cpu_pct_iowait
+    - value (float)
+- cpu_pct_nice
+    - value (float)
+- cpu_pct_steal
+    - value (float)
+- cpu_pct_system
+    - value (float)
+- cpu_pct_user
+    - value (float)
+- disk_avgqu-sz
+    - value (float)
+- disk_avgrq-sz
+    - value (float)
+- disk_await
+    - value (float)
+- disk_pct_util
+    - value (float)
+- disk_rd_sec_per_s
+    - value (float)
+- disk_svctm
+    - value (float)
+- disk_tps
+    - value (float)
+
+And much more, depending on the options you configure.
+
+### Tags:
+
+- All measurements have the following tags:
+    - device
+
+And more if you define some `device_tags`.
+### Example Output:
+
+With the configuration below:
 ```toml
 [[inputs.sysstat]]
   sadc_path = "/usr/lib/sa/sadc" # required
@@ -159,6 +259,22 @@ With the configuration below:
  -v = "inode"
  -W = "swap"
  -w = "task"
+	-C = "cpu"
+	-B = "paging"
+	-b = "io"
+	-d = "disk"             # requires DISK activity
+	-H = "hugepages"
+	"-I ALL" = "interrupts" # requires INT activity
+	"-n ALL" = "network"
+	"-P ALL" = "per_cpu"
+	-q = "queue"
+	-R = "mem"
+	"-r ALL" = "mem_util"
+	-S = "swap_util"
+	-u = "cpu_util"
+	-v = "inode"
+	-W = "swap"
+	-w = "task"
   [[inputs.sysstat.device_tags.sda]]
     vg = "rootvg"
 ```
@@ -166,6 +282,7 @@ With the configuration below:
 you get the following output:
 
 ```shell
+```
 $ telegraf --config telegraf.conf --input-filter sysstat --test
 * Plugin: sysstat, Collection 1
 > cpu_util,device=all pct_idle=98.85,pct_iowait=0,pct_nice=0.38,pct_steal=0,pct_system=0.64,pct_user=0.13 1459255626657883725
@@ -229,6 +346,22 @@ If you change the group value to false like below:
  -v = "inode"
  -W = "swap"
  -w = "task"
+	-C = "cpu"
+	-B = "paging"
+	-b = "io"
+	-d = "disk"             # requires DISK activity
+	-H = "hugepages"
+	"-I ALL" = "interrupts" # requires INT activity
+	"-n ALL" = "network"
+	"-P ALL" = "per_cpu"
+	-q = "queue"
+	-R = "mem"
+	"-r ALL" = "mem_util"
+	-S = "swap_util"
+	-u = "cpu_util"
+	-v = "inode"
+	-W = "swap"
+	-w = "task"
   [[inputs.sysstat.device_tags.sda]]
     vg = "rootvg"
 ```
@@ -236,6 +369,7 @@ If you change the group value to false like below:
 you get the following output:
 
 ```shell
+```
 $ telegraf -config telegraf.conf -input-filter sysstat -test
 * Plugin: sysstat, Collection 1
 > io_tps value=0.5 1459255780126025822

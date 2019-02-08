@@ -4,6 +4,9 @@ This input plugin gathers metrics from a DC/OS cluster's [metrics
 component](https://docs.mesosphere.com/1.10/metrics/).
 
 ## Series Cardinality Warning
+This input plugin gathers metrics from a DC/OS cluster's [metrics component](https://docs.mesosphere.com/1.10/metrics/).
+
+**Series Cardinality Warning**
 
 Depending on the work load of your DC/OS cluster, this plugin can quickly
 create a high number of series which, when unchecked, can cause high load on
@@ -14,6 +17,9 @@ your database.
   options to exclude unneeded tags.
 - Write to a database with an appropriate
   [retention policy](https://docs.influxdata.com/influxdb/latest/guides/downsampling_and_retention/).
+- Limit series cardinality in your database using the
+  [`max-series-per-database`](https://docs.influxdata.com/influxdb/latest/administration/config/#max-series-per-database-1000000) and
+  [`max-values-per-tag`](https://docs.influxdata.com/influxdb/latest/administration/config/#max-values-per-tag-100000) settings.
 - Consider using the
   [Time Series Index](https://docs.influxdata.com/influxdb/latest/concepts/time-series-index/).
 - Monitor your databases
@@ -32,6 +38,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Input plugin for DC/OS metrics
+### Configuration:
+```toml
 [[inputs.dcos]]
   ## The DC/OS cluster URL.
   cluster_url = "https://dcos-master-1"
@@ -76,6 +84,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ### Enterprise Authentication
+#### Enterprise Authentication
 
 When using Enterprise DC/OS, it is recommended to use a service account to
 authenticate with the cluster.
@@ -83,6 +92,7 @@ authenticate with the cluster.
 The plugin requires the following permissions:
 
 ```text
+```
 dcos:adminrouter:ops:system-metrics full
 dcos:adminrouter:ops:mesos full
 ```
@@ -92,6 +102,10 @@ Follow the directions to [create a service account and assign permissions][1].
 Quick configuration using the Enterprise CLI:
 
 ```text
+Follow the directions to [create a service account and assign permissions](https://docs.mesosphere.com/1.10/security/service-auth/custom-service-auth/).
+
+Quick configuration using the Enterprise CLI:
+```
 dcos security org service-accounts keypair telegraf-sa-key.pem telegraf-sa-cert.pem
 dcos security org service-accounts create -p telegraf-sa-cert.pem -d "Telegraf DC/OS input plugin" telegraf
 dcos security org users grant telegraf dcos:adminrouter:ops:system-metrics full
@@ -101,6 +115,7 @@ dcos security org users grant telegraf dcos:adminrouter:ops:mesos full
 [1]: https://docs.mesosphere.com/1.10/security/service-auth/custom-service-auth/
 
 ### Open Source Authentication
+#### Open Source Authentication
 
 The Open Source DC/OS does not provide service accounts.  Instead you can use
 of the following options:
@@ -113,6 +128,7 @@ The cli can login for at most XXX days, you will need to ensure the cli
 performs a new login before this time expires.
 
 ```shell
+```
 dcos auth login --username foo --password bar
 dcos config show core.dcos_acs_token > ~/.dcos/token
 ```
@@ -130,6 +146,12 @@ the cluster.  For more information on this technique reference
 
 Please consult the [Metrics Reference][3] for details about field
 interpretation.
+[this blog post](https://medium.com/@richardgirges/authenticating-open-source-dc-os-with-third-party-services-125fa33a5add).
+
+### Metrics:
+
+Please consult the [Metrics Reference](https://docs.mesosphere.com/1.10/metrics/reference/)
+for details about field interpretation.
 
 - dcos_node
   - tags:
@@ -209,6 +231,9 @@ interpretation.
 ## Example Output
 
 ```shell
+### Example Output:
+
+```
 dcos_node,cluster=enterprise,hostname=192.168.122.18,path=/boot filesystem_capacity_free_bytes=918188032i,filesystem_capacity_total_bytes=1063256064i,filesystem_capacity_used_bytes=145068032i,filesystem_inode_free=523958,filesystem_inode_total=524288,filesystem_inode_used=330 1511859222000000000
 dcos_node,cluster=enterprise,hostname=192.168.122.18,interface=dummy0 network_in_bytes=0i,network_in_dropped=0,network_in_errors=0,network_in_packets=0,network_out_bytes=0i,network_out_dropped=0,network_out_errors=0,network_out_packets=0 1511859222000000000
 dcos_node,cluster=enterprise,hostname=192.168.122.18,interface=docker0 network_in_bytes=0i,network_in_dropped=0,network_in_errors=0,network_in_packets=0,network_out_bytes=0i,network_out_dropped=0,network_out_errors=0,network_out_packets=0 1511859222000000000

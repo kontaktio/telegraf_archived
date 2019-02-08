@@ -1,6 +1,7 @@
 # github webhooks
 
 You should configure your Organization's Webhooks to point at the `webhooks` service. To do this go to `github.com/{my_organization}` and click `Settings > Webhooks > Add webhook`. In the resulting menu set `Payload URL` to `http://<my_ip>:1619/github`, `Content type` to `application/json` and under the section `Which events would you like to trigger this webhook?` select 'Send me **everything**'. By default all of the events will write to the `github_webhooks` measurement, this is configurable by setting the `measurement_name` in the config file.
+You should configure your Organization's Webhooks to point at the `webhooks` service. To do this go to `github.com/{my_organization}` and click `Settings > Webhooks > Add webhook`. In the resulting menu set `Payload URL` to `http://<my_ip>:1619/github`, `Content type` to `application/json` and under the section `Which events would you like to trigger this webhook?` select 'Send me <b>everything</b>'. By default all of the events will write to the `github_webhooks` measurement, this is configurable by setting the `measurement_name` in the config file.
 
 You can also add a secret that will be used by telegraf to verify the authenticity of the requests.
 
@@ -9,6 +10,7 @@ You can also add a secret that will be used by telegraf to verify the authentici
 The titles of the following sections are links to the full payloads and details for each event. The body contains what information from the event is persisted. The format is as follows:
 
 ```toml
+```
 # TAGS
 * 'tagKey' = `tagValue` type
 # FIELDS 
@@ -21,6 +23,11 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+The tag values and field values show the place on the incoming JSON object where the data is sourced from. 
+
+#### [`commit_comment` event](https://developer.github.com/v3/activity/events/types/#commitcommentevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -39,6 +46,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`create` event](https://developer.github.com/v3/activity/events/types/#createevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -57,6 +67,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`delete` event](https://developer.github.com/v3/activity/events/types/#deleteevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -75,6 +88,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`deployment` event](https://developer.github.com/v3/activity/events/types/#deploymentevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -95,6 +111,12 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+* 'environment' = `event.deployment.evnironment` string
+* 'description' = `event.deployment.description` string
+
+#### [`deployment_status` event](https://developer.github.com/v3/activity/events/types/#deploymentstatusevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -109,6 +131,7 @@ The tag values and field values show the place on the incoming JSON object where
 * 'commit' = `event.deployment.sha` string
 * 'task' = `event.deployment.task` string
 * 'environment' = `event.deployment.environment` string
+* 'environment' = `event.deployment.evnironment` string
 * 'description' = `event.deployment.description` string
 * 'depState' = `event.deployment_status.state` string
 * 'depDescription' = `event.deployment_status.description` string
@@ -117,6 +140,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`fork` event](https://developer.github.com/v3/activity/events/types/#forkevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -134,6 +160,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`gollum` event](https://developer.github.com/v3/activity/events/types/#gollumevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -150,6 +179,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`issue_comment` event](https://developer.github.com/v3/activity/events/types/#issuecommentevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -170,6 +202,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`issues` event](https://developer.github.com/v3/activity/events/types/#issuesevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -190,6 +225,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`member` event](https://developer.github.com/v3/activity/events/types/#memberevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -208,6 +246,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`membership` event](https://developer.github.com/v3/activity/events/types/#membershipevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'user' = `event.sender.login` string
 * 'admin' = `event.sender.site_admin` bool
@@ -222,6 +263,12 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+* 'newMember' = `event.sender.login` string
+* 'newMemberStatus' = `event.sender.site_admin` bool
+
+#### [`page_build` event](https://developer.github.com/v3/activity/events/types/#pagebuildevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -238,6 +285,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`public` event](https://developer.github.com/v3/activity/events/types/#publicevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -254,6 +304,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`pull_request_review_comment` event](https://developer.github.com/v3/activity/events/types/#pullrequestreviewcommentevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'action' = `event.action` string
 * 'repository' = `event.repository.full_name` string
@@ -281,6 +334,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`pull_request` event](https://developer.github.com/v3/activity/events/types/#pullrequestevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'action' = `event.action` string
 * 'repository' = `event.repository.full_name` string
@@ -306,6 +362,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`push` event](https://developer.github.com/v3/activity/events/types/#pushevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -325,6 +384,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`repository` event](https://developer.github.com/v3/activity/events/types/#repositoryevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -341,6 +403,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`release` event](https://developer.github.com/v3/activity/events/types/#releaseevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -358,6 +423,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`status` event](https://developer.github.com/v3/activity/events/types/#statusevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -376,6 +444,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`team_add` event](https://developer.github.com/v3/activity/events/types/#teamaddevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool
@@ -393,6 +464,9 @@ The tag values and field values show the place on the incoming JSON object where
 
 **Tags:**
 
+#### [`watch` event](https://developer.github.com/v3/activity/events/types/#watchevent)
+
+**Tags:**
 * 'event' = `headers[X-Github-Event]` string
 * 'repository' = `event.repository.full_name` string
 * 'private' = `event.repository.private` bool

@@ -42,5 +42,11 @@ papertrail,host=myserver.example.com,event=saved_search_name count=1i,source_nam
 When a callback is received, a count-based point will look similar to:
 
 ```shell
+The current functionality is very basic, however this allows you to
+track the number of events by host and saved search.
+
+When an event is received, any point will look similar to:
+
+```
 papertrail,host=myserver.example.com,event=saved_search_name count=3i 1453248892000000000
 ```

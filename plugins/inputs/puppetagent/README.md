@@ -5,6 +5,15 @@ The puppetagent plugin collects variables outputted from the
 [PuppetAgent Runs][1].
 
 ```sh
+## Telegraf Plugin: PuppetAgent
+
+#### Description
+
+The puppetagent plugin collects variables outputted from the 'last_run_summary.yaml' file
+usually located in `/var/lib/puppet/state/`
+[PuppetAgent Runs](https://puppetlabs.com/blog/puppet-monitoring-how-to-monitor-the-success-or-failure-of-puppet-runs).
+
+```
 cat /var/lib/puppet/state/last_run_summary.yaml
 
 ---
@@ -44,6 +53,7 @@ cat /var/lib/puppet/state/last_run_summary.yaml
 ```
 
 ```sh
+```
 jcross@pit-devops-02 ~ >sudo ./telegraf_linux_amd64 --input-filter puppetagent --config tele.conf --test
 * Plugin: puppetagent, Collection 1
 > [] puppetagent_events_failure value=0
@@ -101,6 +111,10 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 Meta:
 
+## Measurements:
+#### PuppetAgent int64 measurements:
+
+Meta:
 - units: int64
 - tags: ``
 
@@ -127,6 +141,25 @@ Measurement names:
 
 Meta:
 
+ - puppetagent_events_failure
+ - puppetagent_events_total
+ - puppetagent_events_success
+ - puppetagent_resources_failed
+ - puppetagent_resources_scheduled
+ - puppetagent_resources_changed
+ - puppetagent_resources_skipped
+ - puppetagent_resources_total
+ - puppetagent_resources_failedtorestart
+ - puppetagent_resources_restarted
+ - puppetagent_resources_outofsync
+ - puppetagent_changes_total
+ - puppetagent_time_service
+ - puppetagent_time_lastrun
+ - puppetagent_version_config
+
+#### PuppetAgent float64 measurements:
+
+Meta:
 - units: float64
 - tags: ``
 
@@ -158,9 +191,27 @@ Measurement names:
 
 Meta:
 
+ - puppetagent_time_user
+ - puppetagent_time_schedule
+ - puppetagent_time_filebucket
+ - puppetagent_time_file
+ - puppetagent_time_exec
+ - puppetagent_time_anchor
+ - puppetagent_time_sshauthorizedkey
+ - puppetagent_time_package
+ - puppetagent_time_total
+ - puppetagent_time_configretrieval
+ - puppetagent_time_lastrun
+ - puppetagent_time_cron
+ - puppetagent_version_config
+
+#### PuppetAgent string measurements:
+
+Meta:
 - units: string
 - tags: ``
 
 Measurement names:
 
 - puppetagent_version_puppet
+ - puppetagent_version_puppet

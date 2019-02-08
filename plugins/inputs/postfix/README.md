@@ -20,6 +20,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Measure postfix queue statistics
+For each of the active, hold, incoming, maildrop, and deferred queues (http://www.postfix.org/QSHAPE_README.html#queues), it will report the queue length (number of items), size (bytes used by items), and age (age of oldest item in seconds).
+
+### Configuration
+
+```toml
 [[inputs.postfix]]
   ## Postfix queue directory. If not provided, telegraf will try to use
   ## 'postconf -h queue_directory' to determine it.
@@ -27,6 +32,7 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ### Permissions
+#### Permissions:
 
 Telegraf will need read access to the files in the queue directory.  You may
 need to alter the permissions of these directories to provide access to the
@@ -57,6 +63,22 @@ sudo setfacl -dm g:telegraf:rX /var/spool/postfix/
   - tags:
     - queue
   - fields:
+Unix permissions:
+```sh
+$ sudo chgrp -R telegraf /var/spool/postfix/{active,hold,incoming,deferred}
+$ sudo chmod -R g+rXs /var/spool/postfix/{active,hold,incoming,deferred}
+$ sudo usermod -a -G postdrop telegraf
+$ sudo chmod g+r /var/spool/postfix/maildrop
+```
+
+Posix ACL:
+```sh
+$ sudo setfacl -Rdm u:telegraf:rX /var/spool/postfix/{active,hold,incoming,deferred,maildrop}
+```
+
+### Measurements & Fields:
+
+- postfix_queue
     - length (integer)
     - size (integer, bytes)
     - age (integer, seconds)
@@ -64,6 +86,14 @@ sudo setfacl -dm g:telegraf:rX /var/spool/postfix/
 ## Example Output
 
 ```shell
+### Tags:
+
+- postfix_queue
+    - queue
+
+### Example Output
+
+```
 postfix_queue,queue=active length=3,size=12345,age=9
 postfix_queue,queue=hold length=0,size=0,age=0
 postfix_queue,queue=maildrop length=1,size=2000,age=2

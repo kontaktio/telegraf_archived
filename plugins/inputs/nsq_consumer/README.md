@@ -15,6 +15,9 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
+### Configuration:
+
+```toml
 # Read metrics from NSQD topic(s)
 [[inputs.nsq_consumer]]
   ## Server option still works but is deprecated, we just prepend it to the nsqd array.
@@ -23,6 +26,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## An array representing the NSQD TCP HTTP Endpoints
   nsqd = ["localhost:4150"]
 
+  ## An array representing the NSQD TCP HTTP Endpoints
+  nsqd = ["localhost:4150"]
   ## An array representing the NSQLookupd HTTP Endpoints
   nsqlookupd = ["localhost:4161"]
   topic = "telegraf"

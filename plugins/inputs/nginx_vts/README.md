@@ -36,6 +36,21 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```
 
 ## Metrics
+# Telegraf Plugin: nginx_vts
+
+This plugin gathers Nginx status using external virtual host traffic status module -  https://github.com/vozlt/nginx-module-vts. This is an Nginx module that provides access to virtual host status information. It contains the current status such as servers, upstreams, caches. This is similar to the live activity monitoring of Nginx plus.
+For module configuration details please see its [documentation](https://github.com/vozlt/nginx-module-vts#synopsis).
+
+### Configuration:
+
+```
+# Read nginx status information using nginx-module-vts module
+[[inputs.nginx_vts]]
+  ## An array of Nginx status URIs to gather stats.
+  urls = ["http://localhost/status"]
+```
+
+### Measurements & Fields:
 
 - nginx_vts_connections
   - active
@@ -95,6 +110,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ### Tags
 
+### Tags:
+
 - nginx_vts_connections
   - source
   - port
@@ -122,6 +139,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 Using this configuration:
 
 ```toml
+
+### Example Output:
+
+Using this configuration:
+```
 [[inputs.nginx_vts]]
   ## An array of Nginx status URIs to gather stats.
   urls = ["http://localhost/status"]
@@ -130,12 +152,14 @@ Using this configuration:
 When run with:
 
 ```sh
+```
 ./telegraf -config telegraf.conf -input-filter nginx_vts -test
 ```
 
 It produces:
 
 ```shell
+```
 nginx_vts_connections,source=localhost,port=80,host=localhost waiting=30i,accepted=295333i,handled=295333i,requests=6833487i,active=33i,reading=0i,writing=3i 1518341521000000000
 nginx_vts_server,zone=example.com,port=80,host=localhost,source=localhost cache_hit=158915i,in_bytes=1935528964i,out_bytes=6531366419i,response_2xx_count=809994i,response_4xx_count=16664i,cache_bypass=0i,cache_stale=0i,cache_revalidated=0i,requests=2187977i,response_1xx_count=0i,response_3xx_count=1360390i,cache_miss=2249i,cache_updating=0i,cache_scarce=0i,request_time=13i,response_5xx_count=929i,cache_expired=0i 1518341521000000000
 nginx_vts_server,host=localhost,source=localhost,port=80,zone=* requests=6775284i,in_bytes=5003242389i,out_bytes=36858233827i,cache_expired=318881i,cache_updating=0i,request_time=51i,response_1xx_count=0i,response_2xx_count=4385916i,response_4xx_count=83680i,response_5xx_count=1186i,cache_bypass=0i,cache_revalidated=0i,cache_hit=1972222i,cache_scarce=0i,response_3xx_count=2304502i,cache_miss=408251i,cache_stale=0i 1518341521000000000

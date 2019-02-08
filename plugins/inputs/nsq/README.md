@@ -18,6 +18,10 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read NSQ topic and channel statistics.
+### Configuration:
+
+```toml
+# Description
 [[inputs.nsq]]
   ## An array of NSQD HTTP API endpoints
   endpoints  = ["http://localhost:4151"]

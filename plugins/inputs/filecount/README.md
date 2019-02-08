@@ -29,6 +29,23 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Count files in subdirectories. Defaults to true.
   recursive = true
+# filecount Input Plugin
+
+Counts files in directories that match certain criteria.
+
+### Configuration:
+
+```toml
+# Count files in a directory
+[[inputs.filecount]]
+  ## Directory to gather stats about.
+  directory = "/var/cache/apt/archives"
+
+  ## Only count files that match the name pattern. Defaults to "*".
+  name = "*.deb"
+
+  ## Count files in subdirectories. Defaults to true.
+  recursive = false
 
   ## Only count regular files. Defaults to true.
   regular_only = true
@@ -62,4 +79,20 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ```shell
 filecount,directory=/var/cache/apt count=7i,size_bytes=7438336i 1530034445000000000
 filecount,directory=/tmp count=17i,size_bytes=28934786i 1530034445000000000
+### Measurements & Fields:
+
+- filecount
+    - count (int)
+
+### Tags:
+
+- All measurements have the following tags:
+    - directory (the directory path, as specified in the config)
+
+### Example Output:
+
+```
+$ telegraf --config /etc/telegraf/telegraf.conf --input-filter filecount --test
+> filecount,directory=/var/cache/apt,host=czernobog count=7i 1530034445000000000
+> filecount,directory=/tmp,host=czernobog count=17i 1530034445000000000
 ```

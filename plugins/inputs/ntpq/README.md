@@ -93,6 +93,36 @@ additional `source` tag.
 ## Example Output
 
 ```shell
+### Configuration:
+
+```toml
+# Get standard NTP query metrics, requires ntpq executable
+[[inputs.ntpq]]
+  ## If false, set the -n ntpq flag. Can reduce metric gather times.
+  dns_lookup = true
+```
+
+### Measurements & Fields:
+
+- ntpq
+    - delay (float, milliseconds)
+    - jitter (float, milliseconds)
+    - offset (float, milliseconds)
+    - poll (int, seconds)
+    - reach (int)
+    - when (int, seconds)
+
+### Tags:
+
+- All measurements have the following tags:
+    - refid
+    - remote
+    - type
+    - stratum
+
+### Example Output:
+
+```
 $ telegraf --config ~/ws/telegraf.conf --input-filter ntpq --test
 * Plugin: ntpq, Collection 1
 > ntpq,refid=.GPSs.,remote=*time.apple.com,stratum=1,type=u delay=91.797,jitter=3.735,offset=12.841,poll=64i,reach=377i,when=35i 1457960478909556134
