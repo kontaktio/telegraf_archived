@@ -17,4 +17,5 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/inputs/rabbitmq"
 	_ "github.com/influxdata/telegraf/plugins/inputs/redis"
 	_ "github.com/influxdata/telegraf/plugins/inputs/tomcat"
+	_ "github.com/influxdata/telegraf/plugins/inputs/internal"
 )
