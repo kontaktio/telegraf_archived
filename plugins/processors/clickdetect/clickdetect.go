@@ -43,7 +43,7 @@ func (p *ClickDetect) Description() string {
 func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 
 	for _, mt := range in {
-		if mt.HasTag(p.TagKey) && mt.HasField(p.FieldName) {
+		if !mt.HasField(p.OutFieldName) && mt.HasField(p.FieldName) {
 			tag, _ := mt.GetTag(p.TagKey)
 			fieldVal, _ := mt.GetField(p.FieldName)
 			currentValue, typeOk := fieldVal.(float64)
