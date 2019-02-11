@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/satori/go.uuid"
 )
