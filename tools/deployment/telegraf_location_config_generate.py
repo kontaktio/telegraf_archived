@@ -103,12 +103,13 @@ cfg = TelegrafConfigFormatter()
 cfg.append_section_name('global_tags')
 cfg.append_section_name('agent')
 cfg.append_key_value('interval', '5s')
-cfg.append_key_value('round_interval', True)
+cfg.append_key_value('round_interval', False)
 cfg.append_key_value('metric_buffer_limit', 1000)
 cfg.append_key_value('flush_buffer_when_full', True)
 cfg.append_key_value('collection_jitter', '0s')
-cfg.append_key_value('flush_interval', '10s')
+cfg.append_key_value('flush_interval', '5s')
 cfg.append_key_value('flush_jitter', '2s')
+cfg.append_key_value('omit_hostname', True)
 cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
 cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
@@ -121,20 +122,21 @@ cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's') # default
 cfg.append_key_value('timeout', '5s') # default
 cfg.append_key_value('retention_policy', 'current_rp')
+cfg.append_key_value('tagexclude', ['url'])
+cfg.append_key_value('fielddrop', ['area_id', 'ble_battery', 'ble_databyte', 'ble_major', 'ble_minor',
+                                   'ble_txpower', 'ble_vendor', 'revision', 'ts_utc', 'uid'])
+
 
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'position')
-
-cfg.append_section_name('processors.tagremove', True)
-cfg.append_key_value('remove', ['host', 'url'])
-
-cfg.append_section_name('processors.fieldremove', True)
-cfg.append_key_value('remove', ['area_id', 'ble_battery', 'ble_databyte', 'ble_major', 
-    'ble_minor', 'ble_txpower', 'ble_vendor', 'revision', 'ts_utc', 'uid'])
+cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.trackingidresolver', True)
 cfg.append_key_value('tag_name', 'ble_proximityuuid')
-cfg.append_key_value('new_tag_name', 'trackingId')
+cfg.append_key_value('new_tag_name', 'tracking_id')
+cfg.append_key_value('order', 1)
+cfg.append_section_name('tagpass', True)
+cfg.append_key_value('trackingId', ['*'])
 
 cfg.append_section_name('inputs.http', True)
 cfg.append_key_value('timeout', '5s')

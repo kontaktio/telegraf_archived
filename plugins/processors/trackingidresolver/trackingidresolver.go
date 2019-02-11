@@ -33,43 +33,20 @@ func (p *TrackingIdResolver) Description() string {
 }
 
 func (p *TrackingIdResolver) Apply(in ...telegraf.Metric) []telegraf.Metric {
-	result := make([]telegraf.Metric, len(in))
-	for idx, mt := range in {
-		if mt.HasTag(p.TagName) {
-			tagVal, _ := mt.GetTag(p.TagName)
-			proximity, err := uuid.FromString(tagVal)
-			if err != nil {
-				log.Printf("E! [processors.trackingidresolver] Proximity is of invalid format: %s", tagVal)
-				return in //Wrong type
-			}
-			proximityBytes := proximity.Bytes()
-			len := bytes.IndexByte(proximityBytes, 0)
-			trackingID := string(proximityBytes[:len])
-			result[idx] = p.copyAndReplaceField(mt, trackingID)
-		} else {
-			log.Printf("W! [processors.trackingidresolver] No Tag with name %s", p.TagName)
-			result[idx] = mt
+	for _, mt := range in {
+		tagVal, _ := mt.GetTag(p.TagName)
+		proximity, err := uuid.FromString(tagVal)
+		if err != nil {
+			log.Printf("E! [processors.trackingidresolver] Proximity is of invalid format: %s", tagVal)
+			continue
 		}
+		proximityBytes := proximity.Bytes()
+		len := bytes.IndexByte(proximityBytes, 0)
+		trackingID := string(proximityBytes[:len])
+
+		mt.AddTag(p.NewTagName, trackingID)
 	}
-	return result
-}
-
-func (p *TrackingIdResolver) copyAndReplaceField(mt telegraf.Metric, newValue string) telegraf.Metric {
-	newMetric, _ := metric.New(
-		mt.Name(),
-		make(map[string]string),
-		mt.Fields(),
-		mt.Time())
-
-	for k, v := range mt.Tags() {
-		if k != p.TagName {
-			newMetric.AddTag(k, v)
-		} else {
-			newMetric.AddTag(p.NewTagName, newValue)
-		}
-	}
-
-	return newMetric
+	return in
 }
 
 func init() {
