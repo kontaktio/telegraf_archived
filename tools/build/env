@@ -1,0 +1,23 @@
+#!/bin/sh
+export REGION=eu-west-1
+
+export API_URL="http://api.kontakt.io"
+export INFLUXDB_URL="http://influx.kontakt.io"
+export INFLUXDB_PORT=8086
+export INFLUXDB_USERNAME=""
+export INFLUXDB_PASSWORD=""
+export INFLUXDB_NEW_USER_PASSWORD=""
+export MQTT_URL="ssl://ovs.kontakt.io:8083"
+
+export TELEMETRY_TYPES="all"
+export STREAMS_PER_TELEGRAF=250
+export TX_POWER=-77
+
+export KAPACITOR_URL="http://influx.kontakt.io:9090"
+export KAPACITOR_USER="kontaktio"
+export KAPACITOR_PASS=""
+
+
+# following variable has to be defined per telegraf service in task definition
+export API_KEY=""
+export VENUE_ID=${VENUE_ID}
