@@ -21,6 +21,7 @@ class Options(object):
         parser.add_argument("--influxdb-port", dest="influxdb_port", default=8086, type=int)
         parser.add_argument("--influxdb-username", dest="influxdb_username", required=True)
         parser.add_argument("--influxdb-password", dest="influxdb_password", required=True)
+        parser.add_argument("--influxdb-new-user-password", dest="influxdb_new_user_password", required=True)
         parser.add_argument("--config-file", dest="config_file")
         parser.add_argument("--api-url", dest="api_url", default="https://testapi.kontakt.io/")
         parser.add_argument("--api-venue-id", dest="api_venue_id", default=None)
@@ -69,9 +70,9 @@ class Options(object):
     def get_streams_per_telegraf(self):
         return self.args['streams_per_telegraf']
 
+    def get_influxdb_new_user_password(self):
+        return self.args['influxdb_new_user_password']
 
-# TODO Remove from VCS
-DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
 options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
@@ -81,15 +82,16 @@ influx_client = InfluxClient(options.get_influx_url(),
     options.get_influx_password())
 
 company_id = api_client.get_company_id()
+influxdb_new_user_password = options.get_influxdb_new_user_password()
 influx_client.create_database(company_id)
-influx_client.create_user(company_id, DEFAULT_INFLUX_PASSWORD, company_id)
+influx_client.create_user(company_id, influxdb_new_user_password, company_id)
 
 influx_client.create_retention_policy(company_id, 'stream_rp', '3h')
 
 influx_client.create_retention_policy(company_id, 'current_rp', '7d')
 influx_client.recreate_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s', '40s')
 
-influx_client.create_retention_policy(company_id, 'recent_rp', '30d')
+influx_client.create_retention_policy(company_id, 'recent_rp', '365d')
 influx_client.recreate_continuous_query(company_id, '5m', 'recent_rp', 'stream_rp', '5m', '5m')
 
 influx_client.create_retention_policy(company_id, 'history_rp', '365d')

@@ -1,30 +1,52 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 REGION=eu-west-1
-TASKDEF=taskdef-prod.json
-CREDENTIALS=influx-credentials-prod.json
 
+eval $(aws ecr get-login --region us-east-1 --no-include-email)
+aws s3 cp s3://kontakt-telegraf-config/build-prod/env . --source-region us-east-1
+source ./env
 
-eval $(aws ecr get-login --region eu-west-1 --no-include-email)
-aws s3 cp s3://kontakt-telegraf-config/"${CREDENTIALS}" . --source-region us-east-1
+API_KEY=$(curl -s -X POST "https://api.kontakt.io/manager/impersonate" \
+	-H "Api-Key: ${SERVICE_API_KEY}" \
+    -H "Accept: application/vnd.com.kontakt+json;version=10" \
+    -H "Content-Type: application/x-www-form-urlencoded; c \
+harset=utf-8" \
+	--data-urlencode "email=$EMAIL" | jq .apiKey | tr -d '"')
+EMAIL_CLEAN=`echo $EMAIL | sed 's/@/-at-/g' | tr -cd '[:alnum:]-'`
+LABEL="telegraf-$EMAIL_CLEAN"
 
-INFLUX_USERNAME=$(cat ${CREDENTIALS} | jq .username | tr -d '"')
-INFLUX_PASSWORD=$(cat ${CREDENTIALS} | jq .password | tr -d '"')
+echo "
+{
+  \"family\": \"$LABEL\",
+  \"taskRoleArn\": \"arn:aws:iam::712852996757:role/telegraf-role\",
+  \"containerDefinitions\": [
+    {
+      \"image\": \"712852996757.dkr.ecr.eu-west-1.amazonaws.com/telegraf-deployment:latest\",
+      \"name\": \"$LABEL-container\",
+      \"memoryReservation\": 256,
+      \"cpu\": 0,
+      \"portMappings\": [],
+      \"logConfiguration\": {
+        \"logDriver\": \"awslogs\",
+        \"options\": {
+          \"awslogs-region\": \"$REGION\",
+          \"awslogs-stream-prefix\": \"$LABEL\",
+          \"awslogs-group\": \"/ecs/telegraf-deployment\"
+        }
+      },
+      \"environment\": [
+        {
+          \"name\": \"API_KEY\",
+          \"value\": \"$API_KEY\"
+        },
+        {
+          \"name\": \"VENUE_ID\",
+          \"value\": \"$VENUE_ID\"
+        }
+      ]
+    }
+  ]
+}
+" > taskdef.json
 
-LABEL_REPLACE_PATTERN="s;%LABEL%;$LABEL;g"
-APIKEY_REPLACE_PATTERN="s;%API_KEY%;$API_KEY;g"
-INFLUXUSERNAME_REPLACE_PATTERN="s;%INFLUXDB_USERNAME%;$INFLUX_USERNAME;g"
-INFLUXPASS_REPLACE_PATTERN="s;%INFLUXDB_PASSWORD%;$INFLUX_PASSWORD;g"
-VENUEID_REPLACE_PATTERN="s;%VENUE_ID%;$VENUE_ID;g"
-
-aws s3 cp s3://kontakt-telegraf-config/"${TASKDEF}" . --source-region us-east-1
-export TASKDEF_TMP=$(cat ${TASKDEF} | tr -d '\r\n' | tr -d '\t')
-export TASKDEF_TMP=$(echo $TASKDEF_TMP | sed -e $LABEL_REPLACE_PATTERN)
-export TASKDEF_TMP=$(echo $TASKDEF_TMP | sed -e $APIKEY_REPLACE_PATTERN)
-export TASKDEF_TMP=$(echo $TASKDEF_TMP | sed -e $INFLUXUSERNAME_REPLACE_PATTERN)
-export TASKDEF_TMP=$(echo $TASKDEF_TMP | sed -e $INFLUXPASS_REPLACE_PATTERN)
-export TASKDEF_TMP=$(echo $TASKDEF_TMP | sed -e $VENUEID_REPLACE_PATTERN)
-
-echo $TASKDEF_TMP | dd of="${TASKDEF}.tmp"
-
-TASK_DEFINITION_REVISION=$(aws ecs register-task-definition --cli-input-json "file://${TASKDEF}.tmp" --region $REGION | jq .taskDefinition.revision | tr -d '"')
-aws ecs create-service --cluster "prod-ecs-cluster" --service-name "$LABEL-telegraf-service" --task-definition "$LABEL:$TASK_DEFINITION_REVISION" --desired-count 1 --region $REGION
+aws ecs register-task-definition --cli-input-json "file://taskdef.json" --region $REGION
+aws ecs create-service --cluster "prod-ecs-cluster" --service-name "$LABEL" --region $REGION --task-definition "$LABEL" --desired-count 1 --placement-strategy type=spread,field=instanceId
