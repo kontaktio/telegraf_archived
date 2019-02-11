@@ -122,10 +122,8 @@ cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's') # default
 cfg.append_key_value('timeout', '5s') # default
 cfg.append_key_value('retention_policy', 'current_rp')
-cfg.append_key_value('tagexclude', ['url'])
-cfg.append_key_value('fielddrop', ['area_id', 'ble_battery', 'ble_databyte', 'ble_major', 'ble_minor',
-                                   'ble_txpower', 'ble_vendor', 'revision', 'ts_utc', 'uid'])
-
+cfg.append_key_value('taginclude', ['trackingId'])
+cfg.append_key_value('fieldpass', ['coord_latitude', 'coord_longitude'])
 
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'position')
@@ -133,9 +131,9 @@ cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.trackingidresolver', True)
 cfg.append_key_value('tag_name', 'ble_proximityuuid')
-cfg.append_key_value('new_tag_name', 'tracking_id')
+cfg.append_key_value('new_tag_name', 'trackingId')
 cfg.append_key_value('order', 1)
-cfg.append_section_name('tagpass', True)
+cfg.append_section_name('processors.trackingidresolver.tagpass', False, True)
 cfg.append_key_value('trackingId', ['*'])
 
 cfg.append_section_name('inputs.http', True)
