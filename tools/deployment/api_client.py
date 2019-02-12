@@ -30,7 +30,7 @@ class ApiClient:
         return unique_ids
 
     def get_location_engine_venues(self, api_venue_id=None):
-        if api_venue_id is not None:
+        if api_venue_id is not None and api_venue_id:
             return self._get_location_engine_configs([api_venue_id])
         
         venues = self._get_collection(self.GET_VENUE_PATH, {}, 'venues')
