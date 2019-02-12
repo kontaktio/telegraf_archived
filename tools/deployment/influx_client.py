@@ -95,6 +95,7 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
             self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
         except InfluxDBClientError as e:
             if e.message == 'retention policy already exists':
+                print "Updating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
                 self._client.alter_retention_policy(policy_name, database_name, duration, 1)
 
     def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time, resample_for):
