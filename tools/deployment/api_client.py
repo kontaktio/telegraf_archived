@@ -38,7 +38,9 @@ class ApiClient:
         return self._get_location_engine_configs(venue_ids)
 
     def get_company_id(self):
+        print(self.GET_MANAGER_ME_PATH % self._api_url)
         response = requests.get(self.GET_MANAGER_ME_PATH % self._api_url, headers=self._get_headers()).json()
+        print(response)
         company_id = str(response['company']['id'])
         print "Received companyId %s" % company_id
         return company_id
@@ -46,7 +48,7 @@ class ApiClient:
     def _get_location_engine_configs(self, venue_ids):
         result = {}
         for venue_id in venue_ids:
-            url =  self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
+            url = self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
             response = requests.get(url, headers=self._get_headers(), params={"venueId": venue_id})
             if response.status_code == 200:
                 result[venue_id] = response.json()
