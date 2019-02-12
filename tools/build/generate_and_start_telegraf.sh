@@ -18,7 +18,7 @@ python /config_generator/telegraf_stream_config_generate.py \
     --mqtt-url "$MQTT_URL" \
     --telemetry-types "$TELEMETRY_TYPES" \
     --streams-per-telegraf $STREAMS_PER_TELEGRAF \
-    ----api-venue-id "$VENUE_ID"
+    --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.stream.conf.*;
 do
 	pm2 start -f /go/src/github.com/influxdata/telegraf/telegraf -- --config $f
@@ -34,7 +34,7 @@ python /config_generator/telegraf_location_config_generate.py \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD"  \
     --tx-power $TX_POWER \
-    ----api-venue-id "$VENUE_ID"
+    --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.location.conf.*;
 do
 	pm2 start -f /go/src/github.com/influxdata/telegraf/telegraf -- --config $f
