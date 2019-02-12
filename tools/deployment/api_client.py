@@ -38,9 +38,7 @@ class ApiClient:
         return self._get_location_engine_configs(venue_ids)
 
     def get_company_id(self):
-        print(self.GET_MANAGER_ME_PATH % self._api_url)
         response = requests.get(self.GET_MANAGER_ME_PATH % self._api_url, headers=self._get_headers()).json()
-        print(response)
         company_id = str(response['company']['id'])
         print "Received companyId %s" % company_id
         return company_id
