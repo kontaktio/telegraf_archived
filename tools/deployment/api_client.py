@@ -20,7 +20,7 @@ class ApiClient:
             'deviceType': 'BEACON',
             'maxResult': 500
         }
-        if api_venue_id is not None:
+        if api_venue_id is not None and api_venue_id:
             params['q'] = 'venue.id==%s' % api_venue_id
 
         result = self._get_collection(self.GET_DEVICES_PATH, params, 'devices')
