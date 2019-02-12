@@ -31,9 +31,11 @@ class ApiClient:
 
     def get_location_engine_venues(self, api_venue_id=None):
         if api_venue_id is not None and api_venue_id:
+            print(api_venue_id)
             return self._get_location_engine_configs([api_venue_id])
         
         venues = self._get_collection(self.GET_VENUE_PATH, {}, 'venues')
+        print(venues)
         venue_ids = [v['id'] for v in venues]
         return self._get_location_engine_configs(venue_ids)
 
@@ -48,6 +50,7 @@ class ApiClient:
         for venue_id in venue_ids:
             url = self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
             response = requests.get(url, headers=self._get_headers(), params={"venueId": venue_id})
+            print(response)
             if response.status_code == 200:
                 result[venue_id] = response.json()
 
