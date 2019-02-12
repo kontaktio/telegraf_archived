@@ -6,8 +6,10 @@ source /config_generator/env
 
 cd /etc/telegraf
 
+echo "API_URL: $API_URL"
+
 python /config_generator/telegraf_stream_config_generate.py \
-    --api-key ${API_KEY} --api-url ${API_URL} \
+    --api-key "$API_KEY" --api-url "$API_URL" \
     --influxdb-url ${INFLUXDB_URL} \
     --influxdb-port ${INFLUXDB_PORT} \
     --influxdb-username ${INFLUXDB_USERNAME} \
