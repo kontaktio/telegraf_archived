@@ -1,4 +1,5 @@
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
 
 
 class InfluxClient:
@@ -79,7 +80,13 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
         
     def create_user(self, user_name, password, database_name=None):
         print "Creating user %s" % user_name
-        self._client.create_user(user_name, password)
+        try:
+            self._client.create_user(user_name, password)
+        except InfluxDBClientError as e:
+            print(e)
+            if e.message != 'user already exists':
+                raise e
+
         if database_name is not None:
             self._client.grant_privilege(self.READ_PRIVILEGE, database_name, user_name)
 
