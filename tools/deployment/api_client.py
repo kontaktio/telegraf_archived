@@ -68,6 +68,7 @@ class ApiClient:
         params['maxResult'] = 500
         while True:
             response = requests.get(path % self._api_url, headers=self._get_headers(), params=params).json()
+            print(response)
             for r in response[collection_name]:
                 result.append(r)
             if response['searchMeta']['nextResults'] == '':
