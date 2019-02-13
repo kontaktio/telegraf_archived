@@ -48,7 +48,6 @@ class ApiClient:
         for venue_id in venue_ids:
             url = self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
             response = requests.get(url, headers=self._get_headers(), params={"venueId": venue_id})
-            print(response)
             if response.status_code == 200:
                 result[venue_id] = response.json()
 
@@ -70,7 +69,6 @@ class ApiClient:
         params['maxResult'] = 500
         while True:
             response = requests.get(path % self._api_url, headers=self._get_headers(), params=params).json()
-            print(response)
             for r in response[collection_name]:
                 result.append(r)
             if response['searchMeta']['nextResults'] == '':
