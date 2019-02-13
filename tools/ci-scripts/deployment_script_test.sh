@@ -33,6 +33,10 @@ echo "
       },
       \"environment\": [
         {
+          \"name\": \"EMAIL\",
+          \"value\": \"$EMAIL\"
+        },
+        {
           \"name\": \"API_KEY\",
           \"value\": \"$API_KEY\"
         },
