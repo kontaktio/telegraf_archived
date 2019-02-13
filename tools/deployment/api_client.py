@@ -60,7 +60,8 @@ class ApiClient:
     def _get_headers(self):
         return {
             'Api-Key': self._api_key,
-            'Accept': self.ACCEPT
+            'Accept': self.ACCEPT,
+            'X-Kontakt-Agent': 'web-panel-telegraf'
         }
 
     def _get_collection(self, path, params, collection_name):
