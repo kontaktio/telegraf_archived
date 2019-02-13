@@ -94,6 +94,7 @@ if len(result['error']) > 0:
     raise(Exception(result['error']))
 
 location_engine_configs = api_client.get_location_engine_venues(options.get_api_venue_id())
+print(location_engine_configs)
 if len(location_engine_configs) == 0:
     print 'None of selected account venues has Location Engine configured!'
     sys.exit(0)
