@@ -145,20 +145,21 @@ cfg.append_key_value('tag_keys', ['ble_proximityuuid'])
 idx = 0
 for venue_id, location_engine_config in location_engine_configs.iteritems():
     current = TelegrafConfigFormatter(cfg)
-    infsoft_apikey = location_engine_config['infsoft']['apiKey']
-    infsoft_locationid = location_engine_config['infsoft']['locationId']
-    current.append_key_value('urls', [
-        '%s?api_key=%s&location_id=%d' % (
-            INFSOFT_REALTIME_ENDPOINT,
-            infsoft_apikey,
-            infsoft_locationid
-        )
-    ])
+    if location_engine_config['infsoft']['enabled']:
+        infsoft_apikey = location_engine_config['infsoft']['apiKey']
+        infsoft_locationid = location_engine_config['infsoft']['locationId']
+        current.append_key_value('urls', [
+            '%s?api_key=%s&location_id=%d' % (
+                INFSOFT_REALTIME_ENDPOINT,
+                infsoft_apikey,
+                infsoft_locationid
+            )
+        ])
 
-    with open('telegraf.location.conf.%d' % idx, 'w') as f:
-        f.write(current.to_string())
-        
-    idx = idx + 1
+        with open('telegraf.location.conf.%d' % idx, 'w') as f:
+            f.write(current.to_string())
 
-    if len(result['error']) > 0: 
-        raise(Exception(result['error']))
+        idx = idx + 1
+
+        if len(result['error']) > 0:
+            raise(Exception(result['error']))
