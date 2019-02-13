@@ -1,4 +1,5 @@
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
 
 
 class InfluxClient:
@@ -79,13 +80,23 @@ DROP CONTINUOUS QUERY "{0}_{1}_cq" ON "{2}"
         
     def create_user(self, user_name, password, database_name=None):
         print "Creating user %s" % user_name
-        self._client.create_user(user_name, password)
+        try:
+            self._client.create_user(user_name, password)
+        except InfluxDBClientError as e:
+            if e.message != 'user already exists':
+                raise e
+
         if database_name is not None:
             self._client.grant_privilege(self.READ_PRIVILEGE, database_name, user_name)
 
     def create_retention_policy(self, database_name, policy_name, duration):
         print "Creating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
-        self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
+        try:
+            self._client.create_retention_policy(policy_name, duration, 1, database=database_name)
+        except InfluxDBClientError as e:
+            if e.message == 'retention policy already exists':
+                print "Updating retention policy %s with duration %s on database %s" % (policy_name, duration, database_name)
+                self._client.alter_retention_policy(policy_name, database_name, duration, 1)
 
     def recreate_continuous_query(self, database_name, aggregation_time, retention_policy, source_retention_policy, resample_time, resample_for):
         self._execute_query(self.REMOVE_CQ_FMT.format(

@@ -21,6 +21,7 @@ class Options(object):
         parser.add_argument("--influxdb-port", dest="influxdb_port", default=8086, type=int)
         parser.add_argument("--influxdb-username", dest="influxdb_username", required=True)
         parser.add_argument("--influxdb-password", dest="influxdb_password", required=True)
+        parser.add_argument("--influxdb-new-user-password", dest="influxdb_new_user_password", required=True)
         parser.add_argument("--config-file", dest="config_file")
         parser.add_argument("--api-url", dest="api_url", default="https://testapi.kontakt.io/")
         parser.add_argument("--api-venue-id", dest="api_venue_id", default=None)
@@ -69,9 +70,9 @@ class Options(object):
     def get_streams_per_telegraf(self):
         return self.args['streams_per_telegraf']
 
+    def get_influxdb_new_user_password(self):
+        return self.args['influxdb_new_user_password']
 
-# TODO Remove from VCS
-DEFAULT_INFLUX_PASSWORD = 'aeg0UKOmUIzJap1QV6m8'
 
 options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
@@ -81,15 +82,16 @@ influx_client = InfluxClient(options.get_influx_url(),
     options.get_influx_password())
 
 company_id = api_client.get_company_id()
+influxdb_new_user_password = options.get_influxdb_new_user_password()
 influx_client.create_database(company_id)
-influx_client.create_user(company_id, DEFAULT_INFLUX_PASSWORD, company_id)
+influx_client.create_user(company_id, influxdb_new_user_password, company_id)
 
 influx_client.create_retention_policy(company_id, 'stream_rp', '3h')
 
 influx_client.create_retention_policy(company_id, 'current_rp', '7d')
 influx_client.recreate_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s', '40s')
 
-influx_client.create_retention_policy(company_id, 'recent_rp', '30d')
+influx_client.create_retention_policy(company_id, 'recent_rp', '365d')
 influx_client.recreate_continuous_query(company_id, '5m', 'recent_rp', 'stream_rp', '5m', '5m')
 
 influx_client.create_retention_policy(company_id, 'history_rp', '365d')
@@ -115,10 +117,10 @@ cfg.append_key_value('flush_buffer_when_full', True)
 cfg.append_key_value('collection_jitter', '0s')
 cfg.append_key_value('flush_interval', '5s')
 cfg.append_key_value('flush_jitter', 0)
+cfg.append_key_value('omit_hostname', True)
 cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
 cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
-cfg.append_key_value('omit_hostname', True)
 
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ["%s:%d" % (options.get_influx_url(), options.get_influx_port())])
@@ -129,80 +131,44 @@ cfg.append_key_value('precision', 's')
 cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'stream_rp')
 
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastSingleClick')
+cfg.append_section_name('processors.clickdetect', True)
+cfg.append_key_value('field_name', 'clickId')
 cfg.append_key_value('out_field_name', 'singleClick')
-cfg.append_key_value('threshold', 60)
-cfg.append_key_value('tag_key', 'topic')
+cfg.append_key_value('tag_key', 'trackingId')
+cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastSingleClick')
 cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('threshold', 60)
 cfg.append_key_value('tag_key', 'trackingId')
-
-cfg.append_section_name('processors.clickdetect', True)
-cfg.append_key_value('field_name', 'clickId')
-cfg.append_key_value('out_field_name', 'singleClick')
-cfg.append_key_value('tag_key', 'topic')
-
-cfg.append_section_name('processors.clickdetect', True)
-cfg.append_key_value('field_name', 'clickId')
-cfg.append_key_value('out_field_name', 'singleClick')
-cfg.append_key_value('tag_key', 'trackingId')
-
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastDoubleTap')
-cfg.append_key_value('out_field_name', 'doubleTap')
-cfg.append_key_value('tag_key', 'topic')
-cfg.append_key_value('threshold', 60)
+cfg.append_key_value('order', 1)
 
 cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastDoubleTap')
 cfg.append_key_value('out_field_name', 'doubleTap')
 cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('threshold', 60)
-
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastThreshold')
-cfg.append_key_value('out_field_name', 'threshold')
-cfg.append_key_value('tag_key', 'topic')
-cfg.append_key_value('threshold', 60)
+cfg.append_key_value('order', 2)
 
 cfg.append_section_name('processors.lastcalc', True)
 cfg.append_key_value('field_name', 'lastThreshold')
 cfg.append_key_value('out_field_name', 'threshold')
 cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('threshold', 60)
-
-cfg.append_section_name('processors.tagrename', True)
-cfg.append_section_name('processors.tagrename.renames', inner=True)
-cfg.append_key_value('topic', 'trackingId')
-
-cfg.append_section_name('processors.tagremove', True)
-cfg.append_key_value('remove', ['host'])
-
-cfg.append_section_name('processors.regex', True)
-cfg.append_section_name('processors.regex.tags', True)
-cfg.append_key_value('key', 'topic')
-cfg.append_key_value('pattern', '^\\\\/stream\\\\/([a-zA-Z0-9]+)\\\\/[a-z]+$')
-cfg.append_key_value('replacement', '${1}')
-cfg.append_section_name('processors.regex.tags', True)
-cfg.append_key_value('key', 'trackingId')
-cfg.append_key_value('pattern', '^\\\\/stream\\\\/([a-zA-Z0-9]+)\\\\/[a-z]+$')
-cfg.append_key_value('replacement', '${1}')
+cfg.append_key_value('order', 3)
 
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'telemetry')
 
 cfg.append_section_name('inputs.mqtt_consumer', True)
 cfg.append_key_value('servers', [options.get_mqtt_url()])
-cfg.append_key_value('qos', 0) # default
-cfg.append_key_value('connection_timeout', '300s')
+cfg.append_key_value('qos', 0)
+cfg.append_key_value('connection_timeout', '30s')
 cfg.append_key_value('persistent_session', False)
-cfg.append_key_value('username', 'telegraf') # default
+cfg.append_key_value('username', 'telegraf')
 cfg.append_key_value('password', options.get_api_key())
-cfg.append_key_value('data_format', 'json') # default
+cfg.append_key_value('data_format', 'json')
 cfg.append_key_value('tag_keys', ['trackingId'])
 
 idx = 0

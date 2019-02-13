@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
 	"github.com/influxdata/telegraf/plugins/processors"
 )
 
@@ -52,21 +51,21 @@ func (p *LastCalc) Description() string {
 }
 
 func (p *LastCalc) Apply(in ...telegraf.Metric) []telegraf.Metric {
-	result := make([]telegraf.Metric, len(in))
-	for idx, mt := range in {
-		if mt.HasTag(p.TagKey) && mt.HasField(p.FieldName) {
+
+	for _, mt := range in {
+		if !mt.HasField(p.OutFieldName) && mt.HasField(p.FieldName) {
 			tag, _ := mt.GetTag(p.TagKey)
 			fieldVal, _ := mt.GetField(p.FieldName)
 			floatFieldVal, typeOk := fieldVal.(float64)
 			if !typeOk {
 				log.Printf("E! [processors.lastcalc] Invalid type of field %s", p.FieldName)
-				return in //Wrong type
+				continue//Wrong type
 			}
 
 			scanInfo, exists := p.cache[tag]
 			if !exists {
 				p.cache[tag] = lastScanInfo{floatFieldVal, mt.Time(), mt.Time(), false}
-				result[idx] = p.copyAndReplaceField(mt, 0)
+				mt.AddField(p.OutFieldName, 0)
 				continue
 			}
 
@@ -91,30 +90,11 @@ func (p *LastCalc) Apply(in ...telegraf.Metric) []telegraf.Metric {
 				}
 				newFieldValue = 0
 			}
-			result[idx] = p.copyAndReplaceField(mt, newFieldValue)
-		} else {
-			result[idx] = mt
-		}
-	}
-	return result
-}
-
-func (p *LastCalc) copyAndReplaceField(mt telegraf.Metric, newValue int32) telegraf.Metric {
-	newMetric, _ := metric.New(
-		mt.Name(),
-		mt.Tags(),
-		make(map[string]interface{}),
-		mt.Time())
-
-	for k, v := range mt.Fields() {
-		if k != p.FieldName {
-			newMetric.AddField(k, v)
-		} else {
-			newMetric.AddField(p.OutFieldName, newValue)
+			mt.AddField(p.OutFieldName, newFieldValue)
 		}
 	}
 
-	return newMetric
+	return in
 }
 
 func init() {

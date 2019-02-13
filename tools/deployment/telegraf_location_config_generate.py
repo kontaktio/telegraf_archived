@@ -94,6 +94,7 @@ if len(result['error']) > 0:
     raise(Exception(result['error']))
 
 location_engine_configs = api_client.get_location_engine_venues(options.get_api_venue_id())
+print(location_engine_configs)
 if len(location_engine_configs) == 0:
     print 'None of selected account venues has Location Engine configured!'
     sys.exit(0)
@@ -103,12 +104,13 @@ cfg = TelegrafConfigFormatter()
 cfg.append_section_name('global_tags')
 cfg.append_section_name('agent')
 cfg.append_key_value('interval', '5s')
-cfg.append_key_value('round_interval', True)
+cfg.append_key_value('round_interval', False)
 cfg.append_key_value('metric_buffer_limit', 1000)
 cfg.append_key_value('flush_buffer_when_full', True)
 cfg.append_key_value('collection_jitter', '0s')
-cfg.append_key_value('flush_interval', '10s')
+cfg.append_key_value('flush_interval', '5s')
 cfg.append_key_value('flush_jitter', '2s')
+cfg.append_key_value('omit_hostname', True)
 cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
 cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
@@ -121,20 +123,19 @@ cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's') # default
 cfg.append_key_value('timeout', '5s') # default
 cfg.append_key_value('retention_policy', 'current_rp')
+cfg.append_key_value('taginclude', ['trackingId'])
+cfg.append_key_value('fieldpass', ['coord_latitude', 'coord_longitude'])
 
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'position')
-
-cfg.append_section_name('processors.tagremove', True)
-cfg.append_key_value('remove', ['host', 'url'])
-
-cfg.append_section_name('processors.fieldremove', True)
-cfg.append_key_value('remove', ['area_id', 'ble_battery', 'ble_databyte', 'ble_major', 
-    'ble_minor', 'ble_txpower', 'ble_vendor', 'revision', 'ts_utc', 'uid'])
+cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.trackingidresolver', True)
 cfg.append_key_value('tag_name', 'ble_proximityuuid')
 cfg.append_key_value('new_tag_name', 'trackingId')
+cfg.append_key_value('order', 1)
+cfg.append_section_name('processors.trackingidresolver.tagpass', False, True)
+cfg.append_key_value('trackingId', ['*'])
 
 cfg.append_section_name('inputs.http', True)
 cfg.append_key_value('timeout', '5s')
@@ -144,20 +145,21 @@ cfg.append_key_value('tag_keys', ['ble_proximityuuid'])
 idx = 0
 for venue_id, location_engine_config in location_engine_configs.iteritems():
     current = TelegrafConfigFormatter(cfg)
-    infsoft_apikey = location_engine_config['infsoft']['apiKey']
-    infsoft_locationid = location_engine_config['infsoft']['locationId']
-    current.append_key_value('urls', [
-        '%s?api_key=%s&location_id=%d' % (
-            INFSOFT_REALTIME_ENDPOINT,
-            infsoft_apikey,
-            infsoft_locationid
-        )
-    ])
+    if location_engine_config['infsoft']['enabled']:
+        infsoft_apikey = location_engine_config['infsoft']['apiKey']
+        infsoft_locationid = location_engine_config['infsoft']['locationId']
+        current.append_key_value('urls', [
+            '%s?api_key=%s&location_id=%d' % (
+                INFSOFT_REALTIME_ENDPOINT,
+                infsoft_apikey,
+                infsoft_locationid
+            )
+        ])
 
-    with open('telegraf.location.conf.%d' % idx, 'w') as f:
-        f.write(current.to_string())
-        
-    idx = idx + 1
+        with open('telegraf.location.conf.%d' % idx, 'w') as f:
+            f.write(current.to_string())
 
-    if len(result['error']) > 0: 
-        raise(Exception(result['error']))
+        idx = idx + 1
+
+        if len(result['error']) > 0:
+            raise(Exception(result['error']))

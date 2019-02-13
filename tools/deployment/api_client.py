@@ -20,7 +20,7 @@ class ApiClient:
             'deviceType': 'BEACON',
             'maxResult': 500
         }
-        if api_venue_id is not None:
+        if api_venue_id is not None and api_venue_id:
             params['q'] = 'venue.id==%s' % api_venue_id
 
         result = self._get_collection(self.GET_DEVICES_PATH, params, 'devices')
@@ -30,7 +30,7 @@ class ApiClient:
         return unique_ids
 
     def get_location_engine_venues(self, api_venue_id=None):
-        if api_venue_id is not None:
+        if api_venue_id is not None and api_venue_id:
             return self._get_location_engine_configs([api_venue_id])
         
         venues = self._get_collection(self.GET_VENUE_PATH, {}, 'venues')
@@ -46,7 +46,7 @@ class ApiClient:
     def _get_location_engine_configs(self, venue_ids):
         result = {}
         for venue_id in venue_ids:
-            url =  self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
+            url = self.GET_VENUE_LOCATION_ENGINE_PATH % self._api_url
             response = requests.get(url, headers=self._get_headers(), params={"venueId": venue_id})
             if response.status_code == 200:
                 result[venue_id] = response.json()
@@ -59,7 +59,8 @@ class ApiClient:
     def _get_headers(self):
         return {
             'Api-Key': self._api_key,
-            'Accept': self.ACCEPT
+            'Accept': self.ACCEPT,
+            'X-Kontakt-Agent': 'web-panel-telegraf'
         }
 
     def _get_collection(self, path, params, collection_name):
