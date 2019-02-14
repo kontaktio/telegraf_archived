@@ -120,8 +120,8 @@ cfg.append_key_value('urls', ['%s:%d' % (options.get_influx_url(), options.get_i
 cfg.append_key_value('database', company_id)
 cfg.append_key_value('username', options.get_influx_username())
 cfg.append_key_value('password', options.get_influx_password())
-cfg.append_key_value('precision', 's') # default
-cfg.append_key_value('timeout', '5s') # default
+cfg.append_key_value('precision', 's')
+cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'current_rp')
 cfg.append_key_value('taginclude', ['trackingId'])
 cfg.append_key_value('fieldpass', ['coord_latitude', 'coord_longitude'])
@@ -135,7 +135,7 @@ cfg.append_key_value('tag_name', 'ble_proximityuuid')
 cfg.append_key_value('new_tag_name', 'trackingId')
 cfg.append_key_value('order', 1)
 cfg.append_section_name('processors.trackingidresolver.tagpass', False, True)
-cfg.append_key_value('trackingId', ['*'])
+cfg.append_key_value('ble_proximityuuid', ['*'])
 
 cfg.append_section_name('inputs.http', True)
 cfg.append_key_value('timeout', '5s')
