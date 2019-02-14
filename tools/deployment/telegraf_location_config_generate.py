@@ -145,7 +145,7 @@ cfg.append_key_value('tag_keys', ['ble_proximityuuid'])
 idx = 0
 for venue_id, location_engine_config in location_engine_configs.iteritems():
     current = TelegrafConfigFormatter(cfg)
-    if location_engine_config['infsoft']['enabled']:
+    if ('enabled' in location_engine_config and location_engine_config['enabled']) or location_engine_config['infsoft']['enabled']:
         infsoft_apikey = location_engine_config['infsoft']['apiKey']
         infsoft_locationid = location_engine_config['infsoft']['locationId']
         current.append_key_value('urls', [
