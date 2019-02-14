@@ -132,7 +132,7 @@ cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'stream_rp')
 cfg.append_key_value('tagexclude', ['topic'])
 cfg.append_key_value('fielddrop', ['lastDoubleTap', 'lastSingleClick', 'lastThreshold', 'loggingEnabled', 'sensitivity',
-                                   'utcTime'])
+                                   'utcTime', 'secondsSinceThreshold', 'secondsSinceDoubleTap'])
 
 cfg.append_section_name('processors.clickdetect', True)
 cfg.append_key_value('field_name', 'clickId')
