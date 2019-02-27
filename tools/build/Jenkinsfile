@@ -15,7 +15,7 @@ node {
             docker.image('golang:1.11').inside {
                 sh 'go get -u github.com/golang/dep/cmd/dep'
 
-                sh 'ln -sf ${GOPATH}/src/github.com/influxdata/telegraf ${WORKSPACE}'
+                sh 'ln -sf ${WORKSPACE} ${GOPATH}/src/github.com/influxdata/telegraf'
                 sh 'ls -l ${GOPATH}/src/github.com/influxdata/telegraf'
                 sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
             }
