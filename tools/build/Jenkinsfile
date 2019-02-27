@@ -16,8 +16,8 @@ node {
                 sh 'mkdir -p ${GOPATH}/src/github.com/influxdata/telegraf'
                 sh 'cp -r ${WORKSPACE}/* ${GOPATH}/src/github.com/influxdata/telegraf'
                 sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf'
-                sh 'make'
+                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
+//                sh 'make'
             }
         }
 
