@@ -13,12 +13,11 @@ node {
         stage('Build Telegraf') {
             sh 'pwd'
             docker.image('golang:1.11').inside {
-//                sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'ls -l /var/jenkins_home/workspace/gregation_based_on_previous_data'
-                sh 'ls -l /var/jenkins_home/workspace'
-                sh 'ls -l /var/jenkins_home/'
-//                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
-//                sh 'make'
+                sh 'go get -u github.com/golang/dep/cmd/dep'
+
+                sh 'ln -sf ${GOPATH}/src/github.com/influxdata/telegraf ${WORKSPACE}'
+                sh 'ls -l ${GOPATH}/src/github.com/influxdata/telegraf'
+                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
             }
         }
 
