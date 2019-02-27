@@ -1,5 +1,5 @@
 var period_time = 10s
-var every_time = 5s
+var every_time = 10s
 
 var database string
 var retention_policy = 'stream_rp'
@@ -7,19 +7,13 @@ var retention_policy = 'stream_rp'
 stream
     |from()
         .measurement('telemetry')
+    |where(lambda: "rssi" > -95)
     |window()
         .period(period_time)
         .every(every_time)
-        .align()
     |default()
         .field('rssi', -128.0)
     @locationEngine()
-    |eval(lambda: string("sourceId"))
-        .as('fSourceId')
-        .keep()
-    |eval(lambda: string("trackingId"))
-        .as('fTrackingId')
-        .keep()
     |influxDBOut()
         .database(database)
         .retentionPolicy(retention_policy)
