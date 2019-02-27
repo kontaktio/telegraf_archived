@@ -11,7 +11,7 @@ node {
         }
 
         stage('Build Telegraf') {
-            docker.image('golang:1.11').inside {
+            docker.image('golang:1.11').inside('-u root') {
                 sh 'go get -u github.com/golang/dep/cmd/dep'
                 sh 'make'
             }
