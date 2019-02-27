@@ -12,9 +12,9 @@ node {
 
         stage('Build Telegraf') {
             sh 'pwd'
-            docker.image('golang:1.11').inside("-v ${env.WORKSPACE}:/telegraf") {
+            docker.image('golang:1.11') {
 //                sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'ls -l /telegraf'
+                sh 'ls -l /var/jenkins_home/workspace/gregation_based_on_previous_data'
 //                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
 //                sh 'make'
             }
