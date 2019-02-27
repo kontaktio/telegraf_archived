@@ -12,10 +12,10 @@ node {
 
         stage('Build Telegraf') {
             sh 'ls -l'
-            docker.image('golang:1.11').inside("-v ${env.WORKSPACE}:/go/src/github.com/influxdata/telegraf") {
+            docker.image('golang:1.11').inside("-v ${env.WORKSPACE}:/go/telegraf") {
 //                sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'ls -l /go/src/github.com/influxdata/telegraf'
-                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
+                sh 'ls -l /go/telegraf'
+//                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
 //                sh 'make'
             }
         }
