@@ -12,7 +12,7 @@ node {
 
         stage('Build Telegraf') {
             sh 'pwd'
-            print ${env.WORKSPACE}
+            print env.WORKSPACE
             docker.image('golang:1.11').inside("-e GOPATH=${env.WORKSPACE}") {
                 sh 'pwd'
                 sh 'ls -la'
