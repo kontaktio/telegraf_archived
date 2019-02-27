@@ -13,11 +13,12 @@ node {
         stage('Build Telegraf') {
             sh 'pwd'
             docker.image('golang:1.11').inside("-u root") {
-                sh 'ls -la'
-                sh 'pwd'
-                sh 'cd $GOPATH'
-                sh 'pwd'
-//                sh 'go get -u github.com/golang/dep/cmd/dep'
+                sh 'cd ${GOPATH}/src'
+                sh 'ls -l'
+                sh 'mkdir -p ${GOPATH}/src/github.com/influxdata/telegraf'
+                sh 'cp -r ${WORKSPACE}/* ${GOPATH}/src/github.com/influxdata/telegraf'
+                sh 'go get -u github.com/golang/dep/cmd/dep'
+                sh 'ls -l github.com'
 //                sh 'make'
             }
         }
