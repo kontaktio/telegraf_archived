@@ -11,11 +11,13 @@ node {
         }
 
         stage('Build Telegraf') {
-            docker.image('golang:1.11').inside('-u root -v "$PWD":/usr/src/telegraf -w /usr/src/telegraf') {
-                sh 'pwd'
-                sh 'ls -la'
-                sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'make'
+            docker.image('golang:1.11').inside('-u root -v "$PWD":/usr/src/telegraf') {
+                dir('/usr/src/telegraf') {
+                    sh 'go get -u github.com/golang/dep/cmd/dep'
+                    sh 'pwd'
+                    sh 'ls -la'
+                    sh 'make'
+                }
             }
         }
 
