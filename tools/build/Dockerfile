@@ -17,7 +17,7 @@ RUN chmod +x /generate_and_start_telegraf.sh
 RUN go get 'github.com/kontaktio/telegraf'
 RUN go get -u github.com/golang/dep/...
 
-RUN mv $GOPATH/src/github.com/kontaktio/telegraf $GOPATH/src/github.com/influxdata/telegraf
+RUN mv $GOPATH/src/github.com/kontaktio $GOPATH/src/github.com/influxdata
 WORKDIR $GOPATH/src/github.com/influxdata/telegraf
 RUN git checkout $BUILD_BRANCH
 RUN make
