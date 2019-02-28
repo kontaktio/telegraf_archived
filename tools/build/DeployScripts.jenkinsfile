@@ -1,0 +1,26 @@
+#!groovy
+
+node {
+
+    currentBuild.result = "SUCCESS"
+
+    try {
+
+        stage('Checkout') {
+            checkout scm
+        }
+
+        def deployEnv = 'test'
+        if (env.BRANCH_NAME == 'master') {
+            deployEnv = 'prod'
+        }
+
+        stage("[${deployEnv}] Build telegraf image") {
+            sh 'aws s3 cp ./tools/deployment s3://kontakt-telegraf-config/build-' + deployEnv + '/ --recursive --exclude "*" --include "*.py"'
+        }
+    }
+    catch (err) {
+        currentBuild.result = "ERROR"
+        throw err
+    }
+}
