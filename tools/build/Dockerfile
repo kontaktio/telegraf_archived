@@ -4,7 +4,7 @@ ARG SCRIPTS_SOURCE=test
 ARG BUILD_BRANCH=develop
 
 RUN apk update
-RUN apk add git python py-pip make bash nodejs
+RUN apk add git python py-pip make bash nodejs nodejs-npm
 
 RUN pip install requests influxdb awscli
 
