@@ -10,33 +10,22 @@ node {
             checkout scm
         }
 
-        stage('Build Telegraf') {
-            sh 'pwd'
-            docker.image('golang:1.11').inside {
-                sh 'go get -u github.com/golang/dep/cmd/dep'
-                sh 'mkdir -p ${GOPATH}/src/github.com/influxdata'
-                sh 'ln -sf ${WORKSPACE} ${GOPATH}/src/github.com/influxdata/telegraf'
-                sh 'ls -l ${GOPATH}/src/github.com/influxdata/telegraf'
-                sh 'cd ${GOPATH}/src/github.com/influxdata/telegraf && make'
+        if (env.BRANCH_NAME == 'master') {
+            stage('[Prod] Build telegraf image') {
+                def deploy = docker.build('kontaktio/telegraf', "-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=prod --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                    deploy.push('latest')
+                }
+            }
+
+        } else {
+            stage('[Test] Build telegraf image') {
+                def deploy = docker.build('kontaktio/telegraf', "-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=test --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                    deploy.push('latest')
+                }
             }
         }
-
-//        if (env.BRANCH_NAME == 'master') {
-//            stage('[Prod] Push telegraf image') {
-//                def deploy = docker.build('kontaktio/telegraf', '-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=prod .')
-//                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
-//                    deploy.push('latest')
-//                }
-//            }
-//
-//        } else {
-//            stage('[Test] Push telegraf image') {
-//                def deploy = docker.build('kontaktio/telegraf', '-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=test .')
-//                docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
-//                    deploy.push('latest')
-//                }
-//            }
-//        }
     }
     catch (err) {
         currentBuild.result = "ERROR"
