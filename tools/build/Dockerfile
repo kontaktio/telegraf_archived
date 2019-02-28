@@ -25,4 +25,5 @@ RUN make
 RUN touch /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
-CMD["/bin/bash", "/generate_and_start_telegraf.sh", "${SCRIPTS_SOURCE}"]
+ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
+CMD["/bin/bash", "/generate_and_start_telegraf.sh"]
