@@ -26,4 +26,4 @@ RUN touch /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
 ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
-ENTRYPOINT "/generate_and_start_telegraf.sh" "$SCRIPTS_SOURCE"
+ENTRYPOINT "/generate_and_start_telegraf.sh test"
