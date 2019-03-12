@@ -12,7 +12,7 @@
 |Description
 
 |`venueId`|ID of venue to enable LE in
-|`enabled`|Whether to enable LE
+|`infsoft.enabled`|Whether to enable LE
 |`infsoft.apiKey`|Api-Key provided by Infsoft
 |`infsoft.locationId`|ID of Infsoft's location to use
 |===

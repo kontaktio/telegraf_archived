@@ -38,7 +38,7 @@ BEGIN
     SELECT 
         mean("rssi") AS "rssi",
         COUNT("rssi") AS "scans",
-        COUNT("rssi")/-mean("rssi") as "quality",
+        COUNT("rssi")/(-mean("rssi")) as "quality",
         MODE("fSourceId") AS "fSourceId",
         MODE("fTrackingId") AS "fTrackingId"
     INTO 
