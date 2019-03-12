@@ -16,7 +16,6 @@ class ApiClient:
 
     def get_telemetry_unique_ids(self, api_venue_id=None):
         params = {
-            'access': 'OWNER',
             'deviceType': 'BEACON',
             'maxResult': 500
         }
