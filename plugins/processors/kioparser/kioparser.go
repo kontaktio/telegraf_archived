@@ -172,7 +172,7 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 			result["humidity"] = asFloat(buffer.ReadByte())
 		case 0x13:
 			temperature16b := buffer.Next(2)
-			result["temperature"] = float64(temperature16b[0]) + float64(float64(temperature16b[1])/256.0)
+			result["temperature"] = float64(temperature16b[1]) + float64(float64(temperature16b[0])/256.0)
 		case 0x16:
 			result["movementId"] = asFloat(buffer.ReadByte())
 			result["secondsSinceThreshold"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))

@@ -8,6 +8,10 @@ module.exports = class TelegrafEmitter {
             throw Error("Socket doesn't exist! Start telegraf first.")
         }
         this.socket = new net.Socket();
+        this.connect();
+    }
+
+    connect() {
         this.socket.connect(this.socketPath, () => {
             console.log("Socket connected");
         });
@@ -25,9 +29,13 @@ module.exports = class TelegrafEmitter {
         });
 
         for(let event of events) {
-            console.log(event);
-            this.socket.write(JSON.stringify(event));
-            this.socket.write('\r\n');
+            try {
+                this.socket.write(JSON.stringify(event));
+                this.socket.write('\r\n');
+            } catch (e) {
+                console.error(`Exception while sending data: ${e.message}. Quitting`);
+                process.exit();
+            }
         }
     }
-}
+};
