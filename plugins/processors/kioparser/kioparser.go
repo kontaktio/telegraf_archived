@@ -78,7 +78,7 @@ func parseData(data []byte) map[string]interface{} {
 	buffer := bytes.NewBuffer(data)
 	for buffer.Len() >= blockHeaderLength {
 		blockLen, _ := buffer.ReadByte()
-		if int(blockLen) < buffer.Len() {
+		if int(blockLen) > buffer.Len() {
 			return make(map[string]interface{})
 		}
 		block := bytes.NewBuffer(buffer.Next(int(blockLen)))
