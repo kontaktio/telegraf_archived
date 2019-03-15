@@ -22,3 +22,5 @@ pm2 start -f /usr/bin/telegraf -- --config telegraf.events.conf
 
 cd /config_generator/event_processor
 pm2 start -f node -- index.js
+
+tail -f /var/log/telegraf-config-gen.log

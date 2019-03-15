@@ -29,4 +29,8 @@ app.post('/event/collect', async (req, res) => {
     }
 });
 
+app.get('/healthcheck', (req, res) => {
+    res.send('OK')
+});
+
 app.listen(8080, () => "Listening started");
