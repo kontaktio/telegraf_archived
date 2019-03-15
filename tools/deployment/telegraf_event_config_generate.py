@@ -87,10 +87,10 @@ cfg.append_section_name('processors.kioparser', True)
 cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.rename', True)
+cfg.append_key_value('order', 1)
 cfg.append_section_name('processors.rename.replace', True, True)
 cfg.append_key_value('tag', 'deviceAddress')
 cfg.append_key_value('dest', 'trackingId')
-cfg.append_key_value('order', 1)
 
 cfg.append_section_name('processors.clickdetect', True)
 cfg.append_key_value('field_name', 'clickId')

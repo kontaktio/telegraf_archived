@@ -1,6 +1,7 @@
 POST localhost:8080/event/collect
 Api-Key: czJChTsHOIbCvNvfGnHgyZVpneQwXayT
 Content-Type: application/json
+Content-Encoding: deflate
 
 {
   "sourceId": "ABABAB",
@@ -12,4 +13,37 @@ Content-Type: application/json
     }
   ]
 }
+###
+
+POST https://api.kontakt.io/venue/locationengine/f90e273a-11d7-40cc-8d03-41143f25384f
+Accept: application/vnd.com.kontakt+json;version=10
+Api-Key: mmZowKVhvLyVpyhEiXTEKsDaHjPklont
+Content-Type: application/json
+
+{
+  "mist": {
+    "enabled": true,
+    "mappings": [
+      {
+        "apiBuildingId": "aa5f83b3-8d15-4bbc-b782-7919f082edc3",
+        "apiFloorId": "e17435bd-5bbd-4c2c-bf21-8486c0b798e0",
+        "mistMapId": "a1ea4cb0-9ec0-4a08-bc1f-46d0147eb8b0",
+        "mistSiteId": "f2778fac-29e4-4a8e-a8b8-1d2a69de6ad5"
+      }
+    ]
+
+  }
+}
+
+###
+GET https://api.kontakt.io/venue?venueId=f90e273a-11d7-40cc-8d03-41143f25384f
+Accept: application/vnd.com.kontakt+json;version=10
+Api-Key: mmZowKVhvLyVpyhEiXTEKsDaHjPklont
+Content-Type: application/json
+
+###
+
+GET https://api.kontakt.io/management/mist
+Api-Key: AlPTtJlFGNcrZAkvnTQvuIJXHUolguiZ
+
 ###
