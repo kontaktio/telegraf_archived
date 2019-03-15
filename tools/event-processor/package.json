@@ -1,0 +1,12 @@
+{
+  "name": "event-processor",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "node $NODE_DEBUG_OPTION index.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  }
+}

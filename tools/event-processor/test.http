@@ -1,0 +1,15 @@
+POST localhost:8080/event/collect
+Api-Key: czJChTsHOIbCvNvfGnHgyZVpneQwXayT
+Content-Type: application/json
+
+{
+  "sourceId": "ABABAB",
+  "events": [
+    {
+      "deviceAddress": "01:02:03:AA:FF:CC",
+      "rssi": -77,
+      "data": "LBZq/gMCCyADEyAgBQYQAQIDBQ++rjM8AhIgAwgAfQMJgD4EFhCADAQRN4C7"
+    }
+  ]
+}
+###
