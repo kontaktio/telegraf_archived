@@ -27,6 +27,16 @@ func assertField(t *testing.T, metric telegraf.Metric, field string, value inter
 	require.Equal(t, value, val)
 }
 
+func TestParseLocation(t *testing.T) {
+	parser := *New()
+
+	var metric = prepareMetric("AgEGDhZq/gX0JgsARXNPT0lM")
+	result := parser.Apply(metric)
+	assertField(t, result[0], "uniqueId", "EsOOIL")
+	assertField(t, result[0], "moving", false)
+	assertField(t, result[0], "channel", float64(38))
+}
+
 func TestParsePlain(t *testing.T) {
 	parser := *New()
 	/*
@@ -49,18 +59,18 @@ func TestParsePlain(t *testing.T) {
 func TestParseTelemetry(t *testing.T) {
 	parser := *New()
 	/*
-		Generated using OVS:
-		RawEventDataCreator.buildTelemetryPacket(List.of(
-	                new TemperatureField(32),
-	                new Temperature16BitField(32.125d),
-	                new AccelerationField(16, new byte[] {1, 2, 3}),
-	                new UTCTimeField(1010020030),
-	                new HumidityField(32),
-	                new DoubleTapField(32000),
-	                new TapField(16000),
-	                new IdentifiedMovementField(16, 3200),
-	                new IdentifiedButtonClickField(55, 48000)
-	        ))
+			Generated using OVS:
+			RawEventDataCreator.buildTelemetryPacket(List.of(
+		                new TemperatureField(32),
+		                new Temperature16BitField(32.125d),
+		                new AccelerationField(16, new byte[] {1, 2, 3}),
+		                new UTCTimeField(1010020030),
+		                new HumidityField(32),
+		                new DoubleTapField(32000),
+		                new TapField(16000),
+		                new IdentifiedMovementField(16, 3200),
+		                new IdentifiedButtonClickField(55, 48000)
+		        ))
 	*/
 	var metric1 = prepareMetric("LBZq/gMCCyADEyAgBQYQAQIDBQ++rjM8AhIgAwgAfQMJgD4EFhCADAQRN4C7")
 	result := parser.Apply(metric1)
