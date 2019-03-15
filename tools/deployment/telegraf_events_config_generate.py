@@ -66,6 +66,11 @@ cfg.append_key_value('debug', True)
 cfg.append_key_value('quiet', False)
 cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
 
+cfg.append_section_name('inputs.socket_listener', True)
+cfg.append_key_value('service_address', 'unix:///tmp/telegraf.sock')
+cfg.append_key_value('data_format', 'json')
+cfg.append_key_value('tag_keys', ['deviceAddress', 'companyId'])
+
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ["%s:%d" % (options.get_influx_url(), options.get_influx_port())])
 cfg.append_key_value('database', options.get_influx_dbname())
