@@ -1,0 +1,34 @@
+#!groovy
+
+node {
+
+    currentBuild.result = "SUCCESS"
+
+    try {
+
+        stage('Checkout') {
+            checkout scm
+        }
+
+        if (env.BRANCH_NAME == 'master') {
+            stage('[Prod] Build telegraf image') {
+                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/EventProcessor.dockerfile --build-arg SCRIPTS_SOURCE=prod --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                    deploy.push('latest')
+                }
+            }
+
+        } else {
+            stage('[Test] Build telegraf image') {
+                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/EventProcessor.dockerfile --build-arg SCRIPTS_SOURCE=test --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:jenkins-aws') {
+                    deploy.push('latest')
+                }
+            }
+        }
+    }
+    catch (err) {
+        currentBuild.result = "ERROR"
+        throw err
+    }
+}

@@ -35,4 +35,7 @@ RUN touch /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
 ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
+
+EXPOSE 8080
+
 ENTRYPOINT "/start_telegraf_and_acceptor.sh" "test"
