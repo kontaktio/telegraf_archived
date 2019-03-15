@@ -17,11 +17,13 @@ RUN git checkout "${BUILD_BRANCH}"
 RUN dep ensure -vendor-only
 RUN make go-install
 
-FROM alpine:3.6
+FROM alpine:3.9
 COPY --from=builder /go/bin/* /usr/bin/
 
 RUN apk update
-RUN apk add python py-pip bash nodejs nodejs-npm
+RUN apk add python py-pip bash curl
+RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+RUN nvm install node
 
 RUN pip install requests influxdb awscli
 
