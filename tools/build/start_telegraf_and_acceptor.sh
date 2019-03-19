@@ -17,6 +17,9 @@ python /config_generator/telegraf_event_config_generate.py \
     --influxdb-port $INFLUXDB_PORT \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD" \
+    --kapacitor-url "$KAPACITOR_URL" \
+    --kapacitor-user "$KAPACITOR_USER" \
+    --kapacitor-pass "$KAPACITOR_PASS" \
 
 pm2 start -f /usr/bin/telegraf -- --config telegraf.events.conf
 

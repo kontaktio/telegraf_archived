@@ -6,6 +6,7 @@ import itertools
 from utils import chunks
 from api_client import ApiClient
 from influx_client import InfluxClient
+from kapacitor_client import KapacitorClient
 from telegraf_config import TelegrafConfigFormatter
 
 class Options(object):
@@ -20,6 +21,9 @@ class Options(object):
         parser.add_argument("--influxdb-username", dest="influxdb_username", required=True)
         parser.add_argument("--influxdb-password", dest="influxdb_password", required=True)
         parser.add_argument("--influxdb-dbname", dest="influxdb_dbname", default="telemetry")
+        parser.add_argument('--kapacitor-url', dest='kapacitor_url', required=True)
+        parser.add_argument('--kapacitor-user', dest='kapacitor_user', required=True)
+        parser.add_argument('--kapacitor-pass', dest='kapacitor_pass', required=True)
         parser.add_argument("--config-file", dest="config_file")
 
         self.args = vars(parser.parse_args(args=args))
@@ -48,10 +52,52 @@ class Options(object):
     def get_influx_dbname(self):
         return self.args['influxdb_dbname']
 
+    def get_kapacitor_url(self):
+        return self.args['kapacitor_url']
+
+    def get_kapacitor_user(self):
+        return self.args['kapacitor_user']
+
+    def get_kapacitor_pass(self):
+        return self.args['kapacitor_pass']
+
 
 options = Options(sys.argv[1:])
 
 cfg = TelegrafConfigFormatter()
+
+influx_client = InfluxClient(options.get_influx_url(),
+                             options.get_influx_port(),
+                             options.get_influx_username(),
+                             options.get_influx_password()),
+
+influx_client.create_database(options.get_influx_dbname())
+
+influx_client.create_retention_policy(options.get_influx_dbname(), 'stream_rp', '3h')
+
+influx_client.create_retention_policy(options.get_influx_dbname(), 'current_rp', '7d')
+influx_client.recreate_continuous_query(options.get_influx_dbname(), '10s', 'current_rp', 'stream_rp', '10s', '40s')
+
+influx_client.create_retention_policy(options.get_influx_dbname(), 'recent_rp', '365d')
+influx_client.recreate_continuous_query(options.get_influx_dbname(), '5m', 'recent_rp', 'stream_rp', '5m', '5m')
+
+influx_client.create_retention_policy(options.get_influx_dbname(), 'history_rp', '365d')
+influx_client.recreate_continuous_query(options.get_influx_dbname(), '1h', 'history_rp', 'stream_rp', '1h', '1h')
+
+influx_client.create_retention_policy(options.get_influx_dbname(), 'temporary_history_rp', '365d')
+
+kapacitor_client = KapacitorClient(options, options.get_influx_dbname(), 'stream_rp')
+location_task_name = 'location_global'
+
+kapacitor_client.remove_task(location_task_name)
+result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
+    'database': {
+        'value': options.get_influx_dbname(),
+        'type': 'string'
+    }
+})
+if len(result['error']) > 0:
+    raise(Exception(result['error']))
 
 cfg.append_section_name('agent')
 cfg.append_key_value('interval', '5s')
