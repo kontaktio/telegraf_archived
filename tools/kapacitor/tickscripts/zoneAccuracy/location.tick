@@ -1,0 +1,21 @@
+var database string
+
+stream
+    |from()
+        .measurement('telemetry')
+    @httpSideload()
+        .field('range')
+        .fieldType('double')
+        .source('/api/management/zone/{database}/{sourceId}')
+    |default()
+        .field('distance', 0.0)
+        .field('rssi', -128.0)
+    |where(lambda: "distance" <= "range")
+    |window()
+        .period(10s)
+        .every(10s)
+    @locationEngine()
+    |influxDBOut()
+    	.database(database)
+        .retentionPolicy('stream_rp')
+        .measurement('locations')
