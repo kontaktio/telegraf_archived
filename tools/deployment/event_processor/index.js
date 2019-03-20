@@ -17,6 +17,7 @@ app.use(compression());
 app.post('/event/collect', async (req, res) => {
     let apiKey = req.get('Api-Key');
     if (apiKey === undefined) {
+        console.log(`Unauthorized api key ${apiKey}`);
         res.status(401).end();
     }
     try {

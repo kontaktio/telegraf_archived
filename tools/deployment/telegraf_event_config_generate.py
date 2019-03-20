@@ -69,7 +69,7 @@ cfg = TelegrafConfigFormatter()
 influx_client = InfluxClient(options.get_influx_url(),
                              options.get_influx_port(),
                              options.get_influx_username(),
-                             options.get_influx_password()),
+                             options.get_influx_password())
 
 influx_client.create_database(options.get_influx_dbname())
 
