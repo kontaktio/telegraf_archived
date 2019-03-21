@@ -21,7 +21,7 @@ python /config_generator/telegraf_stream_config_generate.py \
     --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.stream.conf.*;
 do
-	pm2 start -f /go/src/github.com/influxdata/telegraf/telegraf -- --config $f
+	pm2 start -f /usr/bin/telegraf -- --config $f
 done;
 
 python /config_generator/telegraf_location_config_generate.py \
@@ -37,7 +37,7 @@ python /config_generator/telegraf_location_config_generate.py \
     --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.location.conf.*;
 do
-	pm2 start -f /go/src/github.com/influxdata/telegraf/telegraf -- --config $f
+	pm2 start -f /usr/bin/telegraf -- --config $f
 done;
 
 
