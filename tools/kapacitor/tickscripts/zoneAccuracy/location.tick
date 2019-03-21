@@ -9,6 +9,7 @@ stream
         .source('/api/management/zone/{database}/{sourceId}')
     |default()
         .field('distance', 0.0)
+        .field('range', 999.0)
         .field('rssi', -128.0)
     |where(lambda: "distance" <= "range")
     |window()
