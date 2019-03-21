@@ -1,8 +1,5 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const app = express();
-
+const http = require('http');
+const process = require('process');
 const ApiCaller = require('./apiCaller');
 const apiAddress = process.env.API_URL;
 console.log(`Talking with API: ${apiAddress}`);
@@ -11,27 +8,45 @@ const apiCaller = new ApiCaller(apiAddress);
 const TelegrafEmitter = require('./telegrafEmitter');
 const emitter = new TelegrafEmitter('/tmp/telegraf.sock');
 
-app.use(bodyParser.json());
-app.use(compression());
-
-app.post('/event/collect', async (req, res) => {
-    let apiKey = req.get('Api-Key');
+async function processRequest(req, res, requestContent) {
+    console.log(requestContent);
+    let apiKey = req.headers['api-key'];
     if (apiKey === undefined) {
-        console.log(`Unauthorized api key ${apiKey}`);
-        res.status(401).end();
+        return;
     }
     try {
         let companyId = await apiCaller.getCompanyId(apiKey);
-        emitter.emit(companyId, req.body);
-        res.status(202).end();
+        emitter.emit(companyId, JSON.parse(requestContent));
     } catch (e) {
         console.log(`${apiKey}: ${e.message}`);
         res.status(e.response.status).end();
     }
-});
+}
 
-app.get('/healthcheck', (req, res) => {
-    res.send('OK')
-});
+function respond(res, code) {
+    res.writeHead(code);
+    res.end();
+}
 
-app.listen(8080, () => "Listening started");
+http.createServer((req, res) => {
+    if(req.method === 'POST') {
+        let requestContent = '';
+        req.on('readable', () => {
+            let read = req.read();
+            if (read !== null) {
+                requestContent += read;
+            }
+
+        });
+        req.on('end', async () => {
+            respond(res, 202);
+            await processRequest(req, res, requestContent);
+        });
+        req.on('aborted', () => respond(res, 202));
+        req.on('error', () => respond(res, 202));
+    } else {
+        respond(res, 202);
+    }
+}).listen(8080, () => {
+    console.log("Listening started")
+});
