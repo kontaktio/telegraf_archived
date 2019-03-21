@@ -86,6 +86,8 @@ class SideloadHandler(Handler):
                 kwargs[name] = point.fieldsInt[name]
             elif name in point.fieldsDouble:
                 kwargs[name] = point.fieldsDouble[name]
+            elif name in point:
+                kwargs[name] = point[name]
 
         sideload = self.store.call_get(self._source.format(**kwargs))
 
