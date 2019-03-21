@@ -7,7 +7,7 @@
       endpoint = "dwellTime"
       url = "https://testba-api.kontakt.io/api/reports/input/dwellTime"
       headers = { Api-Key = "" }
-      row-template-file = "/etc/kapacitor/task-templates/dwellTime/dwellTime-tpl.tick"
+      row-template-file = "/etc/kapacitor/tickscripts/dwellTime/dwellTime-tpl.tick"
     ```
 2. Copy ``dwellTime-httppost.tmpl`` to correct location on kapacitor server.
     ```bash
@@ -15,6 +15,6 @@
     ```
 3. Register ``dwellTime-tpl`` task definition on for kapacitor instance.
     ```
-    kapacitor define-template dwellTime-tpl -tick /etc/kapacitor/task-templates/dwellTime/dwellTime-tpl.tick
+    kapacitor define-template dwellTime-tpl -tick /etc/kapacitor/tickscripts/dwellTime/dwellTime-tpl.tick
     ```
     
