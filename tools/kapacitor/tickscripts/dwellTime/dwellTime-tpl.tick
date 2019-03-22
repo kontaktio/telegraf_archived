@@ -8,6 +8,7 @@ batch
         .groupBy('trackingId')
     |default()
         .field('timeSpent', 1)
+        .field('database', database)
     |httpPost()
         .endpoint('dwellTime')
         .timeout(15s)
