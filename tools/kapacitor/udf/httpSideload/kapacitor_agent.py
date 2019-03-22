@@ -91,26 +91,31 @@ class SideloadHandler(Handler):
             elif name == 'name':
                 kwargs[name] = point.name
 
-        sideload = self.store.call_get(self._source.format(**kwargs))
+        try:
 
-        if isinstance(sideload, list):
-            if len(sideload) > 0:
-                sideload = sideload[0]
-            else:
-                sideload = {}
+            sideload = self.store.call_get(self._source.format(**kwargs))
 
-        if self._field in sideload:
-            field = sideload[self._field]
-            if self._fieldType == 'string':
-                response.point.fieldsDouble[self._field] = field
-            elif self._fieldType == 'int':
-                response.point.fieldsInt[self._field] = field
-            elif self._fieldType == 'double':
-                response.point.fieldsDouble[self._field] = field
+            if isinstance(sideload, list):
+                if len(sideload) > 0:
+                    sideload = sideload[0]
+                else:
+                    sideload = {}
 
-        if self._tag in sideload:
-            tag = sideload[self._tag]
-            response.point.tags[self._tag] = tag
+            if self._field in sideload:
+                field = sideload[self._field]
+                if self._fieldType == 'string':
+                    response.point.fieldsDouble[self._field] = field
+                elif self._fieldType == 'int':
+                    response.point.fieldsInt[self._field] = field
+                elif self._fieldType == 'double':
+                    response.point.fieldsDouble[self._field] = field
+
+            if self._tag in sideload:
+                tag = sideload[self._tag]
+                response.point.tags[self._tag] = tag
+
+        except Exception as e:
+            logger.error('Error: %s processing point: %s', e, response.point)
 
         logger.info('Point processed: %s', response.point)
 
