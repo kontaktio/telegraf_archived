@@ -11,7 +11,7 @@
     ```
 2. Copy ``dwellTime-httppost.tmpl`` to correct location on kapacitor server.
     ```bash
-    sudo cp -r /home/ec2-user/telegraf/tools/kapacitor/tickscripts/dwellTime/* /etc/kapacitor/task-templates/dwellTime
+    sudo cp -r /home/ec2-user/telegraf/tools/kapacitor/tickscripts/dwellTime/* /etc/kapacitor/tickscripts/dwellTime
     ```
 3. Register ``dwellTime-tpl`` task definition on for kapacitor instance.
     ```
