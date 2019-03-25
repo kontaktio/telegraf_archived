@@ -38,7 +38,7 @@ module.exports = class ApiCaller {
                         const jsonResult = JSON.parse(result);
                         const companyId = jsonResult.companyId;
                         cache[apiKey] = companyId;
-                        resolve(companyId);
+                        resolve(companyId.split('-').pop());
                     })
                 }).on('error', (e) => {
                     reject(e);
