@@ -28,8 +28,8 @@ RUN pip install requests influxdb awscli
 RUN npm config set unsafe-perm true
 RUN npm i -g pm2@latest
 
-COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
-RUN chmod +x /start_telegraf_and_acceptor.sh
+COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_processor.sh
+RUN chmod +x /start_telegraf_and_processor.sh
 
 RUN touch /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
@@ -38,4 +38,4 @@ ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
 
 EXPOSE 8080
 
-ENTRYPOINT "/start_telegraf_and_acceptor.sh" "test"
+ENTRYPOINT "/start_telegraf_and_processor.sh" "test"

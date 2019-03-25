@@ -23,6 +23,7 @@ module.exports = class TelegrafEmitter {
     }
 
     emit(companyId, packet) {
+        //Substring companyId (last 12 characters)
         if (!packet.sourceId || !packet.events) {
             return;
         }

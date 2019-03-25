@@ -23,19 +23,6 @@ const externalPower byte = 0xFF
 const movingFlagIdx = 0
 
 var kioUuid = []byte{0x6A, 0xFE}[:]
-var models = map[byte]string{
-	1:  "SMART_BEACON",
-	3:  "USB_BEACON",
-	5:  "GATEWAY",
-	4:  "CARD_BEACON",
-	6:  "BEACON_PRO",
-	8:  "TAG_BEACON",
-	9:  "SMART_BEACON_3",
-	10: "HEAVY_DUTY_BEACON",
-	11: "CARD_BEACON_2",
-	14: "TOUGH_BEACON_2",
-	15: "BRACELET_TAG",
-}
 
 type KioParser struct {
 }
@@ -54,8 +41,6 @@ func (p *KioParser) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	for _, metric := range metrics {
 		p.append("data", metric)
 		metric.RemoveField("data")
-		p.append("srData", metric)
-		metric.RemoveField("srData")
 	}
 	return metrics
 }
@@ -109,12 +94,9 @@ func convertLocation(buffer *bytes.Buffer, result map[string]interface{}) {
 		return
 	}
 
-	txPower, _ := buffer.ReadByte()
-	result["txPower"] = float64(txPower)
-	bleChannel, _ := buffer.ReadByte()
-	result["channel"] = float64(bleChannel)
-	model, _ := buffer.ReadByte()
-	result["model"] = models[model]
+	result["txPower"] = asFloat(buffer.ReadByte())
+	result["channel"] = asFloat(buffer.ReadByte())
+	result["model"] = asFloat(buffer.ReadByte())
 	flags, _ := buffer.ReadByte()
 	result["moving"] = flags&(1<<movingFlagIdx) == 1
 	result["uniqueId"] = buffer.String()
@@ -191,15 +173,13 @@ func convertPlain(buffer *bytes.Buffer, result map[string]interface{}) {
 		return
 	}
 
-	model, _ := buffer.ReadByte()
-	result["model"] = models[model]
+	result["model"] = asFloat(buffer.ReadByte())
 	buffer.Next(2) //Skip firmware
 	batteryLevel, _ := buffer.ReadByte()
 	if batteryLevel != externalPower {
 		result["batteryLevel"] = float64(batteryLevel)
 	}
-	txPower, _ := buffer.ReadByte()
-	result["txPower"] = float64(txPower)
+	result["txPower"] = asFloat(buffer.ReadByte())
 	result["uniqueId"] = buffer.String()
 }
 

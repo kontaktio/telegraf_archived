@@ -1,15 +1,23 @@
 const http = require('http');
 const process = require('process');
 const ApiCaller = require('./apiCaller');
+
 const apiAddress = process.env.API_URL;
 console.log(`Talking with API: ${apiAddress}`);
+
+if (process.argv.length !== 3) {
+    throw new Error("Invalid arguments. Usage: node index.js /socket/address.sock")
+}
+
+const socketPath = process.argv[2];
+console.log(`Socket address: ${socketPath}`);
+
 const apiCaller = new ApiCaller(apiAddress);
 
 const TelegrafEmitter = require('./telegrafEmitter');
-const emitter = new TelegrafEmitter('/tmp/telegraf.sock');
+const emitter = new TelegrafEmitter(socketPath); //from parameter
 
 async function processRequest(req, res, requestContent) {
-    console.log(requestContent);
     let apiKey = req.headers['api-key'];
     if (apiKey === undefined) {
         return;
@@ -38,9 +46,9 @@ http.createServer((req, res) => {
             }
 
         });
-        req.on('end', async () => {
+        req.on('end', () => {
             respond(res, 202);
-            await processRequest(req, res, requestContent);
+            processRequest(req, res, requestContent);
         });
         req.on('aborted', () => respond(res, 202));
         req.on('error', () => respond(res, 202));
