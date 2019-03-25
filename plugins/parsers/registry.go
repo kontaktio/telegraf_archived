@@ -2,6 +2,7 @@ package parsers
 
 import (
 	"fmt"
+	"github.com/influxdata/telegraf/plugins/parsers/kontakt"
 	"time"
 
 	"github.com/influxdata/telegraf"
@@ -203,6 +204,8 @@ func NewParser(config *Config) (Parser, error) {
 			config.DefaultTags)
 	case "logfmt":
 		parser, err = NewLogFmtParser(config.MetricName, config.DefaultTags)
+	case "kontakt":
+		parser, err = NewKontaktParser(config.DefaultTags)
 	default:
 		err = fmt.Errorf("Invalid data format: %s", config.DataFormat)
 	}
@@ -392,4 +395,8 @@ func NewLogFmtParser(metricName string, defaultTags map[string]string) (Parser, 
 
 func NewWavefrontParser(defaultTags map[string]string) (Parser, error) {
 	return wavefront.NewWavefrontParser(defaultTags), nil
+}
+
+func NewKontaktParser(defaultTags map[string]string) (Parser, error) {
+	return &kontakt.KontaktEventParser{DefaultTags:defaultTags}, nil
 }

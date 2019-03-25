@@ -45,6 +45,7 @@ type HTTPListenerV2 struct {
 
 	listener net.Listener
 
+	HeaderTags []string
 	parsers.Parser
 	acc telegraf.Accumulator
 }
@@ -218,7 +219,13 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 		return
 	}
 	for _, m := range metrics {
+		for _, hdrName := range h.HeaderTags {
+			if hdrValue := req.Header.Get(hdrName); hdrValue != "" {
+				m.AddTag(hdrName, hdrValue)
+			}
+		}
 		h.acc.AddFields(m.Name(), m.Fields(), m.Tags(), m.Time())
+		
 	}
 	res.WriteHeader(http.StatusNoContent)
 }
