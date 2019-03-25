@@ -94,13 +94,13 @@ func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 		m, _ := metric.New(
 			"telemetry",
 			map[string]string{
-				"sourceId": sourceId,
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
 				"rssi": evt["rssi"],
 				"data": evt["data"],
 				"srData": evt["srData"],
+				"sourceId": sourceId,
 			},
 			time.Now(),
 		)
