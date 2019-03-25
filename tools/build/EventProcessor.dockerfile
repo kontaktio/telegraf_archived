@@ -28,7 +28,7 @@ RUN pip install requests influxdb awscli
 RUN npm config set unsafe-perm true
 RUN npm i -g pm2@latest
 
-COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_processor.sh
+COPY tools/build/start_telegraf_and_processor.sh /start_telegraf_and_processor.sh
 RUN chmod +x /start_telegraf_and_processor.sh
 
 RUN touch /var/log/telegraf-config-gen.log

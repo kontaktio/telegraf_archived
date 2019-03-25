@@ -27,7 +27,11 @@ async function processRequest(req, res, requestContent) {
         emitter.emit(companyId, JSON.parse(requestContent));
     } catch (e) {
         console.log(`${apiKey}: ${e.message}`);
-        res.status(e.response.status).end();
+        if(e.response) {
+            respond(res, e.response.status);
+        } else {
+            respond(res, 500)
+        }
     }
 }
 

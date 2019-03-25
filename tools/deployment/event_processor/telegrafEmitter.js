@@ -11,6 +11,7 @@ module.exports = class TelegrafEmitter {
         this.connect();
 
         this.processors = {
+            2: this.processV3,
             3: this.processV3,
             4: this.processV4
         }
@@ -28,7 +29,11 @@ module.exports = class TelegrafEmitter {
             return;
         }
 
-        const events = this.processors[packet.version](companyId, packet);
+        const parser = this.processors[packet.version];
+        if (!parser) {
+            return; //Unknown version
+        }
+        const events = parser(companyId, packet);
 
         for(let event of events) {
             try {
