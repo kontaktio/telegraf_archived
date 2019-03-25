@@ -1,14 +1,14 @@
 #!/bin/sh
 
-mkdir /config
-aws s3 cp s3://kontakt-telegraf-config/build-$1/env /config
-aws s3 cp s3://kontakt-telegraf-config/telegraf.eventprocessor.$1.conf /config/telegraf.eventprocesor.conf
+mkdir /config_generator
+aws s3 cp s3://kontakt-telegraf-config/build-$1 /config_generator --recursive
+aws s3 cp s3://kontakt-telegraf-config/telegraf.eventprocessor.$1.conf /telegraf.eventprocesor.conf
 
-source /config/env
+source /config_generator/env
 
 echo "API_URL: $API_URL"
 
-pm2 start -f /usr/bin/telegraf -- --config /config/telegraf.eventprocessor.conf
+pm2 start -f /usr/bin/telegraf -- --config /telegraf.eventprocessor.conf
 
 cd /config_generator/event_processor
 pm2 start -f node -- index.js /tmp/telegraf.sock
