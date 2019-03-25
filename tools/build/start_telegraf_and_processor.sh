@@ -2,7 +2,7 @@
 
 mkdir /config_generator
 aws s3 cp s3://kontakt-telegraf-config/build-$1 /config_generator --recursive
-aws s3 cp s3://kontakt-telegraf-config/telegraf.eventprocessor.$1.conf /telegraf.eventprocesor.conf
+aws s3 cp s3://kontakt-telegraf-config/telegraf.eventprocessor.$1.conf /telegraf.eventprocessor.conf
 
 source /config_generator/env
 
