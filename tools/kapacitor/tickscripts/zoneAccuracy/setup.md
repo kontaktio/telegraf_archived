@@ -22,7 +22,7 @@
     ```bash
     cd /etc/kapacitor/udf/httpSideload
     sudo virtualenv venv
-    sudo venv/bin/pip install .
+    sudo venv/bin/pip install -U .
     ```
     
 3. Register ``dwellTime-tpl`` task definition on for kapacitor instance.
