@@ -195,6 +195,14 @@
   version = "v2.1.13"
 
 [[projects]]
+  digest = "1:59df7ab87ddca233bb586ff32c6feba12bf787260f6694dc45ceecea9d3e1a7e"
+  name = "github.com/cenk/backoff"
+  packages = ["."]
+  pruneopts = ""
+  revision = "1e4cf3da559842a91afcb6ea6141451e6c30c618"
+  version = "v2.1.1"
+
+[[projects]]
   digest = "1:f619cb9b07aebe5416262cdd8b86082e8d5bdc5264cb3b615ff858df0b645f97"
   name = "github.com/cenkalti/backoff"
   packages = ["."]
@@ -382,6 +390,14 @@
   pruneopts = ""
   revision = "d1bbc0cffaf9849ddcae7b9efffae33e2dd52e9a"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:88b37f144a80737f9e5cd50c887c00c2f3c7211257f884b8b80ce97e61ed1ccb"
+  name = "github.com/facebookgo/clock"
+  packages = ["."]
+  pruneopts = ""
+  revision = "600d898af40aa09a7a93ecb9265d87b0504b6f03"
 
 [[projects]]
   digest = "1:858b7fe7b0f4bc7ef9953926828f2816ea52d01a88d72d1c45bc8c108f23c356"
@@ -914,6 +930,14 @@
   packages = ["."]
   pruneopts = ""
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+
+[[projects]]
+  digest = "1:34bc218f2006423f7fc7d79e7014a95d5b373f6b87a09fe8038eb1ad49c888ea"
+  name = "github.com/rubyist/circuitbreaker"
+  packages = ["."]
+  pruneopts = ""
+  revision = "2074adba5ddc7d5f7559448a9c3066573521c5bf"
+  version = "v2.2.1"
 
 [[projects]]
   branch = "master"
@@ -1482,6 +1506,7 @@
     "github.com/prometheus/client_model/go",
     "github.com/prometheus/common/expfmt",
     "github.com/prometheus/common/log",
+    "github.com/rubyist/circuitbreaker",
     "github.com/satori/go.uuid",
     "github.com/shirou/gopsutil/cpu",
     "github.com/shirou/gopsutil/disk",

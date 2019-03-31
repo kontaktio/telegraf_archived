@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
+	"github.com/rubyist/circuitbreaker"
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 type KontaktAuth struct {
 	ApiAddress            string            `toml:"api_address"`
 
-	Client *http.Client
+	Client *circuit.HTTPClient
 }
 
 type apiCompany struct {
@@ -49,31 +50,37 @@ func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 		}
 	}
 	var manager apiManager
-	err := ka.get("manager/me", apiKey, &manager)
+	correct, err := ka.get("manager/me", apiKey, &manager)
 	if err == nil {
 		cache[apiKey] = manager
-	} else {
+	} else if correct {
 		log.Printf("Error %v", err)
 		unknownCache[apiKey] = time.Now()
+	} else {
+		//Don't cache if there wasn't a correct response
+		return apiManager{}, errors.New("error querying manager")
 	}
 	return manager, err
 }
 
-func (ka *KontaktAuth) get(path, apiKey string, result interface{}) error {
+func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error) {
 	request, err := http.NewRequest("GET", ka.ApiAddress+path, nil)
 	if err != nil {
-		return err
+		return false, err
 	}
 	request.Header.Add("Accept", acceptHeader)
 	request.Header.Add("Api-Key", apiKey)
 	response, err := ka.Client.Do(request)
+	if response.StatusCode == 401 || response.StatusCode == 403 {
+		return true, nil
+	}
 	if err != nil {
-		return err
+		return false, err
 	}
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
-		return err
+		return false, err
 	}
-	return nil
+	return true, nil
 }
 
 func (p *KontaktAuth) SampleConfig() string {
@@ -102,7 +109,7 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 
 func New() *KontaktAuth {
 	kontaktAuth := KontaktAuth{
-		Client: &http.Client{Timeout: time.Second * 5},
+		Client: circuit.NewHTTPClient(time.Second * 5, 10, nil),
 	}
 	return &kontaktAuth
 }
