@@ -140,27 +140,6 @@ cfg.append_key_value('out_field_name', 'singleClick')
 cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('order', 0)
 
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastSingleClick')
-cfg.append_key_value('out_field_name', 'singleClick')
-cfg.append_key_value('threshold', 60)
-cfg.append_key_value('tag_key', 'trackingId')
-cfg.append_key_value('order', 1)
-
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastDoubleTap')
-cfg.append_key_value('out_field_name', 'doubleTap')
-cfg.append_key_value('tag_key', 'trackingId')
-cfg.append_key_value('threshold', 60)
-cfg.append_key_value('order', 2)
-
-cfg.append_section_name('processors.lastcalc', True)
-cfg.append_key_value('field_name', 'lastThreshold')
-cfg.append_key_value('out_field_name', 'threshold')
-cfg.append_key_value('tag_key', 'trackingId')
-cfg.append_key_value('threshold', 60)
-cfg.append_key_value('order', 3)
-
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'telemetry')
 
