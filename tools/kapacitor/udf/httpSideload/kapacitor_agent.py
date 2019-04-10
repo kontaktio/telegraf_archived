@@ -104,7 +104,7 @@ class SideloadHandler(Handler):
             if self._field in sideload:
                 field = sideload[self._field]
                 if self._fieldType == 'string':
-                    response.point.fieldsDouble[self._field] = field
+                    response.point.fieldsString[self._field] = field
                 elif self._fieldType == 'int':
                     response.point.fieldsInt[self._field] = field
                 elif self._fieldType == 'double':
@@ -126,6 +126,7 @@ class SideloadHandler(Handler):
 
 
 if __name__ == '__main__':
+    #ADD TIMEOUT FROM ARGS
     a = Agent()
     h = SideloadHandler(a, HttpStore())
     a.handler = h
