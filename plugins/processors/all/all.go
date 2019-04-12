@@ -4,7 +4,7 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/processors/clickdetect"
 	_ "github.com/influxdata/telegraf/plugins/processors/converter"
 	_ "github.com/influxdata/telegraf/plugins/processors/kioparser"
-	_ "github.com/influxdata/telegraf/plugins/processors/konaktauth"
+	_ "github.com/influxdata/telegraf/plugins/processors/kontaktauth"
 	_ "github.com/influxdata/telegraf/plugins/processors/lastcalc"
 	_ "github.com/influxdata/telegraf/plugins/processors/override"
 	_ "github.com/influxdata/telegraf/plugins/processors/parser"
