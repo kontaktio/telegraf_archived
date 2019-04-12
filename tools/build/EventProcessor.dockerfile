@@ -1,7 +1,7 @@
 FROM golang:1.11-alpine as builder
 
 ARG SCRIPTS_SOURCE=test
-ARG BUILD_BRANCH=kba-329_company_id_new_telegraf
+ARG BUILD_BRANCH=dev_kontakt_parser
 
 RUN apk add git make curl
 
@@ -17,24 +17,19 @@ RUN git checkout "${BUILD_BRANCH}"
 RUN dep ensure -vendor-only
 RUN make go-install
 
-FROM node:11-alpine
+FROM alpine:3.9
 COPY --from=builder /go/bin/* /usr/bin/
 
 RUN apk update
-RUN apk add python py-pip bash
-
-RUN pip install requests influxdb awscli
-
-RUN npm config set unsafe-perm true
-RUN npm i -g pm2@latest
+RUN apk add python py-pip
 
 COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
 RUN chmod +x /start_telegraf_and_acceptor.sh
 
-RUN touch /var/log/telegraf-config-gen.log
-RUN mkdir /etc/telegraf
+RUN mkdir /root/.aws
+COPY tools/build/credentials /root/.aws/
 
-ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
+RUN pip install awscli
 
 EXPOSE 8080
 
