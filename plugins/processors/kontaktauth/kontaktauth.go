@@ -1,4 +1,4 @@
-package konaktauth
+package kontaktauth
 
 import (
 	"encoding/json"
@@ -71,11 +71,12 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error
 	request.Header.Add("Accept", acceptHeader)
 	request.Header.Add("Api-Key", apiKey)
 	response, err := ka.Client.Do(request)
+	if err != nil {
+		log.Printf("Error %v", err)
+		return false, err
+	}
 	if response.StatusCode == 401 || response.StatusCode == 403 {
 		return true, nil
-	}
-	if err != nil {
-		return false, err
 	}
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
 		return false, err

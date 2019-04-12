@@ -23,13 +23,13 @@ COPY --from=builder /go/bin/* /usr/bin/
 RUN apk update
 RUN apk add python py-pip
 
+RUN pip install awscli
+
 COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
 RUN chmod +x /start_telegraf_and_acceptor.sh
 
 RUN mkdir /root/.aws
 COPY tools/build/credentials /root/.aws/
-
-RUN pip install awscli
 
 EXPOSE 8080
 
