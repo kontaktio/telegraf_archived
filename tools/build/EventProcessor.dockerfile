@@ -26,7 +26,9 @@ RUN apk add
 RUN apk --update upgrade && \
     apk add python py-pip ca-certificates && \
     update-ca-certificates && \
-    rm -rf /var/cache/apk/*
+    rm -rf /var/cache/apk/* && \
+    wget -O /etc/ssl/ca-bundle.pem https://curl.haxx.se/ca/cacert.pem
+
 
 RUN pip install awscli
 
