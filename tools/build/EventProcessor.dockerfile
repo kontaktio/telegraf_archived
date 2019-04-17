@@ -6,8 +6,6 @@ ARG BUILD_BRANCH=dev_kontakt_parser
 RUN apk --update upgrade && \
     apk add git make curl
 
-RUN wget -O /etc/ssl/ca-bundle.pem https://curl.haxx.se/ca/cacert.pem
-
 ENV DEP_VERSION 0.5.0
 RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
 
@@ -24,7 +22,11 @@ FROM alpine:3.9
 COPY --from=builder /go/bin/* /usr/bin/
 
 RUN apk update
-RUN apk add python py-pip
+RUN apk add
+RUN apk --update upgrade && \
+    apk add python py-pip ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/cache/apk/*
 
 RUN pip install awscli
 
