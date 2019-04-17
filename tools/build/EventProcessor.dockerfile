@@ -29,7 +29,6 @@ COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
 RUN chmod +x /start_telegraf_and_acceptor.sh
 
 RUN mkdir /root/.aws
-COPY tools/build/credentials /root/.aws/
 
 EXPOSE 8080
 
