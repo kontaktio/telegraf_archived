@@ -3,7 +3,8 @@ FROM golang:1.11-alpine as builder
 ARG SCRIPTS_SOURCE=test
 ARG BUILD_BRANCH=dev_kontakt_parser
 
-RUN apk add git make curl
+RUN apk add git make curl ca-certificates
+RUN update-ca-certificates
 
 ENV DEP_VERSION 0.5.0
 RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
