@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir /config_generator
+aws s3 cp s3://kontakt-telegraf-config/build-$1 /config_generator --recursive
 source /config_generator/env
 
 cd /etc/telegraf

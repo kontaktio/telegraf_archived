@@ -1,6 +1,5 @@
 FROM golang:1.11-alpine as builder
 
-ARG SCRIPTS_SOURCE=test
 ARG BUILD_BRANCH=develop
 
 RUN apk add git make curl
@@ -18,6 +17,9 @@ RUN dep ensure -vendor-only
 RUN make go-install
 
 FROM alpine:3.6
+
+ARG SCRIPTS_SOURCE=test
+
 COPY --from=builder /go/bin/* /usr/bin/
 
 RUN apk update
@@ -31,17 +33,15 @@ RUN npm i -g pm2@latest
 COPY tools/build/generate_and_start_telegraf.sh /generate_and_start_telegraf.sh
 RUN chmod +x /generate_and_start_telegraf.sh
 
-RUN touch /var/log/telegraf-config-gen.log
+RUN echo "wrote batch of START" >> /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
-COPY monitoring-scripts/exit.sh /
-COPY monitoring-scripts/check-logs.sh /etc/periodic/15min/check-logs
+COPY tools/build/monitoring-scripts/exit.sh /
+COPY tools/build/monitoring-scripts/check-logs.sh /etc/periodic/15min/check-logs
 RUN chmod a+x /exit.sh
 RUN chmod a+x /etc/periodic/15min/check-logs
 
-RUN mkdir /config_generator
-RUN aws s3 cp s3://kontakt-telegraf-config/build-$SCRIPTS_SOURCE /config_generator --recursive
+ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE
 
-CMD
-    rc-service crond start && rc-update add crond && \
-    /generate_and_start_telegraf.sh test
+CMD crond -b && \
+    /generate_and_start_telegraf.sh "${SCRIPTS_SOURCE}"
