@@ -34,5 +34,14 @@ RUN chmod +x /generate_and_start_telegraf.sh
 RUN touch /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
-ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
-ENTRYPOINT "/generate_and_start_telegraf.sh" "test"
+COPY monitoring-scripts/exit.sh /
+COPY monitoring-scripts/check-logs.sh /etc/periodic/15min/check-logs
+RUN chmod a+x /exit.sh
+RUN chmod a+x /etc/periodic/15min/check-logs
+
+RUN mkdir /config_generator
+RUN aws s3 cp s3://kontakt-telegraf-config/build-$SCRIPTS_SOURCE /config_generator --recursive
+
+CMD
+    rc-service crond start && rc-update add crond && \
+    /generate_and_start_telegraf.sh test
