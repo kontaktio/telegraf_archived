@@ -63,9 +63,9 @@ func (p *KioParser) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 func (p *KioParser) append(fieldName string, metric telegraf.Metric) {
 	field, exists := metric.GetField(fieldName)
 	if exists {
-		bytes, convError := base64.StdEncoding.DecodeString(field.(string))
+		b, convError := base64.StdEncoding.DecodeString(field.(string))
 		if convError == nil {
-			fields := parseData(bytes)
+			fields := parseData(b)
 			for k, v := range fields {
 				metric.AddField(k, v)
 			}
@@ -108,6 +108,7 @@ func convertLocation(buffer *bytes.Buffer, result map[string]interface{}) {
 	if buffer.Len() < minimumLocationLength {
 		return
 	}
+	result["frameType"] = int64(locationIdentifier)
 
 	txPower, _ := buffer.ReadByte()
 	result["txPower"] = float64(txPower)
@@ -180,6 +181,7 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 			buffer.Next(int(fieldLength) - 1)
 		}
 	}
+	result["frameType"] = int64(telemetryIdentifier)
 }
 
 func asFloat(b byte, _ error) float64 {
@@ -201,6 +203,7 @@ func convertPlain(buffer *bytes.Buffer, result map[string]interface{}) {
 	txPower, _ := buffer.ReadByte()
 	result["txPower"] = float64(txPower)
 	result["uniqueId"] = buffer.String()
+	result["frameType"] = int64(plainIdentifier)
 }
 
 func New() *KioParser {
