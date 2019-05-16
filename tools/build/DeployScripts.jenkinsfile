@@ -10,17 +10,23 @@ node {
             checkout scm
         }
 
-        def deployEnv = 'test'
         if (env.BRANCH_NAME == 'master') {
-            deployEnv = 'prod'
+            buildImageStage('accept')
+            timeout(time: 30, unit: 'MINUTES') {
+                input(message: 'Proceed to production?')
+                buildImageStage('prod')
+            }
+        } else {
+            buildImageStage('test')
         }
-
-        stage("[${deployEnv}] Build telegraf image") {
-            sh 'aws s3 cp ./tools/deployment s3://kontakt-telegraf-config/build-' + deployEnv + '/ --recursive --exclude "*" --include "*.py"'
-        }
-    }
-    catch (err) {
+    } catch (err) {
         currentBuild.result = "ERROR"
         throw err
+    }
+}
+
+def buildImageStage(deployEnv) {
+    stage("[${deployEnv}] Build telegraf image") {
+        sh 'aws s3 cp ./tools/deployment s3://kontakt-telegraf-config/build-' + deployEnv + '/ --recursive --exclude "*" --include "*.py"'
     }
 }
