@@ -18,6 +18,9 @@ RUN dep ensure -vendor-only
 RUN make go-install
 
 FROM alpine:3.6
+
+ARG SCRIPTS_SOURCE=test
+
 COPY --from=builder /go/bin/* /usr/bin/
 
 RUN apk update
@@ -31,8 +34,15 @@ RUN npm i -g pm2@latest
 COPY tools/build/generate_and_start_telegraf.sh /generate_and_start_telegraf.sh
 RUN chmod +x /generate_and_start_telegraf.sh
 
-RUN touch /var/log/telegraf-config-gen.log
+RUN echo "wrote batch of START" >> /var/log/telegraf-config-gen.log
 RUN mkdir /etc/telegraf
 
-ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE;
-ENTRYPOINT "/generate_and_start_telegraf.sh" "$SCRIPTS_SOURCE"
+COPY tools/build/monitoring-scripts/exit.sh /
+COPY tools/build/monitoring-scripts/check-logs.sh /etc/periodic/15min/check-logs
+RUN chmod a+x /exit.sh
+RUN chmod a+x /etc/periodic/15min/check-logs
+
+ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE
+
+CMD crond -b && \
+    /generate_and_start_telegraf.sh "${SCRIPTS_SOURCE}"

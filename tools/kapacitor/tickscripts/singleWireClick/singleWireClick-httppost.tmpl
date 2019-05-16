@@ -1,6 +1,0 @@
-{
-  "subject": "Button clicked on beacon {{.Tags.trackingId}}",
-  "distributionListIds": ["{{(index .Values 0).distributionListId}}"],
-  "messageTemplateId": "{{(index .Values 0).messageTemplateId}}",
-  "customVars": "\"sourceId\": \"{{(index .Values 0).sourceId}}\", \"trackingId\": \"{{.Tags.trackingId}}\", \"timestamp\": \"{{(index .Values 0).time.Format "2006-01-02T15:04:05Z07:00"}}\""
-}
