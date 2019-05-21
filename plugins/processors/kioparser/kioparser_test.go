@@ -32,9 +32,18 @@ func TestParseLocation(t *testing.T) {
 
 	var metric = prepareMetric("AgEGDhZq/gX0JgsARXNPT0lM")
 	result := parser.Apply(metric)
+	require.Equal(t, 1, len(result))
 	assertField(t, result[0], "uniqueId", "EsOOIL")
 	assertField(t, result[0], "moving", false)
 	assertField(t, result[0], "channel", float64(38))
+}
+
+func TestParseEddystoneEID(t *testing.T) {
+	parser := *New()
+
+	var metric = prepareMetric("AgEGAwOq/g0Wqv4wEAECAwQFBgcI")
+	result := parser.Apply(metric)
+	require.Equal(t, 0, len(result))
 }
 
 func TestParsePlain(t *testing.T) {
@@ -49,8 +58,9 @@ func TestParsePlain(t *testing.T) {
 			"abcdef",
 			AdvertisedDeviceModel.BEACON_PRO)
 	*/
-	var metric1 = prepareMetric("EBZq/gIGAQpkBGFiY2RlZg==")
+	var metric1 = prepareMetric("DxZq/gIGAQpkBGFiY2RlZg==")
 	result := parser.Apply(metric1)
+	require.Equal(t, 1, len(result))
 	assertField(t, result[0], "uniqueId", "abcdef")
 	assertField(t, result[0], "model", "BEACON_PRO")
 	require.False(t, result[0].HasField("data"))
@@ -74,6 +84,7 @@ func TestParseTelemetry(t *testing.T) {
 	*/
 	var metric1 = prepareMetric("LBZq/gMCCyADEyAgBQYQAQIDBQ++rjM8AhIgAwgAfQMJgD4EFhCADAQRN4C7")
 	result := parser.Apply(metric1)
+	require.Equal(t, 1, len(result))
 	parsedMetric := result[0]
 	assertField(t, parsedMetric, "temperature", 32.125)
 	assertField(t, parsedMetric, "x", float64(1))

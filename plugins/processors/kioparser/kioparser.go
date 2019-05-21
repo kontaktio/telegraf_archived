@@ -51,35 +51,34 @@ func (p *KioParser) Description() string {
 }
 
 func (p *KioParser) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
+	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
-		p.append("data", metric)
-		metric.RemoveField("data")
-		p.append("srData", metric)
-		metric.RemoveField("srData")
-	}
-	return metrics
-}
-
-func (p *KioParser) append(fieldName string, metric telegraf.Metric) {
-	field, exists := metric.GetField(fieldName)
-	if exists {
-		b, convError := base64.StdEncoding.DecodeString(field.(string))
-		if convError == nil {
-			fields := parseData(b)
-			for k, v := range fields {
-				metric.AddField(k, v)
+		field, exists := metric.GetField("data")
+		if exists {
+			b, convError := base64.StdEncoding.DecodeString(field.(string))
+			if convError == nil {
+				fields, success := parseData(b)
+				if success {
+					result = append(result, metric)
+					for k, v := range fields {
+						metric.AddField(k, v)
+					}
+					metric.RemoveField("data")
+				}
 			}
 		}
 	}
+	return result
 }
 
-func parseData(data []byte) map[string]interface{} {
+func parseData(data []byte) (map[string]interface{}, bool) {
 	result := make(map[string]interface{})
+	success := false
 	buffer := bytes.NewBuffer(data)
 	for buffer.Len() >= blockHeaderLength {
 		blockLen, _ := buffer.ReadByte()
 		if int(blockLen) > buffer.Len() {
-			return make(map[string]interface{})
+			return make(map[string]interface{}), success
 		}
 		block := bytes.NewBuffer(buffer.Next(int(blockLen)))
 		blockType, _ := block.ReadByte()
@@ -92,16 +91,19 @@ func parseData(data []byte) map[string]interface{} {
 		blockIdentifier, _ := block.ReadByte()
 		switch blockIdentifier {
 		case plainIdentifier:
+			success = true
 			convertPlain(block, result)
 		case telemetryIdentifier:
+			success = true
 			convertTelemetry(block, result)
 		case locationIdentifier:
+			success = true
 			convertLocation(block, result)
 		default:
 			continue
 		}
 	}
-	return result
+	return result, success
 }
 
 func convertLocation(buffer *bytes.Buffer, result map[string]interface{}) {

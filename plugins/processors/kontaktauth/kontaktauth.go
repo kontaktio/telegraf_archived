@@ -4,35 +4,36 @@ import (
 	"encoding/json"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
-	"github.com/rubyist/circuitbreaker"
 	"github.com/pkg/errors"
+	"github.com/rubyist/circuitbreaker"
 	"log"
 	"net/http"
 	"time"
 )
 
 type KontaktAuth struct {
-	ApiAddress            string            `toml:"api_address"`
+	ApiAddress string `toml:"api_address"`
 
 	Client *circuit.HTTPClient
 }
 
 type apiCompany struct {
-	ID                string
-	SubscriptionPlans []string
+	CompanyID string
+	Name      string
 }
 
 type apiManager struct {
-	ID      string
+	EMail   string
+	ApiKey  string
 	Company apiCompany
 }
 
 var SampleConfig = `
-api_address="https://testapi.kontakt.io"
+api_address="https://testba-api.kontakt.io"
 `
 
-const acceptHeader = "application/vnd.com.kontakt+json;version=10"
 var unknownApiKeyDuration = time.Minute * 10
+
 const apiKeyTag = "Api-Key"
 
 var cache = make(map[string]apiManager)
@@ -68,7 +69,6 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error
 	if err != nil {
 		return false, err
 	}
-	request.Header.Add("Accept", acceptHeader)
 	request.Header.Add("Api-Key", apiKey)
 	response, err := ka.Client.Do(request)
 	if err != nil {
@@ -103,14 +103,14 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			continue
 		}
 		metric.RemoveTag(apiKeyTag)
-		metric.AddTag("companyId", manager.Company.ID)
+		metric.AddTag("companyId", manager.Company.CompanyID)
 	}
 	return metrics
 }
 
 func New() *KontaktAuth {
 	kontaktAuth := KontaktAuth{
-		Client: circuit.NewHTTPClient(time.Second * 5, 10, nil),
+		Client: circuit.NewHTTPClient(time.Second*5, 10, nil),
 	}
 	return &kontaktAuth
 }
