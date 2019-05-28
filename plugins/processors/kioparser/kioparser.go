@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
+	"errors"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
+	"math"
 )
 
 const blockHeaderLength = 2
@@ -22,6 +24,8 @@ const externalPower byte = 0xFF
 
 const movingFlagIdx = 0
 
+var unknownTxPowerError = errors.New("TxPower unknown")
+
 var kioUuid = []byte{0x6A, 0xFE}[:]
 var models = map[byte]string{
 	1:  "SMART_BEACON",
@@ -35,6 +39,17 @@ var models = map[byte]string{
 	11: "CARD_BEACON_2",
 	14: "TOUGH_BEACON_2",
 	15: "BRACELET_TAG",
+}
+
+var rssisAt1M = map[int]float64{
+	4:   -59,
+	0:   -65,
+	-4:  -69,
+	-8:  -72,
+	-12: -77,
+	-16: -81,
+	-20: -84,
+	-30: -115,
 }
 
 type KioParser struct {
@@ -53,11 +68,19 @@ func (p *KioParser) Description() string {
 func (p *KioParser) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
+		rssi, exists := metric.GetField("rssi")
+		if !exists {
+			continue
+		}
+		rssiFloat, ok := rssi.(float64)
+		if !ok {
+			continue
+		}
 		field, exists := metric.GetField("data")
 		if exists {
 			b, convError := base64.StdEncoding.DecodeString(field.(string))
 			if convError == nil {
-				fields, success := parseData(b)
+				fields, success := parseData(b, rssiFloat)
 				if success {
 					result = append(result, metric)
 					for k, v := range fields {
@@ -71,7 +94,7 @@ func (p *KioParser) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	return result
 }
 
-func parseData(data []byte) (map[string]interface{}, bool) {
+func parseData(data []byte, rssi float64) (map[string]interface{}, bool) {
 	result := make(map[string]interface{})
 	success := false
 	buffer := bytes.NewBuffer(data)
@@ -93,28 +116,30 @@ func parseData(data []byte) (map[string]interface{}, bool) {
 		switch blockIdentifier {
 		case plainIdentifier:
 			success = true
-			convertPlain(block, result)
+			convertPlain(block, result, rssi)
 		case telemetryIdentifier:
 			success = true
 			convertTelemetry(block, result)
 		case locationIdentifier:
 			success = true
-			convertLocation(block, result)
+			convertLocation(block, result, rssi)
 		default:
 			continue
 		}
 	}
+
 	return result, success
 }
 
-func convertLocation(buffer *bytes.Buffer, result map[string]interface{}) {
+func convertLocation(buffer *bytes.Buffer, result map[string]interface{}, rssi float64) {
 	if buffer.Len() < minimumLocationLength {
 		return
 	}
 	result["frameType"] = int64(locationIdentifier)
 
 	txPower, _ := buffer.ReadByte()
-	result["txPower"] = float64(txPower)
+	txPowerFloat := float64(txPower)
+	result["txPower"] = txPowerFloat
 	bleChannel, _ := buffer.ReadByte()
 	result["channel"] = float64(bleChannel)
 	model, _ := buffer.ReadByte()
@@ -122,6 +147,11 @@ func convertLocation(buffer *bytes.Buffer, result map[string]interface{}) {
 	flags, _ := buffer.ReadByte()
 	result["moving"] = flags&(1<<movingFlagIdx) == 1
 	result["uniqueId"] = buffer.String()
+
+	if distance, err := calculateDistance(rssi, txPowerFloat); err == nil {
+		result["distance"] = distance
+	}
+
 }
 
 func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
@@ -187,11 +217,7 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 	result["frameType"] = int64(telemetryIdentifier)
 }
 
-func asFloat(b byte, _ error) float64 {
-	return float64(b)
-}
-
-func convertPlain(buffer *bytes.Buffer, result map[string]interface{}) {
+func convertPlain(buffer *bytes.Buffer, result map[string]interface{}, rssi float64) {
 	if buffer.Len() < minimumPlainLength {
 		return
 	}
@@ -204,9 +230,38 @@ func convertPlain(buffer *bytes.Buffer, result map[string]interface{}) {
 		result["batteryLevel"] = float64(batteryLevel)
 	}
 	txPower, _ := buffer.ReadByte()
-	result["txPower"] = float64(txPower)
+	txPowerFloat := float64(txPower)
+	result["txPower"] = txPowerFloat
 	result["uniqueId"] = buffer.String()
 	result["frameType"] = int64(plainIdentifier)
+
+	if distance, err := calculateDistance(rssi, txPowerFloat); err == nil {
+		result["distance"] = distance
+	}
+}
+
+func asFloat(b byte, _ error) float64 {
+	return float64(b)
+}
+
+func calculateDistance(rssi, txPower float64) (float64, error) {
+	var txPowerNormalized int
+	if txPower <= 4 { //Values 0 and 4
+		txPowerNormalized = int(txPower)
+	} else {
+		txPowerNormalized = int(txPower) - 256
+	}
+	rssiAt1M, exists := rssisAt1M[txPowerNormalized]
+	if !exists {
+		return 0, unknownTxPowerError
+	}
+
+	ratio := 1.0 * rssi / rssiAt1M
+	if ratio < 1.0 {
+		return math.Pow(ratio, 10), nil
+	} else {
+		return 0.89976*math.Pow(ratio, 7.7095) + 0.111, nil
+	}
 }
 
 func New() *KioParser {
