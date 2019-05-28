@@ -89,6 +89,7 @@ func parseData(data []byte) (map[string]interface{}, bool) {
 			continue
 		}
 		blockIdentifier, _ := block.ReadByte()
+		result["packetType"] = int64(blockIdentifier)
 		switch blockIdentifier {
 		case plainIdentifier:
 			success = true

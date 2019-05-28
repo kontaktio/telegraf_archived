@@ -36,6 +36,7 @@ func TestParseLocation(t *testing.T) {
 	assertField(t, result[0], "uniqueId", "EsOOIL")
 	assertField(t, result[0], "moving", false)
 	assertField(t, result[0], "channel", float64(38))
+	assertField(t, result[0], "packetType", int64(locationIdentifier))
 }
 
 func TestParseEddystoneEID(t *testing.T) {
@@ -64,6 +65,7 @@ func TestParsePlain(t *testing.T) {
 	assertField(t, result[0], "uniqueId", "abcdef")
 	assertField(t, result[0], "model", "BEACON_PRO")
 	require.False(t, result[0].HasField("data"))
+	assertField(t, result[0], "packetType", int64(plainIdentifier))
 }
 
 func TestParseTelemetry(t *testing.T) {
@@ -99,6 +101,7 @@ func TestParseTelemetry(t *testing.T) {
 	assertField(t, parsedMetric, "secondsSinceThreshold", float64(3200))
 	assertField(t, parsedMetric, "clickId", float64(55))
 	assertField(t, parsedMetric, "secondsSinceClick", float64(48000))
+	assertField(t, result[0], "packetType", int64(telemetryIdentifier))
 
 	require.False(t, parsedMetric.HasField("data"))
 }
