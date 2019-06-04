@@ -26,6 +26,7 @@ class Options(object):
         parser.add_argument('--influxdb-port', dest='influxdb_port', default=8086, type=int)
         parser.add_argument('--influxdb-username', dest='influxdb_username', required=True)
         parser.add_argument('--influxdb-password', dest='influxdb_password', required=True)
+        parser.add_argument('--influxdb-database', dest='influxdb_database', default='telemetry', required=False)
         parser.add_argument('--config-file', dest='config_file')
         parser.add_argument('--api-url', dest='api_url', default='https://testapi.kontakt.io/')
         parser.add_argument('--api-venue-id', dest='api_venue_id', default=None)
@@ -63,6 +64,9 @@ class Options(object):
     def get_influx_password(self):
         return self.args['influxdb_password']
 
+    def get_influx_database(self):
+        return self.args['influxdb_database']
+
     def get_kapacitor_url(self):
         return self.args['kapacitor_url']
 
@@ -80,13 +84,14 @@ options = Options(sys.argv[1:])
 api_client = ApiClient(options.get_api_url(), options.get_api_key())
 
 company_id = api_client.get_company_id()
-kapacitor_client = KapacitorClient(options, company_id, 'stream_rp')
+database = options.get_influx_database()
+kapacitor_client = KapacitorClient(options, database, 'stream_rp')
 
 location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
 kapacitor_client.remove_task(location_task_name)
 result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
     'database': {
-        'value': company_id,
+        'value': database,
         'type': 'string'
     }
 })
@@ -117,7 +122,7 @@ cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
 
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ['%s:%d' % (options.get_influx_url(), options.get_influx_port())])
-cfg.append_key_value('database', company_id)
+cfg.append_key_value('database', database)
 cfg.append_key_value('username', options.get_influx_username())
 cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's')
@@ -129,6 +134,8 @@ cfg.append_key_value('fieldpass', ['coord_latitude', 'coord_longitude'])
 cfg.append_section_name('processors.override', True)
 cfg.append_key_value('name_override', 'position')
 cfg.append_key_value('order', 0)
+cfg.append_section_name('processors.override.tags', inner=True)
+cfg.append_key_value('companyId', company_id[-12:])
 
 cfg.append_section_name('processors.trackingidresolver', True)
 cfg.append_key_value('tag_name', 'ble_proximityuuid')
