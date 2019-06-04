@@ -14,7 +14,6 @@ python /config_generator/telegraf_stream_config_generate.py \
     --influxdb-port $INFLUXDB_PORT \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD"  \
-    --influxdb-new-user-password "$INFLUXDB_NEW_USER_PASSWORD"  \
     --mqtt-url "$MQTT_URL" \
     --telemetry-types "$TELEMETRY_TYPES" \
     --streams-per-telegraf $STREAMS_PER_TELEGRAF \
