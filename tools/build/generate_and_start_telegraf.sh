@@ -25,14 +25,10 @@ done;
 
 python /config_generator/telegraf_location_config_generate.py \
     --api-key "$API_KEY" --api-url "$API_URL" \
-    --kapacitor-url "$KAPACITOR_URL" \
-    --kapacitor-user "$KAPACITOR_USER" \
-    --kapacitor-pass "$KAPACITOR_PASS" \
     --influxdb-url "$INFLUXDB_URL" \
     --influxdb-port $INFLUXDB_PORT \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD"  \
-    --tx-power $TX_POWER \
     --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.location.conf.*;
 do

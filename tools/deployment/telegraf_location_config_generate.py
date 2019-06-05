@@ -18,9 +18,6 @@ class Options(object):
             description='Generate Telegraf config for K.io API Account',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('--api-key', dest='api_key', required=True)
-        parser.add_argument('--kapacitor-url', dest='kapacitor_url', required=True)
-        parser.add_argument('--kapacitor-user', dest='kapacitor_user', required=True)
-        parser.add_argument('--kapacitor-pass', dest='kapacitor_pass', required=True)
         parser.add_argument('--influxdb-url', dest='influxdb_url', required=True)
         parser.add_argument('--influxdb-port', dest='influxdb_port', default=8086, type=int)
         parser.add_argument('--influxdb-username', dest='influxdb_username', required=True)
@@ -29,7 +26,6 @@ class Options(object):
         parser.add_argument('--config-file', dest='config_file')
         parser.add_argument('--api-url', dest='api_url', default='https://testapi.kontakt.io/')
         parser.add_argument('--api-venue-id', dest='api_venue_id', default=None)
-        parser.add_argument('--tx-power', dest='tx_power', type=int, default=-77)
 
         self.args = vars(parser.parse_args(args=args))
         if self.args['config_file'] is not None:
@@ -65,18 +61,6 @@ class Options(object):
 
     def get_influx_database(self):
         return self.args['influxdb_database']
-
-    def get_kapacitor_url(self):
-        return self.args['kapacitor_url']
-
-    def get_kapacitor_user(self):
-        return self.args['kapacitor_user']
-
-    def get_kapacitor_pass(self):
-        return self.args['kapacitor_pass']
-
-    def get_tx_power(self):
-        return self.args['tx_power']
 
 
 options = Options(sys.argv[1:])
