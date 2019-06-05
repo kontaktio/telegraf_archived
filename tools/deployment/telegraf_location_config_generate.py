@@ -4,7 +4,6 @@ import sys
 
 from api_client import ApiClient
 from telegraf_config import TelegrafConfigFormatter
-from kapacitor_client import KapacitorClient
 
 INFSOFT_REALTIME_ENDPOINT = 'https://api.infsoft.com/v1/devices-realtime/ble'
 KAPACITOR_POSITION_TASK_NAME = "position_%s"
@@ -85,18 +84,6 @@ api_client = ApiClient(options.get_api_url(), options.get_api_key())
 
 company_id = api_client.get_company_id()
 database = options.get_influx_database()
-kapacitor_client = KapacitorClient(options, database, 'stream_rp')
-
-location_task_name = KAPACITOR_LOCATION_TASK_NAME % company_id
-kapacitor_client.remove_task(location_task_name)
-result = kapacitor_client.create_task(location_task_name, 'location-tpl', {
-    'database': {
-        'value': database,
-        'type': 'string'
-    }
-})
-if len(result['error']) > 0: 
-    raise(Exception(result['error']))
 
 location_engine_configs = api_client.get_location_engine_venues(options.get_api_venue_id())
 print(location_engine_configs)
