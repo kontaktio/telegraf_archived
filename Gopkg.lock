@@ -132,17 +132,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7f21a8f175ee7f91c659f919c61032e11889fba5dc25c0cec555087cbb87435a"
-  name = "github.com/amir/raidman"
-  packages = [
-    ".",
-    "proto",
-  ]
-  pruneopts = ""
-  revision = "1ccc43bfb9c93cb401a4025e49c64ba71e5e668b"
-
-[[projects]]
-  branch = "master"
   digest = "1:0828d8c0f95689f832cf348fe23827feb7640cd698d612ef59e2f9d041f54c68"
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
@@ -204,6 +193,14 @@
   pruneopts = ""
   revision = "cf455bc755fe41ac9bb2861e7a961833d9c2ecc3"
   version = "v2.1.13"
+
+[[projects]]
+  digest = "1:59df7ab87ddca233bb586ff32c6feba12bf787260f6694dc45ceecea9d3e1a7e"
+  name = "github.com/cenk/backoff"
+  packages = ["."]
+  pruneopts = ""
+  revision = "1e4cf3da559842a91afcb6ea6141451e6c30c618"
+  version = "v2.1.1"
 
 [[projects]]
   digest = "1:f619cb9b07aebe5416262cdd8b86082e8d5bdc5264cb3b615ff858df0b645f97"
@@ -393,6 +390,14 @@
   pruneopts = ""
   revision = "d1bbc0cffaf9849ddcae7b9efffae33e2dd52e9a"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:88b37f144a80737f9e5cd50c887c00c2f3c7211257f884b8b80ce97e61ed1ccb"
+  name = "github.com/facebookgo/clock"
+  packages = ["."]
+  pruneopts = ""
+  revision = "600d898af40aa09a7a93ecb9265d87b0504b6f03"
 
 [[projects]]
   digest = "1:858b7fe7b0f4bc7ef9953926828f2816ea52d01a88d72d1c45bc8c108f23c356"
@@ -596,6 +601,14 @@
   version = "v2.0.0"
 
 [[projects]]
+  digest = "1:2e9751146862a321173f98acf070786ae6a64493b01044c07ab24b5eac9ec311"
+  name = "github.com/influxdata/kapacitor"
+  packages = ["udf/agent"]
+  pruneopts = ""
+  revision = "3086452d00830e01d932838d8c6d1df818648ad3"
+  version = "v1.5.2"
+
+[[projects]]
   branch = "master"
   digest = "1:bc3eb5ddfd59781ea1183f2b3d1eb105a1495d421f09b2ccd360c7fced0b612d"
   name = "github.com/influxdata/tail"
@@ -693,19 +706,6 @@
   ]
   pruneopts = ""
   revision = "299bdde78165d4ca4bc7d064d8d6a4f39ac6de8c"
-
-[[projects]]
-  branch = "master"
-  digest = "1:7e9956922e349af0190afa0b6621befcd201072679d8e51a9047ff149f2afe93"
-  name = "github.com/mailru/easyjson"
-  packages = [
-    ".",
-    "buffer",
-    "jlexer",
-    "jwriter",
-  ]
-  pruneopts = ""
-  revision = "efc7eb8984d6655c26b5c9d2e65c024e5767c37c"
 
 [[projects]]
   digest = "1:63722a4b1e1717be7b98fc686e0b30d5e7f734b9e93d7dee86293b6deab7ea28"
@@ -930,6 +930,14 @@
   packages = ["."]
   pruneopts = ""
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+
+[[projects]]
+  digest = "1:34bc218f2006423f7fc7d79e7014a95d5b373f6b87a09fe8038eb1ad49c888ea"
+  name = "github.com/rubyist/circuitbreaker"
+  packages = ["."]
+  pruneopts = ""
+  revision = "2074adba5ddc7d5f7559448a9c3066573521c5bf"
+  version = "v2.2.1"
 
 [[projects]]
   branch = "master"
@@ -1185,7 +1193,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "0:"
+  digest = "1:b697592485cb412be4188c08ca0beed9aab87f36b86418e21acc4a3998f63734"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -1266,7 +1274,7 @@
   revision = "19ff8768a5c0b8e46ea281065664787eefc24121"
 
 [[projects]]
-  digest = "0:"
+  digest = "1:c1771ca6060335f9768dff6558108bc5ef6c58506821ad43377ee23ff059e472"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -1408,18 +1416,6 @@
   revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
 
 [[projects]]
-  digest = "1:b49c4d3115800eace659c9a6a5c384a922f5b210178b24a01abb10731f404ea2"
-  name = "gopkg.in/olivere/elastic.v5"
-  packages = [
-    ".",
-    "config",
-    "uritemplates",
-  ]
-  pruneopts = ""
-  revision = "52741dc2ce53629cbe1e673869040d886cba2cd5"
-  version = "v5.0.70"
-
-[[projects]]
   branch = "v1"
   digest = "1:a96d16bd088460f2e0685d46c39bcf1208ba46e0a977be2df49864ec7da447dd"
   name = "gopkg.in/tomb.v1"
@@ -1449,7 +1445,6 @@
     "github.com/StackExchange/wmi",
     "github.com/aerospike/aerospike-client-go",
     "github.com/alecthomas/units",
-    "github.com/amir/raidman",
     "github.com/apache/thrift/lib/go/thrift",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/client",
@@ -1487,6 +1482,7 @@
     "github.com/influxdata/go-syslog/nontransparent",
     "github.com/influxdata/go-syslog/octetcounting",
     "github.com/influxdata/go-syslog/rfc5424",
+    "github.com/influxdata/kapacitor/udf/agent",
     "github.com/influxdata/tail",
     "github.com/influxdata/toml",
     "github.com/influxdata/toml/ast",
@@ -1510,6 +1506,7 @@
     "github.com/prometheus/client_model/go",
     "github.com/prometheus/common/expfmt",
     "github.com/prometheus/common/log",
+    "github.com/rubyist/circuitbreaker",
     "github.com/satori/go.uuid",
     "github.com/shirou/gopsutil/cpu",
     "github.com/shirou/gopsutil/disk",
@@ -1558,7 +1555,6 @@
     "gopkg.in/ldap.v2",
     "gopkg.in/mgo.v2",
     "gopkg.in/mgo.v2/bson",
-    "gopkg.in/olivere/elastic.v5",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
