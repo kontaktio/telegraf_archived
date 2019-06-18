@@ -39,4 +39,4 @@ RUN mkdir /root/.aws
 
 EXPOSE 8080
 
-ENTRYPOINT "/start_telegraf_and_acceptor.sh" "test"
+ENTRYPOINT "/start_telegraf_and_acceptor.sh" "${SCRIPTS_SOURCE}"
