@@ -1,5 +1,6 @@
 FROM golang:1.11-alpine as builder
 
+ARG SCRIPTS_SOURCE=test
 ARG BUILD_BRANCH=develop
 
 RUN apk add git make curl
