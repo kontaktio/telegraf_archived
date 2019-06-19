@@ -50,7 +50,7 @@ node {
 
 def updateTestEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region us-east-1 --no-include-email)'
-    sh "aws s3 cp s3://telegraf-config/build-test/event-processor-test-taskdef.json ."
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-test/event-processor-test-taskdef.json ."
     sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-test-taskdef.json"
     def registerTask = readJSON text: sh(
             script: "aws ecs register-task-definition --cli-input-json file://event-processor-test-taskdef.json --region us-east-1",
@@ -60,7 +60,7 @@ def updateTestEscTaskAndService(appVersion) {
 
 def updateAcceptEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region us-east-1 --no-include-email)'
-    sh "aws s3 cp s3://telegraf-config/build-accept/event-processor-accept-taskdef.json ."
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-accept/event-processor-accept-taskdef.json ."
     sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-accept-taskdef.json"
     def registerTask = readJSON text: sh(
             script: "aws ecs register-task-definition --cli-input-json file://event-processor-accept-taskdef.json --region us-east-1",
@@ -70,7 +70,7 @@ def updateAcceptEscTaskAndService(appVersion) {
 
 def updateProdEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region eu-west-1 --no-include-email)'
-    sh "aws s3 cp s3://telegraf-config/build-prod/event-processor-prod-taskdef.json ."
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-prod/event-processor-prod-taskdef.json ."
     sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-prod-taskdef.json"
     def registerTask = readJSON text: sh(
             script: "aws ecs register-task-definition --cli-input-json file://event-processor-prod-taskdef.json --region eu-west-1",
