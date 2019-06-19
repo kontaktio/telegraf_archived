@@ -14,7 +14,6 @@ python /config_generator/telegraf_stream_config_generate.py \
     --influxdb-port $INFLUXDB_PORT \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD"  \
-    --influxdb-new-user-password "$INFLUXDB_NEW_USER_PASSWORD"  \
     --mqtt-url "$MQTT_URL" \
     --telemetry-types "$TELEMETRY_TYPES" \
     --streams-per-telegraf $STREAMS_PER_TELEGRAF \
@@ -26,14 +25,10 @@ done;
 
 python /config_generator/telegraf_location_config_generate.py \
     --api-key "$API_KEY" --api-url "$API_URL" \
-    --kapacitor-url "$KAPACITOR_URL" \
-    --kapacitor-user "$KAPACITOR_USER" \
-    --kapacitor-pass "$KAPACITOR_PASS" \
     --influxdb-url "$INFLUXDB_URL" \
     --influxdb-port $INFLUXDB_PORT \
     --influxdb-username "$INFLUXDB_USERNAME" \
     --influxdb-password "$INFLUXDB_PASSWORD"  \
-    --tx-power $TX_POWER \
     --api-venue-id "$VENUE_ID"
 for f in /etc/telegraf/telegraf.location.conf.*;
 do

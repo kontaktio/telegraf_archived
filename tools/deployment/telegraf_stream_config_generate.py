@@ -21,7 +21,7 @@ class Options(object):
         parser.add_argument("--influxdb-port", dest="influxdb_port", default=8086, type=int)
         parser.add_argument("--influxdb-username", dest="influxdb_username", required=True)
         parser.add_argument("--influxdb-password", dest="influxdb_password", required=True)
-        parser.add_argument("--influxdb-new-user-password", dest="influxdb_new_user_password", required=True)
+        parser.add_argument('--influxdb-database', dest='influxdb_database', default='telemetry', required=False)
         parser.add_argument("--config-file", dest="config_file")
         parser.add_argument("--api-url", dest="api_url", default="https://testapi.kontakt.io/")
         parser.add_argument("--api-venue-id", dest="api_venue_id", default=None)
@@ -61,6 +61,9 @@ class Options(object):
     def get_influx_password(self):
         return self.args['influxdb_password']
 
+    def get_influx_database(self):
+        return self.args['influxdb_database']
+
     def get_mqtt_url(self):
         return self.args['mqtt_url']
 
@@ -69,9 +72,6 @@ class Options(object):
 
     def get_streams_per_telegraf(self):
         return self.args['streams_per_telegraf']
-
-    def get_influxdb_new_user_password(self):
-        return self.args['influxdb_new_user_password']
 
 
 options = Options(sys.argv[1:])
@@ -82,22 +82,7 @@ influx_client = InfluxClient(options.get_influx_url(),
     options.get_influx_password())
 
 company_id = api_client.get_company_id()
-influxdb_new_user_password = options.get_influxdb_new_user_password()
-influx_client.create_database(company_id)
-influx_client.create_user(company_id, influxdb_new_user_password, company_id)
-
-influx_client.create_retention_policy(company_id, 'stream_rp', '3h')
-
-influx_client.create_retention_policy(company_id, 'current_rp', '7d')
-influx_client.recreate_continuous_query(company_id, '10s', 'current_rp', 'stream_rp', '10s', '40s')
-
-influx_client.create_retention_policy(company_id, 'recent_rp', '365d')
-influx_client.recreate_continuous_query(company_id, '5m', 'recent_rp', 'stream_rp', '5m', '5m')
-
-influx_client.create_retention_policy(company_id, 'history_rp', '365d')
-influx_client.recreate_continuous_query(company_id, '1h', 'history_rp', 'stream_rp', '1h', '1h')
-
-influx_client.create_retention_policy(company_id, 'temporary_history_rp', '365d')
+database = options.get_influx_database()
 
 unique_ids = api_client.get_telemetry_unique_ids(api_venue_id=options.get_api_venue_id())
 
@@ -124,7 +109,7 @@ cfg.append_key_value('logfile', '/var/log/telegraf-config-gen.log')
 
 cfg.append_section_name('outputs.influxdb', True)
 cfg.append_key_value('urls', ["%s:%d" % (options.get_influx_url(), options.get_influx_port())])
-cfg.append_key_value('database', company_id)
+cfg.append_key_value('database', database)
 cfg.append_key_value('username', options.get_influx_username())
 cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's')
@@ -141,7 +126,9 @@ cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.override', True)
-cfg.append_key_value('name_override', 'telemetry')
+cfg.append_key_value('name_override', database)
+cfg.append_section_name('processors.override.tags', inner=True)
+cfg.append_key_value('companyId', company_id[-12:])
 
 cfg.append_section_name('inputs.mqtt_consumer', True)
 cfg.append_key_value('servers', [options.get_mqtt_url()])
