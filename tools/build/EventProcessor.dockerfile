@@ -1,7 +1,7 @@
 FROM golang:1.11-alpine as builder
 
 ARG SCRIPTS_SOURCE=test
-ARG BUILD_BRANCH=dev_kontakt_parser
+ARG BUILD_BRANCH=develop
 
 RUN apk --update upgrade && \
     apk add git make curl
