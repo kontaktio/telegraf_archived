@@ -35,12 +35,4 @@ do
 	pm2 start -f /usr/bin/telegraf -- --config $f
 done;
 
-
-python /config_generator/kapacitor_reports_job.py \
-    --api-key "$API_KEY" --api-url "$API_URL" \
-    --kapacitor-url "$KAPACITOR_URL" \
-    --kapacitor-user "$KAPACITOR_USER" \
-    --kapacitor-pass "$KAPACITOR_PASS"
-
-
 tail -f /var/log/telegraf-config-gen.log
