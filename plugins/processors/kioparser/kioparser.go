@@ -165,22 +165,22 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 		switch identifier {
 		case 0x01:
 			result["utcTimestamp"] = float64(binary.LittleEndian.Uint32(buffer.Next(4)))
-			result["batteryLevel"] = asFloat(buffer.ReadByte())
+			result["batteryLevel"] = asFloatUnsigned(buffer.ReadByte())
 		case 0x02:
-			result["sensitivity"] = asFloat(buffer.ReadByte())
-			result["x"] = asFloat(buffer.ReadByte())
-			result["y"] = asFloat(buffer.ReadByte())
-			result["z"] = asFloat(buffer.ReadByte())
+			result["sensitivity"] = asFloatUnsigned(buffer.ReadByte())
+			result["x"] = asFloatSigned(buffer.ReadByte())
+			result["y"] = asFloatSigned(buffer.ReadByte())
+			result["z"] = asFloatSigned(buffer.ReadByte())
 			result["secondsSinceDoubleTap"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 			result["secondsSinceThreshold"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		case 0x05:
-			result["lightLevel"] = asFloat(buffer.ReadByte())
-			result["temperature"] = asFloat(buffer.ReadByte())
+			result["lightLevel"] = asFloatUnsigned(buffer.ReadByte())
+			result["temperature"] = asFloatSigned(buffer.ReadByte())
 		case 0x06:
-			result["sensitivity"] = asFloat(buffer.ReadByte())
-			result["x"] = asFloat(buffer.ReadByte())
-			result["y"] = asFloat(buffer.ReadByte())
-			result["z"] = asFloat(buffer.ReadByte())
+			result["sensitivity"] = asFloatUnsigned(buffer.ReadByte())
+			result["x"] = asFloatSigned(buffer.ReadByte())
+			result["y"] = asFloatSigned(buffer.ReadByte())
+			result["z"] = asFloatSigned(buffer.ReadByte())
 		case 0x07:
 			result["secondsSinceThreshold"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		case 0x08:
@@ -188,11 +188,11 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 		case 0x09:
 			result["secondsSinceTap"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		case 0x0A:
-			result["lightLevel"] = asFloat(buffer.ReadByte())
+			result["lightLevel"] = asFloatUnsigned(buffer.ReadByte())
 		case 0x0B:
-			result["temperature"] = asFloat(buffer.ReadByte())
+			result["temperature"] = asFloatSigned(buffer.ReadByte())
 		case 0x0C:
-			result["batteryLevel"] = asFloat(buffer.ReadByte())
+			result["batteryLevel"] = asFloatUnsigned(buffer.ReadByte())
 		case 0x0D:
 			result["secondsSinceClick"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		case 0x0E:
@@ -200,15 +200,14 @@ func convertTelemetry(buffer *bytes.Buffer, result map[string]interface{}) {
 		case 0x0F:
 			result["utcTimestamp"] = float64(binary.LittleEndian.Uint32(buffer.Next(4)))
 		case 0x11:
-			result["clickId"] = asFloat(buffer.ReadByte())
+			result["clickId"] = asFloatUnsigned(buffer.ReadByte())
 			result["secondsSinceClick"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		case 0x12:
-			result["humidity"] = asFloat(buffer.ReadByte())
+			result["humidity"] = asFloatUnsigned(buffer.ReadByte())
 		case 0x13:
-			temperature16b := buffer.Next(2)
-			result["temperature"] = float64(temperature16b[1]) + float64(float64(temperature16b[0])/256.0)
+			result["temperature"] = asFixedPoint88Signed(buffer.Next(2))
 		case 0x16:
-			result["movementId"] = asFloat(buffer.ReadByte())
+			result["movementId"] = asFloatUnsigned(buffer.ReadByte())
 			result["secondsSinceThreshold"] = float64(binary.LittleEndian.Uint16(buffer.Next(2)))
 		default:
 			buffer.Next(int(fieldLength) - 1)
@@ -240,8 +239,26 @@ func convertPlain(buffer *bytes.Buffer, result map[string]interface{}, rssi floa
 	}
 }
 
-func asFloat(b byte, _ error) float64 {
+func asFloatUnsigned(b byte, _ error) float64 {
 	return float64(b)
+}
+
+func asFloatSigned(b byte, _ error) float64 {
+	result := float64(b)
+	if b >= 128 {
+		return -256 + result
+	} else {
+		return result
+	}
+}
+
+func asFixedPoint88Signed(b []byte) float64 {
+	result := float64(binary.LittleEndian.Uint16(b)) / 256.0
+	if result >= 128.0 {
+		return result - 256.0
+	} else {
+		return result
+	}
 }
 
 func calculateDistance(rssi, txPower float64) (float64, error) {
