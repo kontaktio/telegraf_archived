@@ -139,6 +139,3 @@ for venue_id, location_engine_config in location_engine_configs.iteritems():
             f.write(current.to_string())
 
         idx = idx + 1
-
-        if len(result['error']) > 0:
-            raise(Exception(result['error']))
