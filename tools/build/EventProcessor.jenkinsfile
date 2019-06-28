@@ -15,7 +15,7 @@ node {
         if (env.BRANCH_NAME == 'master') {
 
             stage('[Accept] Build telegraf image && update service') {
-                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/EventProcessor.dockerfile --build-arg SCRIPTS_SOURCE=prod --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/EventProcessor.dockerfile --build-arg SCRIPTS_SOURCE=accept --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
                 docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:jenkins-aws') {
                     deploy.push(appVersion)
                 }
