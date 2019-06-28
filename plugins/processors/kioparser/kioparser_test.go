@@ -72,6 +72,36 @@ func TestParsePlain(t *testing.T) {
 	require.True(t, result[0].HasField("distance"))
 }
 
+func TestParseTelemetryNegativeValues(t *testing.T) {
+	parser := *New()
+	/*
+		    Generated using OVS:
+			RawEventDataCreator.buildTelemetryPacket(List.of(
+		                new TemperatureField(-60))
+	*/
+	var metric1 = prepareMetric("BxZq/gMCC8Q=")
+
+	/*
+				Generated using OVS:
+				RawEventDataCreator.buildTelemetryPacket(Set.of(
+		                new Temperature16BitField(-60.25),
+		                new AccelerationField(16, new byte[] {-10, -20, -30}))))
+	*/
+	var metric2 = prepareMetric("DhZq/gMFBhD27OIDE8DD")
+
+	result1 := parser.Apply(metric1)
+	parsedMetric := result1[0]
+	assertField(t, parsedMetric, "temperature", float64(-60))
+
+	result2 := parser.Apply(metric2)
+	parsedMetric = result2[0]
+	assertField(t, parsedMetric, "temperature", float64(-60.25))
+	assertField(t, parsedMetric, "x", float64(-10))
+	assertField(t, parsedMetric, "y", float64(-20))
+	assertField(t, parsedMetric, "z", float64(-30))
+
+}
+
 func TestParseTelemetry(t *testing.T) {
 	parser := *New()
 	/*
