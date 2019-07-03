@@ -29,7 +29,7 @@ node {
             }
         } else if (env.BRANCH_NAME == 'masterv2') {
             stage('[ProdV2] Build telegraf image') {
-                def deploy = docker.build('kontaktio/telegraf', "-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=prodv2 --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                def deploy = docker.build('kontaktio/telegraf-v2', "-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=prodv2 --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
                 docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
                     deploy.push('latest')
                 }
