@@ -16,6 +16,8 @@ node {
                 input(message: 'Proceed to production?')
                 buildImageStage('prod')
             }
+        } else if (env.BRANCH_NAME == 'masterv2') {
+            buildImageStage('prodv2')
         } else {
             buildImageStage('test')
         }
