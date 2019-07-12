@@ -99,7 +99,7 @@ cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's')
 cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'current_rp')
-cfg.append_key_value('taginclude', ['trackingId', 'companyId'])
+cfg.append_key_value('tagexclude', ['ble_proximityuuid', 'url'])
 cfg.append_key_value('fieldpass', ['coord_latitude', 'coord_longitude'])
 
 cfg.append_section_name('processors.override', True)
