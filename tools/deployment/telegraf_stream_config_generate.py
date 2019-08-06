@@ -83,6 +83,7 @@ influx_client = InfluxClient(options.get_influx_url(),
 
 company_id = api_client.get_company_id()
 database = options.get_influx_database()
+measurement = 'telemetry'
 
 unique_ids = api_client.get_telemetry_unique_ids(api_venue_id=options.get_api_venue_id())
 
@@ -115,7 +116,7 @@ cfg.append_key_value('password', options.get_influx_password())
 cfg.append_key_value('precision', 's')
 cfg.append_key_value('timeout', '5s')
 cfg.append_key_value('retention_policy', 'stream_rp')
-cfg.append_key_value('tagexclude', ['topic'])
+cfg.append_key_value('taginclude', ['companyId', 'trackingId'])
 cfg.append_key_value('fielddrop', ['lastDoubleTap', 'lastSingleClick', 'lastThreshold', 'loggingEnabled', 'sensitivity',
                                    'utcTime', 'secondsSinceThreshold', 'secondsSinceDoubleTap'])
 
@@ -126,7 +127,7 @@ cfg.append_key_value('tag_key', 'trackingId')
 cfg.append_key_value('order', 0)
 
 cfg.append_section_name('processors.override', True)
-cfg.append_key_value('name_override', database)
+cfg.append_key_value('name_override', measurement)
 cfg.append_section_name('processors.override.tags', inner=True)
 cfg.append_key_value('companyId', company_id[-12:])
 
