@@ -47,14 +47,12 @@ func TestNotEmit1WhenTimeDiffTooSmall(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = lastc.Apply([]telegraf.Metric{metric2}...)
 	require.Equal(t, 1, len(result))
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
 
 func TestCreate(t *testing.T) {
@@ -102,19 +100,16 @@ func TestCreate(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = lastc.Apply([]telegraf.Metric{metric2}...)
 	require.Equal(t, 1, len(result))
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(1), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = lastc.Apply([]telegraf.Metric{metric3}...)
 	require.Equal(t, 1, len(result))
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
