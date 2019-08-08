@@ -2,6 +2,7 @@ package clickdetect
 
 import (
 	"log"
+	"sync"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
@@ -18,7 +19,7 @@ type ClickDetect struct {
 	OutFieldName string `toml:"out_field_name"`
 	TagKey       string `toml:"tag_key"`
 
-	cache map[string]float64
+	cache sync.Map
 }
 
 func New() *ClickDetect {
@@ -29,7 +30,6 @@ func New() *ClickDetect {
 }
 
 func (p *ClickDetect) Reset() {
-	p.cache = make(map[string]float64)
 }
 
 func (p *ClickDetect) SampleConfig() string {
@@ -53,22 +53,24 @@ func (p *ClickDetect) Apply(in ...telegraf.Metric) []telegraf.Metric {
 				continue //Wrong type
 			}
 
-			lastValue, exists := p.cache[tag]
+			item, exists := p.cache.Load(tag)
 
-			if !exists || (lastValue == currentValue) {
+			if !exists || (item.(float64) == currentValue) {
 				mt.AddField(p.OutFieldName, 0)
-				p.cache[tag] = currentValue
+				p.cache.Store(tag, currentValue)
 				continue
 			}
 
+			lastValue := item.(float64)
+
 			if currentValue > lastValue {
 				mt.AddField(p.OutFieldName, int32(currentValue-lastValue))
-				p.cache[tag] = currentValue
+				p.cache.Store(tag, currentValue)
 				continue
 			} else if currentValue < 10 && lastValue > 250 {
 				diff := 256 - lastValue + currentValue
 				mt.AddField(p.OutFieldName, int32(diff))
-				p.cache[tag] = currentValue
+				p.cache.Store(tag, currentValue)
 				continue
 			}
 
