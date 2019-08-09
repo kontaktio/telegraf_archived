@@ -27,7 +27,6 @@ node {
                     }
                 }
             }
-
         } else {
             stage('[Test] Build telegraf image') {
                 def deploy = docker.build('kontaktio/telegraf', "-f tools/build/Dockerfile --build-arg SCRIPTS_SOURCE=test --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
