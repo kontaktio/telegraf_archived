@@ -52,13 +52,11 @@ func TestEmit0WhenClickIdEqual(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = cd.Apply([]telegraf.Metric{metric2}...)
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
 
 func TestNotEmit0WhenClickIdGreater(t *testing.T) {
@@ -100,13 +98,11 @@ func TestNotEmit0WhenClickIdGreater(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = cd.Apply([]telegraf.Metric{metric2}...)
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(6), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
 
 func TestNotEmit0WhenClickIdRolledBack(t *testing.T) {
@@ -148,13 +144,11 @@ func TestNotEmit0WhenClickIdRolledBack(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = cd.Apply([]telegraf.Metric{metric2}...)
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(8), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
 
 func TestNotEmit0WhenClickIdLower(t *testing.T) {
@@ -196,11 +190,9 @@ func TestNotEmit0WhenClickIdLower(t *testing.T) {
 	var changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 
 	result = cd.Apply([]telegraf.Metric{metric2}...)
 	changedFieldValue, changedFieldExists = result[0].GetField(ChangedField)
 	require.True(t, changedFieldExists)
 	require.Equal(t, int64(0), changedFieldValue)
-	require.False(t, result[0].HasField(FieldToChange))
 }
