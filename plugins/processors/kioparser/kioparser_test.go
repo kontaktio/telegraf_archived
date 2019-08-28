@@ -28,6 +28,12 @@ func assertField(t *testing.T, metric telegraf.Metric, field string, value inter
 	require.Equal(t, value, val)
 }
 
+func assertTag(t *testing.T, metric telegraf.Metric, tag string, value string) {
+	val, exists := metric.GetTag(tag)
+	require.True(t, exists)
+	require.Equal(t, value, val)
+}
+
 func TestParseLocation(t *testing.T) {
 	parser := *New()
 
@@ -48,6 +54,47 @@ func TestParseEddystoneEID(t *testing.T) {
 	var metric = prepareMetric("AgEGAwOq/g0Wqv4wEAECAwQFBgcI")
 	result := parser.Apply(metric)
 	require.Equal(t, 0, len(result))
+}
+
+func TestParseEmbeddedKontaktIBeacon(t *testing.T) {
+	parser := *New()
+	/*
+		Generated using OVS:
+		RawEventDataCreator.buildKontaktEmbededIBeaconAdvertise(
+			"4.1",
+			100,
+			false,
+			4,
+			uniqueId,
+			AdvertisedDeviceModel.MOBILE_DEVICE);
+	*/
+	var metric = prepareMetric("AgEGGv9MAAIVav4CEgQBZARhYmNkZWZnaGlqawAE")
+	result := parser.Apply(metric)
+	assertTag(t, result[0], "trackingId", "abcdefghijk")
+	assertField(t, result[0], "uniqueId", "abcdefghijk")
+}
+
+func TestParseQuuppaIBeacon(t *testing.T) {
+	parser := *New()
+	/*
+		Generated using OVS:
+		buildQuuppaIBeaconAdvertise("00badbeef000")
+	*/
+	var metric = prepareMetric("AgEGGv9MAAIVGgC62+7wAABn99s0xAOOXAuqlzBW")
+	result := parser.Apply(metric)
+
+	assertTag(t, result[0], "trackingId", "00badbeef000")
+	assertField(t, result[0], "uniqueId", "00badbeef000")
+}
+
+func TestParseOtherIBeacon(t *testing.T) {
+	parser := *New()
+
+	//Some iBeacon, not matching Kio/Quuppa criteria
+	var metric = prepareMetric("AgEGGv9MAAIVzAC62+7wAABn99s0xAOOXAuqlzBW")
+
+	result := parser.Apply(metric)
+	require.Len(t, result, 0)
 }
 
 func TestParsePlain(t *testing.T) {
