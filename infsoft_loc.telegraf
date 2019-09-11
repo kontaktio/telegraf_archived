@@ -1,0 +1,51 @@
+[global_tags]
+[agent]
+  interval="5s"
+  round_interval=false
+  metric_buffer_limit=1000
+  flush_buffer_when_full=true
+  collection_jitter="0s"
+  flush_interval="5s"
+  flush_jitter="2s"
+  omit_hostname=true
+  debug=true
+  quiet=false
+  logfile="/var/log/telegraf-config-gen.log"
+#[[outputs.influxdb]]
+#  urls=["http://testinflux.kontakt.io:8086"]
+#  database="telemetry"
+#  username="root"
+#  password="OTAwYzIwY2U5Y2IwY2VlODIyZGNjMTA2"
+#  precision="s"
+#  timeout="5s"
+#  retention_policy="current_rp"
+[[outputs.file]]
+  files=['stdout']
+  tagexclude=["ble_proximityuuid","url"]
+  fieldpass=["coord_latitude","coord_longitude"]
+[[processors.override]]
+  name_override="geoposition"
+  order=0
+  [processors.override.tags]
+    companyId="fedbf1292f35"
+
+[[processors.rename]]
+  order=1
+  [[processors.rename.replace]]
+    field="coord_latitude"
+    dest="latitude"
+  [[processors.rename.replace]]
+    field="coord_longitude"
+    dest="longitude"
+
+[[processors.trackingidresolver]]
+  tag_name="ble_proximityuuid"
+  new_tag_name="trackingId"
+  order=2
+  [processors.trackingidresolver.tagpass]
+    ble_proximityuuid=["*"]
+[[inputs.http]]
+  timeout="5s"
+  data_format="json"
+  tag_keys=["ble_proximityuuid"]
+  urls=["https://api.infsoft.com/v1/devices-realtime/ble?api_key=a29a7fa0-3bee-447e-bea7-6f766465f537&location_id=102119"]

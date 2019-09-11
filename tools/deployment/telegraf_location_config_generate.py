@@ -110,10 +110,10 @@ cfg.append_key_value('companyId', company_id[-12:])
 
 cfg.append_section_name('processors.rename', True)
 cfg.append_key_value('order', 1)
-cfg.append_section_name('processors.rename.replace', inner=True)
+cfg.append_section_name('processors.rename.replace', collection=True, inner=True)
 cfg.append_key_value('field', 'coord_latitude')
 cfg.append_key_value('dest', 'latitude')
-cfg.append_section_name('processors.rename.replace', inner=True)
+cfg.append_section_name('processors.rename.replace', collection=True, inner=True)
 cfg.append_key_value('field', 'coord_longitude')
 cfg.append_key_value('dest', 'longitude')
 
