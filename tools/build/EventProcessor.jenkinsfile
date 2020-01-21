@@ -28,7 +28,12 @@ node {
                     docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
                         deploy.push(appVersion)
                     }
+                    deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/EventProcessor.dockerfile --build-arg SCRIPTS_SOURCE=officeprod --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                    docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                        deploy.push(appVersion + "-office")
+                    }
                     updateProdEscTaskAndService(appVersion)
+                    updateOfficeProdEscTaskAndService(appVersion)
                 }
             }
 
@@ -76,4 +81,15 @@ def updateProdEscTaskAndService(appVersion) {
             script: "aws ecs register-task-definition --cli-input-json file://event-processor-prod-taskdef.json --region eu-west-1",
             returnStdout: true)
     sh "aws ecs update-service --cluster prod-ecs-cluster --service telegraf-event-processor --region eu-west-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
+}
+
+
+def updateOfficeProdEscTaskAndService(appVersion) {
+    sh 'eval $(aws ecr get-login --region eu-west-1 --no-include-email)'
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-officeprod/event-processor-officeprod-taskdef.json ."
+    sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-officeprod-taskdef.json"
+    def registerTask = readJSON text: sh(
+            script: "aws ecs register-task-definition --cli-input-json file://event-processor-officeprod-taskdef.json --region eu-west-1",
+            returnStdout: true)
+    sh "aws ecs update-service --cluster prod-ecs-cluster --service telegraf-event-processor-office --region eu-west-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
 }
