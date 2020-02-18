@@ -51,7 +51,7 @@ func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 		}
 	}
 	var manager apiManager
-	correct, err := ka.get("manager/me", apiKey, &manager)
+	correct, err := ka.get("v2/organization/account/me", apiKey, &manager)
 	if err == nil {
 		cache[apiKey] = manager
 	} else if correct {
