@@ -93,6 +93,7 @@ func (p *KontaktAuth) Description() string {
 }
 
 func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
+	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
 		if !metric.HasTag(apiKeyTag) {
 			continue
@@ -104,8 +105,9 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		}
 		metric.RemoveTag(apiKeyTag)
 		metric.AddTag("companyId", manager.Company.CompanyID)
+		result = append(result, metric)
 	}
-	return metrics
+	return result
 }
 
 func New() *KontaktAuth {
