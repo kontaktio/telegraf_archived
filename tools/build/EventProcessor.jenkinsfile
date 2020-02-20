@@ -6,12 +6,24 @@ node {
 
     try {
         def appVersion = ''
+        stage('Checkout') {
+            timeout(time: 10, unit: 'MINUTES') {
+                appVersion = input(
+                        id: 'appVersion', message: 'Enter a telegraf build app version:?',
+                        parameters: [
+                                [$class: 'StringParameterDefinition', defaultValue: 'None', description: 'App version', name: 'appVersionString'],
+                        ]
+                )
+                echo "Build version: ${appVersion}"
+            }
+        }
+
         if (env.BRANCH_NAME == 'master') {
 
-            stage('[Accept] Build telegraf image && update service') {
+            stage('[Accept] Update service') {
                 updateAcceptEscTaskAndService(appVersion)
             }
-            stage('[Prod] Build telegraf image && update service') {
+            stage('[Prod] Update service') {
                 timeout(time: 30, unit: 'MINUTES') {
                     input(message: 'Proceed to production?')
                     updateProdEscTaskAndService(appVersion)
@@ -20,7 +32,7 @@ node {
             }
 
         } else {
-            stage('[Test] Build telegraf image && update service') {
+            stage('[Test] Update service') {
                 updateTestEscTaskAndService(appVersion)
             }
         }
