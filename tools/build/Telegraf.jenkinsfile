@@ -1,0 +1,50 @@
+#!groovy
+
+node {
+
+    currentBuild.result = "SUCCESS"
+
+    try {
+        def appVersion = ''
+        stage('Checkout') {
+            def scmInfo = checkout(scm)
+            appVersion = "v${env.BUILD_ID}-${scmInfo.GIT_COMMIT.take(8)}"
+            echo "Build version: ${appVersion}"
+        }
+
+        if (env.BRANCH_NAME == 'master') {
+
+            stage('[Accept] Build telegraf image && update service') {
+                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/Telegraf.dockerfile --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:jenkins-aws') {
+                    deploy.push(appVersion)
+                }
+            }
+            stage('[Prod] Build telegraf image && update service') {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input(message: 'Proceed to production?')
+                    def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/Telegraf.dockerfile --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                    docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                        deploy.push(appVersion)
+                    }
+                    deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/Telegraf.dockerfile --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                    docker.withRegistry('https://712852996757.dkr.ecr.eu-west-1.amazonaws.com', 'ecr:eu-west-1:jenkins-aws') {
+                        deploy.push(appVersion + "-office")
+                    }
+                }
+            }
+
+        } else {
+            stage('[Test] Build telegraf image && update service') {
+                def deploy = docker.build('kontaktio/telegraf-event-processor', "-f tools/build/Telegraf.dockerfile --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:jenkins-aws') {
+                    deploy.push(appVersion)
+                }
+            }
+        }
+    }
+    catch (err) {
+        currentBuild.result = "ERROR"
+        throw err
+    }
+}
