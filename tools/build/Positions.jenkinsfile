@@ -27,7 +27,6 @@ node {
                 timeout(time: 30, unit: 'MINUTES') {
                     input(message: 'Proceed to production?')
                     updateProdEscTaskAndService(appVersion)
-                    updateOfficeProdEscTaskAndService(appVersion)
                 }
             }
 
@@ -45,41 +44,30 @@ node {
 
 def updateTestEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region us-east-1 --no-include-email)'
-    sh "aws s3 cp s3://kontakt-telegraf-config/build-test/event-processor-test-taskdef.json ."
-    sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-test-taskdef.json"
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-test/positions-test-taskdef.json ."
+    sh "sed -i 's/VERSION_TAG/${appVersion}/g' positions-test-taskdef.json"
     def registerTask = readJSON text: sh(
-            script: "aws ecs register-task-definition --cli-input-json file://event-processor-test-taskdef.json --region us-east-1",
+            script: "aws ecs register-task-definition --cli-input-json file://positions-test-taskdef.json --region us-east-1",
             returnStdout: true)
-    sh "aws ecs update-service --cluster test-ecs-cluster --service telegraf-event-processor --region us-east-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
+    sh "aws ecs update-service --cluster test-ecs-cluster --service telegraf-positions --region us-east-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
 }
 
 def updateAcceptEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region us-east-1 --no-include-email)'
-    sh "aws s3 cp s3://kontakt-telegraf-config/build-accept/event-processor-accept-taskdef.json ."
-    sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-accept-taskdef.json"
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-accept/positions-accept-taskdef.json ."
+    sh "sed -i 's/VERSION_TAG/${appVersion}/g' positions-accept-taskdef.json"
     def registerTask = readJSON text: sh(
-            script: "aws ecs register-task-definition --cli-input-json file://event-processor-accept-taskdef.json --region us-east-1",
+            script: "aws ecs register-task-definition --cli-input-json file://positions-accept-taskdef.json--region us-east-1",
             returnStdout: true)
-    sh "aws ecs update-service --cluster accept-ecs-cluster --service telegraf-event-processor --region us-east-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
+    sh "aws ecs update-service --cluster accept-ecs-cluster --service telegraf-positions --region us-east-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
 }
 
 def updateProdEscTaskAndService(appVersion) {
     sh 'eval $(aws ecr get-login --region eu-west-1 --no-include-email)'
-    sh "aws s3 cp s3://kontakt-telegraf-config/build-prod/event-processor-prod-taskdef.json ."
-    sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-prod-taskdef.json"
+    sh "aws s3 cp s3://kontakt-telegraf-config/build-prod/positions-prod-taskdef.json ."
+    sh "sed -i 's/VERSION_TAG/${appVersion}/g' positions-prod-taskdef.json"
     def registerTask = readJSON text: sh(
-            script: "aws ecs register-task-definition --cli-input-json file://event-processor-prod-taskdef.json --region eu-west-1",
+            script: "aws ecs register-task-definition --cli-input-json file://positions-prod-taskdef.json --region eu-west-1",
             returnStdout: true)
-    sh "aws ecs update-service --cluster prod-ecs-cluster --service telegraf-event-processor --region eu-west-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
-}
-
-
-def updateOfficeProdEscTaskAndService(appVersion) {
-    sh 'eval $(aws ecr get-login --region eu-west-1 --no-include-email)'
-    sh "aws s3 cp s3://kontakt-telegraf-config/build-officeprod/event-processor-officeprod-taskdef.json ."
-    sh "sed -i 's/VERSION_TAG/${appVersion}/g' event-processor-officeprod-taskdef.json"
-    def registerTask = readJSON text: sh(
-            script: "aws ecs register-task-definition --cli-input-json file://event-processor-officeprod-taskdef.json --region eu-west-1",
-            returnStdout: true)
-    sh "aws ecs update-service --cluster prod-ecs-cluster --service telegraf-event-processor-office --region eu-west-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
+    sh "aws ecs update-service --cluster prod-ecs-cluster --service telegraf-positions --region eu-west-1 --force-new-deployment --task-definition ${registerTask.taskDefinition.taskDefinitionArn}"
 }
