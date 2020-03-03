@@ -34,6 +34,13 @@ node {
                     deploy.push('latest')
                 }
             }
+            stage('[Test] Build telegraf new-generation') {
+                def deploy = docker.build('kontakt.io/telegraf', "-f tools/build/Telegraf.dockerfile --build-arg BUILD_BRANCH=${env.BRANCH_NAME} .")
+                docker.withRegistry('https://712852996757.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:jenkins-aws') {
+                    deploy.push("${env.BUILD_ID}")
+                    deploy.push('latest')
+                }
+            }
         }
     }
     catch (err) {
