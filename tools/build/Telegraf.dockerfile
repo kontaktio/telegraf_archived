@@ -1,41 +1,33 @@
-FROM golang:1.11-alpine as builder
+FROM golang:1.13-alpine as builder
 
 ARG BUILD_BRANCH=develop
 
-RUN apk --update upgrade && \
-    apk add git make curl
+RUN apk --update --no-cache add dep git make
 
-ENV DEP_VERSION 0.5.0
-RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
+#ENV DEP_VERSION 0.5.0
 
 RUN go get 'github.com/kontaktio/telegraf'
-RUN go get -u github.com/golang/dep/...
+#RUN go get -u github.com/golang/dep/...
 
 RUN mv $GOPATH/src/github.com/kontaktio $GOPATH/src/github.com/influxdata
 WORKDIR $GOPATH/src/github.com/influxdata/telegraf
-RUN git checkout "${BUILD_BRANCH}"
-RUN dep ensure -vendor-only
-RUN make go-install
+RUN git checkout "${BUILD_BRANCH}" && \
+    dep ensure -vendor-only && \
+    make go-install
 
-FROM alpine:3.9
+FROM alpine:latest
 COPY --from=builder /go/bin/* /usr/bin/
+COPY --from=hairyhenderson/gomplate:alpine /bin/gomplate /bin/gomplate
 
-RUN apk update
-RUN apk add
-RUN apk --update upgrade && \
-    apk add python py-pip ca-certificates && \
+RUN apk add --update --no-cache ca-certificates && \
     update-ca-certificates && \
-    rm -rf /var/cache/apk/* && \
-    wget -O /etc/ssl/ca-bundle.pem https://curl.haxx.se/ca/cacert.pem
+    rm -rf /var/cache/apk/*
 
+RUN wget -O /etc/ssl/ca-bundle.pem https://curl.haxx.se/ca/cacert.pem
 
-RUN pip install awscli
-
-COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
-RUN chmod +x /start_telegraf_and_acceptor.sh
-
-RUN mkdir /root/.aws
+COPY tools/build/telegraf.conf.tpl /telegraf.conf.tpl
+COPY tools/build/entrypoint.sh /entrypoint.sh
 
 EXPOSE 8080
 
-ENTRYPOINT "/start_telegraf_and_acceptor.sh"
+ENTRYPOINT "/entrypoint.sh"
