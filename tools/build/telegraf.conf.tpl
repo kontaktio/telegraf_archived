@@ -16,6 +16,28 @@
   data_format = "kontakt"
   header_tags = ["Api-Key"]
 
+{{ if has .Env "HEALTH_PORT" -}}
+[[outputs.health]]
+  ## Address and port to listen on.
+  service_address = "http://:{{ env.Getenv "HEALTH_PORT" 8080 }}"
+
+  ## The maximum duration for reading the entire request.
+  read_timeout = "{{ env.Getenv "HEALTH_READ_TIMEOUT" "5s" }}"
+  ## The maximum duration for writing the entire response.
+  write_timeout = "{{ env.Getenv "HEALTH_WRITE_TIMEOUT" "5s" }}"
+
+  ## Username and password to accept for HTTP basic authentication.
+  # basic_username = "{{ env.Getenv "HEALTH_BASIC_USERNAME" "health" }}"
+  # basic_password = "{{ env.Getenv "HEALTH_BASIC_PASSWORD" "health" }}"
+
+  ## Allowed CA certificates for client certificates.
+  # tls_allowed_cacerts = ["/etc/telegraf/clientca.pem"]
+
+  ## TLS server certificate and private key.
+  # tls_cert = "{{ env.Getenv "HEALTH_TLS_CERT" "/etc/telegraf/cert.pem" }}"
+  # tls_key  = "{{ env.Getenv "HEALTH_TLS_KEY" "/etc/telegraf/key.pem" }}"
+{{ end -}}
+
 {{ if has .Env "TELEMETRY_DATABASE_ENDPOINT" -}}
 [[outputs.influxdb]]
   urls      = [ "{{ .Env.TELEMETRY_DATABASE_ENDPOINT }}" ]
