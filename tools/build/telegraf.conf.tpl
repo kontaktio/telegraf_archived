@@ -7,7 +7,7 @@
   flush_interval="5s"
   flush_jitter=0
   omit_hostname=true
-  debug=true
+  debug={{ env.Getenv "DEBUG" "false" }}
 
 [[inputs.http_listener_v2]]
   service_address = ":{{ env.Getenv "SERVICE_PORT" "8080" }}"
@@ -16,7 +16,7 @@
   data_format = "kontakt"
   header_tags = ["Api-Key"]
 
-{{ if has .Env "HEALTH_PORT" -}}
+{{ if env.Getenv "HEALTH_PORT" "" -}}
 [[outputs.health]]
   ## Address and port to listen on.
   service_address = "http://:{{ env.Getenv "HEALTH_PORT" 8080 }}"
@@ -36,9 +36,10 @@
   ## TLS server certificate and private key.
   # tls_cert = "{{ env.Getenv "HEALTH_TLS_CERT" "/etc/telegraf/cert.pem" }}"
   # tls_key  = "{{ env.Getenv "HEALTH_TLS_KEY" "/etc/telegraf/key.pem" }}"
+
 {{ end -}}
 
-{{ if has .Env "TELEMETRY_DATABASE_ENDPOINT" -}}
+{{ if env.Getenv "TELEMETRY_DATABASE_ENDPOINT" "" -}}
 [[outputs.influxdb]]
   urls      = [ "{{ .Env.TELEMETRY_DATABASE_ENDPOINT }}" ]
   database  = "{{ env.Getenv "TELEMETRY_DATABASE_NAME" "telemetry" }}"
@@ -49,9 +50,10 @@
   retention_policy="stream_rp"
   taginclude = ["companyId", "trackingId"]
   fielddrop=["lastDoubleTap","lastSingleClick","lastThreshold","loggingEnabled","sensitivity","utcTime","secondsSinceThreshold","secondsSinceDoubleTap"]
+
 {{ end -}}
 
-{{ if has .Env "LOCATION_DATABASE_ENDPOINT" -}}
+{{ if env.Getenv "LOCATION_DATABASE_ENDPOINT" -}}
 [[outputs.influxdb]]
   urls             = [ "{{ .Env.LOCATION_DATABASE_ENDPOINT }}" ]
   database         = "{{ env.Getenv "LOCATION_DATABASE_NAME" "le" }}"
@@ -64,7 +66,7 @@
   fielddrop        = ["sourceId", "lastDoubleTap","lastSingleClick","lastThreshold","loggingEnabled","sensitivity","utcTime","secondsSinceThreshold","secondsSinceDoubleTap"]
 {{ end -}}
 
-{{ if has .Env "LOCATION_ENGINE_ENDPOINT" -}}
+{{ if env.Getenv "LOCATION_ENGINE_ENDPOINT" -}}
 [[outputs.http]]
   url         = "{{ .Env.LOCATION_ENGINE_ENDPOINT }}"
   method      = "{{ env.Getenv "LOCATION_ENGINE_METHOD" "POST" }}"
@@ -80,7 +82,7 @@
     tag  = "deviceAddress"
     dest = "trackingId"
 
-{{ if has .Env "AUTH_API_ENDPOINT" -}}
+{{ if env.Getenv "AUTH_API_ENDPOINT" -}}
 [[processors.kontaktauth]]
   api_address = "{{ .Env.AUTH_API_ENDPOINT }}"
   order       = 1
@@ -138,3 +140,7 @@
   [[processors.rename.replace]]
     tag = "tSourceId"
     dest = "sourceId"
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+{{ end -}}
