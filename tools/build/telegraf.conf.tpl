@@ -39,6 +39,20 @@
 
 {{ end -}}
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[outputs.file]]
+  files       = ["stdout", "/tmp/raw_metrics.out"]
+  data_format = "influx"
+{{ end -}}
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[outputs.file]]
+  files       = ["stdout", "/tmp/filtered_metrics.out"]
+  taginclude  = ["companyId", "trackingId", "sourceId"]
+  fielddrop   = ["sourceId", "lastDoubleTap","lastSingleClick","lastThreshold","loggingEnabled","sensitivity","utcTime","secondsSinceThreshold","secondsSinceDoubleTap"]
+  data_format = "influx"
+{{ end -}}
+
 {{ if env.Getenv "TELEMETRY_DATABASE_ENDPOINT" "" -}}
 [[outputs.influxdb]]
   urls      = [ "{{ .Env.TELEMETRY_DATABASE_ENDPOINT }}" ]
@@ -52,6 +66,7 @@
   fielddrop=["lastDoubleTap","lastSingleClick","lastThreshold","loggingEnabled","sensitivity","utcTime","secondsSinceThreshold","secondsSinceDoubleTap"]
 
 {{ end -}}
+
 
 {{ if env.Getenv "LOCATION_DATABASE_ENDPOINT" -}}
 [[outputs.influxdb]]
@@ -76,53 +91,98 @@
     Content-Type = "application/json"
 {{ end -}}
 
-[[processors.rename]]
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
   order = 0
+{{ end -}}
+
+[[processors.rename]]
+  order = 1
   [[processors.rename.replace]]
     tag  = "deviceAddress"
     dest = "trackingId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 2
+{{ end -}}
+
 {{ if env.Getenv "AUTH_API_ENDPOINT" -}}
 [[processors.kontaktauth]]
   api_address = "{{ .Env.AUTH_API_ENDPOINT }}"
-  order       = 1
+  order       = 3
+{{ end -}}
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 4
 {{ end -}}
 
 [[processors.kioparser]]
-  order = 2
+  order = 5
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 6
+{{ end -}}
 
 [[processors.clickdetect]]
+  order          = 7
   field_name     = "clickId"
-  order          = 3
   out_field_name = "singleClick"
   tag_key        = "trackingId"
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 8
+{{ end -}}
 
 [[processors.clickdetect]]
   field_name     = "movementId"
-  order          = 4
+  order          = 9
   out_field_name = "movement"
   tag_key        = "trackingId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 10
+{{ end -}}
+
 [[processors.lastcalc]]
   field_name     = "lastSingleClick"
-  order          = 5
+  order          = 11
   out_field_name = "singleClick"
   tag_key        = "trackingId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 12
+{{ end -}}
+
 [[processors.lastcalc]]
   field_name     = "lastThreshold"
-  order          = 6
+  order          = 13
   out_field_name = "threshold"
   tag_key        = "trackingId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 14
+{{ end -}}
+
 [[processors.lastcalc]]
   field_name     = "lastDoubleTap"
-  order          = 7
+  order          = 15
   out_field_name = "tap"
   tag_key        = "trackingId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 16
+{{ end -}}
+
 [[processors.regex]]
-  order = 8
+  order = 17
   [[processors.regex.fields]]
     key = "sourceId"
     pattern = "^(.*)$"
@@ -130,17 +190,38 @@
     ## adding new field key
     result_key = "tSourceId"
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 18
+{{ end -}}
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order =19
+{{ end -}}
+
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 20
+{{ end -}}
+
 [[processors.converter]]
-  order = 9
+  order = 21
   [processors.converter.fields]
     tag = ["tSourceId"]
 
+{{ if env.Getenv "DEBUG" "" -}}
+[[processors.printer]]
+  order = 22
+{{ end -}}
+
 [[processors.rename]]
-  order = 10
+  order = 23
   [[processors.rename.replace]]
     tag = "tSourceId"
     dest = "sourceId"
 
 {{ if env.Getenv "DEBUG" "" -}}
 [[processors.printer]]
+  order = 24
 {{ end -}}
