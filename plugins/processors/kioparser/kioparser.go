@@ -213,8 +213,7 @@ func convertLocation(buffer *bytes.Buffer, result map[string]interface{}, rssi f
 	}
 	result["frameType"] = int64(locationIdentifier)
 
-	txPower, _ := buffer.ReadByte()
-	txPowerFloat := float64(txPower)
+	txPowerFloat := asFloatSigned(buffer.ReadByte())
 	result["txPower"] = txPowerFloat
 	bleChannel, _ := buffer.ReadByte()
 	result["channel"] = float64(bleChannel)
@@ -304,8 +303,7 @@ func convertPlain(buffer *bytes.Buffer, result map[string]interface{}, rssi floa
 	if batteryLevel != externalPower {
 		result["batteryLevel"] = float64(batteryLevel)
 	}
-	txPower, _ := buffer.ReadByte()
-	txPowerFloat := float64(txPower)
+	txPowerFloat := asFloatSigned(buffer.ReadByte())
 	result["txPower"] = txPowerFloat
 	result["uniqueId"] = strings.Trim(buffer.String(), "\x00")
 	result["frameType"] = int64(plainIdentifier)
