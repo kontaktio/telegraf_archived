@@ -1,6 +1,5 @@
 FROM golang:1.11-alpine as builder
 
-ARG SCRIPTS_SOURCE=test
 ARG BUILD_BRANCH=develop
 
 RUN apk --update upgrade && \
@@ -21,8 +20,6 @@ RUN make go-install
 FROM alpine:3.9
 COPY --from=builder /go/bin/* /usr/bin/
 
-ARG SCRIPTS_SOURCE=test
-
 RUN apk update
 RUN apk add
 RUN apk --update upgrade && \
@@ -40,6 +37,5 @@ RUN chmod +x /start_telegraf_and_acceptor.sh
 RUN mkdir /root/.aws
 
 EXPOSE 8080
-ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE
 
-ENTRYPOINT "/start_telegraf_and_acceptor.sh" "${SCRIPTS_SOURCE}"
+ENTRYPOINT "/start_telegraf_and_acceptor.sh"

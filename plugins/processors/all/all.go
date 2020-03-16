@@ -2,6 +2,7 @@ package all
 
 import (
 	_ "github.com/influxdata/telegraf/plugins/processors/clickdetect"
+	_ "github.com/influxdata/telegraf/plugins/processors/clone"
 	_ "github.com/influxdata/telegraf/plugins/processors/converter"
 	_ "github.com/influxdata/telegraf/plugins/processors/kioparser"
 	_ "github.com/influxdata/telegraf/plugins/processors/kontaktauth"

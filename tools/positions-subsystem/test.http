@@ -1,0 +1,23 @@
+POST http://localhost:8080/positions
+Api-Key: apiKey
+Content-Type: application/json
+
+{
+  "latitude" : 12.9159187885232,
+  "longitude" : 112.68674201379775,
+  "xm" : 76.7585707189009,
+  "xe" : 0.5966379836824096,
+  "ym" : 14.207176352268746,
+  "ye" : 2.7336293713993962,
+  "zm" : 53.89355795761338,
+  "ze" : 1.7376232795561235,
+  "q" : 0.04787021366202959,
+  "floorId" : 35011,
+  "time" : 1580136239,
+  "originId" : "testOriginId",
+  "trackingId" : "NMiPwKIWPwbUa"
+}
+
+###
+
+
