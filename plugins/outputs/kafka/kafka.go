@@ -305,6 +305,7 @@ func (k *Kafka) Write(metrics []telegraf.Metric) error {
 		if key != "" {
 			m.Key = sarama.StringEncoder(key)
 		}
+		m.Timestamp = metric.Time()
 		msgs = append(msgs, m)
 	}
 
