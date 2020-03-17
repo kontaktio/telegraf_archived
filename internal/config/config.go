@@ -1794,6 +1794,7 @@ func buildSerializer(name string, tbl *ast.Table) (serializers.Serializer, error
 	delete(tbl.Fields, "prefix")
 	delete(tbl.Fields, "template")
 	delete(tbl.Fields, "json_timestamp_units")
+	delete(tbl.Fields, "exclude_timestamp")
 	delete(tbl.Fields, "splunkmetric_hec_routing")
 	return serializers.NewSerializer(c)
 }
