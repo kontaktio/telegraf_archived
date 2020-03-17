@@ -63,6 +63,9 @@ type Config struct {
 	// Timestamp units to use for JSON formatted output
 	TimestampUnits time.Duration
 
+	// Should include timestamp in the output
+	ExcludeTimestamp bool
+
 	// Include HEC routing fields for splunkmetric output
 	HecRouting bool
 }
@@ -79,7 +82,7 @@ func NewSerializer(config *Config) (Serializer, error) {
 	case "json":
 		serializer, err = NewJsonSerializer(config.TimestampUnits)
 	case "flat_json":
-		serializer, err = NewFlatJsonSerializer(config.TimestampUnits)
+		serializer, err = NewFlatJsonSerializer(config.TimestampUnits, config.ExcludeTimestamp)
 	case "splunkmetric":
 		serializer, err = NewSplunkmetricSerializer(config.HecRouting)
 	default:
@@ -92,8 +95,8 @@ func NewJsonSerializer(timestampUnits time.Duration) (Serializer, error) {
 	return json.NewSerializer(timestampUnits)
 }
 
-func NewFlatJsonSerializer(timestampUnits time.Duration) (Serializer, error) {
-	return flat_json.NewSerializer(timestampUnits)
+func NewFlatJsonSerializer(timestampUnits time.Duration, excludeTimestamp bool) (Serializer, error) {
+	return flat_json.NewSerializer(timestampUnits, excludeTimestamp)
 }
 
 func NewSplunkmetricSerializer(splunkmetric_hec_routing bool) (Serializer, error) {

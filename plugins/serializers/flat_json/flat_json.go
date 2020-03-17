@@ -8,11 +8,13 @@ import (
 
 type serializer struct {
 	TimestampUnits time.Duration
+	ExcludeTimestamp bool
 }
 
-func NewSerializer(timestampUnits time.Duration) (*serializer, error) {
+func NewSerializer(timestampUnits time.Duration, excludeTimestamp bool) (*serializer, error) {
 	s := &serializer{
 		TimestampUnits: truncateDuration(timestampUnits),
+		ExcludeTimestamp: excludeTimestamp,
 	}
 	return s, nil
 }
@@ -54,7 +56,9 @@ func (s *serializer) createObject(metric telegraf.Metric) map[string]interface{}
 	}
 
 	m["name"] = metric.Name()
-	m["timestamp"] = metric.Time().UnixNano() / int64(s.TimestampUnits)
+	if !s.ExcludeTimestamp {
+		m["timestamp"] = metric.Time().UnixNano() / int64(s.TimestampUnits)
+	}
 	return m
 }
 
