@@ -13,6 +13,7 @@ import (
 
 type KontaktAuth struct {
 	ApiAddress string `toml:"api_address"`
+	ForwardApiKey bool `toml:"forward_api_key"`
 
 	Client *circuit.HTTPClient
 }
@@ -30,6 +31,7 @@ type apiManager struct {
 
 var SampleConfig = `
 api_address="https://testba-api.kontakt.io"
+forward_api_key=false
 `
 
 var unknownApiKeyDuration = time.Minute * 10
@@ -103,7 +105,9 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		if err != nil {
 			continue
 		}
-		metric.RemoveTag(apiKeyTag)
+		if !p.ForwardApiKey {
+			metric.RemoveTag(apiKeyTag)
+		}
 		metric.AddTag("companyId", manager.Company.CompanyID)
 		result = append(result, metric)
 	}
