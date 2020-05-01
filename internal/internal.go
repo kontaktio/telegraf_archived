@@ -7,11 +7,13 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math/big"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -174,6 +176,11 @@ func SnakeCase(in string) string {
 	}
 
 	return string(out)
+}
+
+func ProductToken() string {
+	return fmt.Sprintf("Telegraf/%s Go/%s",
+		Version(), strings.TrimPrefix(runtime.Version(), "go"))
 }
 
 // CombinedOutputTimeout runs the given command with the given timeout and
