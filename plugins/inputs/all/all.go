@@ -11,5 +11,6 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/inputs/kafka_consumer"
 	_ "github.com/influxdata/telegraf/plugins/inputs/mqtt_consumer"
 	_ "github.com/influxdata/telegraf/plugins/inputs/socket_listener"
+	_ "github.com/influxdata/telegraf/plugins/inputs/statsd"
 	_ "github.com/influxdata/telegraf/plugins/inputs/system"
 )
