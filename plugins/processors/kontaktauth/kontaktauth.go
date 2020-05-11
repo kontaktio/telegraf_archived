@@ -24,6 +24,7 @@ type apiCompany struct {
 }
 
 type apiManager struct {
+	ID		int64
 	EMail   string
 	ApiKey  string
 	Company apiCompany
@@ -109,6 +110,7 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			metric.RemoveTag(apiKeyTag)
 		}
 		metric.AddTag("companyId", manager.Company.CompanyID)
+		metric.AddTag("userId", string(manager.ID))
 		result = append(result, metric)
 	}
 	return result
