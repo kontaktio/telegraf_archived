@@ -8,6 +8,7 @@ import (
 	"github.com/rubyist/circuitbreaker"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -110,7 +111,7 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			metric.RemoveTag(apiKeyTag)
 		}
 		metric.AddTag("companyId", manager.Company.CompanyID)
-		metric.AddTag("userId", string(manager.ID))
+		metric.AddTag("userId", strconv.FormatInt(manager.ID, 10))
 		result = append(result, metric)
 	}
 	return result
