@@ -36,6 +36,8 @@ api_address="https://testba-api.kontakt.io"
 forward_api_key=false
 `
 
+var ErrUnauthorized = errors.New("unauthorized")
+
 var unknownApiKeyDuration = time.Minute * 10
 
 const apiKeyTag = "Api-Key"
@@ -43,49 +45,49 @@ const apiKeyTag = "Api-Key"
 var cache = make(map[string]apiManager)
 var unknownCache = make(map[string]time.Time)
 
-func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
+func (ka *KontaktAuth) getManager(apiKey string) (*apiManager, error) {
 	if manager, ok := cache[apiKey]; ok {
-		return manager, nil
+		return &manager, nil
 	}
 	if t, ok := unknownCache[apiKey]; ok {
 		if t.Add(unknownApiKeyDuration).Before(t) {
 			delete(unknownCache, apiKey)
 		} else {
-			return apiManager{}, errors.New("unauthorized")
+			return nil, ErrUnauthorized
 		}
 	}
 	var manager apiManager
-	correct, err := ka.get("v2/organization/account/me", apiKey, &manager)
-	if err == nil {
-		cache[apiKey] = manager
-	} else if correct {
+	err := ka.get("v2/organization/account/me", apiKey, &manager)
+	if err != nil {
 		log.Printf("Error %v", err)
-		unknownCache[apiKey] = time.Now()
+		if err == ErrUnauthorized {
+			unknownCache[apiKey] = time.Now()
+		}
+		return nil, err
 	} else {
-		//Don't cache if there wasn't a correct response
-		return apiManager{}, errors.New("error querying manager")
+		cache[apiKey] = manager
+		return &manager, nil
 	}
-	return manager, err
 }
 
-func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error) {
+func (ka *KontaktAuth) get(path, apiKey string, result interface{}) error {
 	request, err := http.NewRequest("GET", ka.ApiAddress+path, nil)
 	if err != nil {
-		return false, err
+		return err
 	}
 	request.Header.Add("Api-Key", apiKey)
 	response, err := ka.Client.Do(request)
 	if err != nil {
 		log.Printf("Error %v", err)
-		return false, err
+		return err
 	}
 	if response.StatusCode == 401 || response.StatusCode == 403 {
-		return true, nil
+		return ErrUnauthorized
 	}
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
 
 func (p *KontaktAuth) SampleConfig() string {
