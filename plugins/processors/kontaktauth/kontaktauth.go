@@ -13,8 +13,8 @@ import (
 )
 
 type KontaktAuth struct {
-	ApiAddress string `toml:"api_address"`
-	ForwardApiKey bool `toml:"forward_api_key"`
+	ApiAddress    string `toml:"api_address"`
+	ForwardApiKey bool   `toml:"forward_api_key"`
 
 	Client *circuit.HTTPClient
 }
@@ -25,7 +25,7 @@ type apiCompany struct {
 }
 
 type apiManager struct {
-	ID		int64
+	ID      int64
 	EMail   string
 	ApiKey  string
 	Company apiCompany
@@ -78,7 +78,6 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) error {
 	request.Header.Add("Api-Key", apiKey)
 	response, err := ka.Client.Do(request)
 	if err != nil {
-		log.Printf("Error %v", err)
 		return err
 	}
 	if response.StatusCode == 401 || response.StatusCode == 403 {
@@ -107,6 +106,8 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		apiKey, _ := metric.GetTag(apiKeyTag)
 		manager, err := p.getManager(apiKey)
 		if err != nil {
+			metric.Drop()
+			log.Printf("Error %v", err)
 			continue
 		}
 		if !p.ForwardApiKey {
