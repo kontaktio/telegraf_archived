@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	millisInSecond = int64(time.Second / time.Millisecond)
+	nanosInMilli   = int64(time.Millisecond / time.Nanosecond)
+)
+
 type KontaktEventParser struct {
 	DefaultTags map[string]string
 }
@@ -50,23 +55,27 @@ func parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 		if !ok {
 			continue
 		}
+		timestamp, ok := bleEvt["timestamp"].(float64)
+		if !ok {
+			continue
+		}
+		timestampInt := int64(timestamp)
 
 		m, _ := metric.New(
 			"telemetry",
 			map[string]string{
-				"sourceId": sourceId,
+				"sourceId":      sourceId,
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi": evt["rssi"],
-				"data": bleEvt["data"],
+				"rssi":   evt["rssi"],
+				"data":   bleEvt["data"],
 				"srData": bleEvt["srData"],
 			},
-			time.Now(),
+			time.Unix(timestampInt/millisInSecond, (timestampInt%millisInSecond)*nanosInMilli),
 		)
 		metrics = append(metrics, m)
 	}
-
 
 	return metrics, nil
 }
@@ -90,6 +99,11 @@ func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 		if !ok {
 			continue
 		}
+		timestamp, ok := evt["timestamp"].(float64)
+		if !ok {
+			continue
+		}
+		timestampInt := int64(timestamp)
 
 		m, _ := metric.New(
 			"telemetry",
@@ -97,16 +111,15 @@ func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi": evt["rssi"],
-				"data": evt["data"],
-				"srData": evt["srData"],
+				"rssi":     evt["rssi"],
+				"data":     evt["data"],
+				"srData":   evt["srData"],
 				"sourceId": sourceId,
 			},
-			time.Now(),
+			time.Unix(timestampInt/millisInSecond, (timestampInt%millisInSecond)*nanosInMilli),
 		)
 		metrics = append(metrics, m)
 	}
-
 
 	return metrics, nil
 }
