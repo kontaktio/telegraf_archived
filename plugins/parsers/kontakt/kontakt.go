@@ -11,7 +11,6 @@ import (
 
 const (
 	millisInSecond = int64(time.Second / time.Millisecond)
-	nanosInMilli   = int64(time.Millisecond / time.Nanosecond)
 )
 
 type KontaktEventParser struct {
@@ -69,11 +68,12 @@ func (p *KontaktEventParser) parseV4(metrics []telegraf.Metric, json map[string]
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi":   evt["rssi"],
-				"data":   bleEvt["data"],
-				"srData": bleEvt["srData"],
+				"rssi":             evt["rssi"],
+				"data":             bleEvt["data"],
+				"srData":           bleEvt["srData"],
+				"gatewayTimestamp": p.normalizeTimestamp(timestampInt),
 			},
-			p.normalizeTimestamp(timestampInt),
+			time.Now(),
 		)
 		metrics = append(metrics, m)
 	}
@@ -112,12 +112,13 @@ func (p *KontaktEventParser) parseV3(metrics []telegraf.Metric, json map[string]
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi":     evt["rssi"],
-				"data":     evt["data"],
-				"srData":   evt["srData"],
-				"sourceId": sourceId,
+				"rssi":             evt["rssi"],
+				"data":             evt["data"],
+				"srData":           evt["srData"],
+				"sourceId":         sourceId,
+				"gatewayTimestamp": p.normalizeTimestamp(timestampInt),
 			},
-			p.normalizeTimestamp(timestampInt),
+			time.Now(),
 		)
 		metrics = append(metrics, m)
 	}
@@ -160,11 +161,11 @@ func (p *KontaktEventParser) SetDefaultTags(tags map[string]string) {
 	p.DefaultTags = tags
 }
 
-func (p *KontaktEventParser) normalizeTimestamp(timestamp int64) time.Time {
+func (p *KontaktEventParser) normalizeTimestamp(timestamp int64) int64 {
 	// Because of this comparison, it won't work for ms timestamps before 1970-01-25T20:31:23Z
 	if timestamp > math.MaxInt32 {
-		return time.Unix(timestamp/millisInSecond, (timestamp%millisInSecond)*nanosInMilli)
+		return timestamp
 	} else {
-		return time.Unix(timestamp, 0)
+		return timestamp * millisInSecond
 	}
 }
