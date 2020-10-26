@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/metric"
+	"math"
 	"time"
 )
 
@@ -24,15 +25,15 @@ func (p *KontaktEventParser) parseObject(metrics []telegraf.Metric, json map[str
 	}
 	switch version {
 	case 3:
-		return parseV3(metrics, json)
+		return p.parseV3(metrics, json)
 	case 4:
-		return parseV4(metrics, json)
+		return p.parseV4(metrics, json)
 	default:
 		return metrics, nil
 	}
 }
 
-func parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf.Metric, error) {
+func (p *KontaktEventParser) parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf.Metric, error) {
 	events, ok := json["events"].([]interface{})
 	if !ok {
 		return metrics, nil
@@ -72,7 +73,7 @@ func parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 				"data":   bleEvt["data"],
 				"srData": bleEvt["srData"],
 			},
-			time.Unix(timestampInt/millisInSecond, (timestampInt%millisInSecond)*nanosInMilli),
+			p.normalizeTimestamp(timestampInt),
 		)
 		metrics = append(metrics, m)
 	}
@@ -80,7 +81,7 @@ func parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 	return metrics, nil
 }
 
-func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf.Metric, error) {
+func (p *KontaktEventParser) parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf.Metric, error) {
 	events, ok := json["events"].([]interface{})
 	if !ok {
 		return metrics, nil
@@ -116,7 +117,7 @@ func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 				"srData":   evt["srData"],
 				"sourceId": sourceId,
 			},
-			time.Unix(timestampInt/millisInSecond, (timestampInt%millisInSecond)*nanosInMilli),
+			p.normalizeTimestamp(timestampInt),
 		)
 		metrics = append(metrics, m)
 	}
@@ -157,4 +158,13 @@ func (p *KontaktEventParser) ParseLine(line string) (telegraf.Metric, error) {
 
 func (p *KontaktEventParser) SetDefaultTags(tags map[string]string) {
 	p.DefaultTags = tags
+}
+
+func (p *KontaktEventParser) normalizeTimestamp(timestamp int64) time.Time {
+	// Because of this comparison, it won't work for ms timestamps before 1970-01-25T20:31:23Z
+	if timestamp > math.MaxInt32 {
+		return time.Unix(timestamp/millisInSecond, (timestamp%millisInSecond)*nanosInMilli)
+	} else {
+		return time.Unix(timestamp, 0)
+	}
 }
