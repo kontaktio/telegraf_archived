@@ -55,11 +55,6 @@ func (p *KontaktEventParser) parseV4(metrics []telegraf.Metric, json map[string]
 		if !ok {
 			continue
 		}
-		timestamp, ok := bleEvt["timestamp"].(float64)
-		if !ok {
-			continue
-		}
-		timestampInt := int64(timestamp)
 
 		m, _ := metric.New(
 			"telemetry",
@@ -68,13 +63,19 @@ func (p *KontaktEventParser) parseV4(metrics []telegraf.Metric, json map[string]
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi":             evt["rssi"],
-				"data":             bleEvt["data"],
-				"srData":           bleEvt["srData"],
-				"gatewayTimestamp": p.normalizeTimestamp(timestampInt),
+				"rssi":   evt["rssi"],
+				"data":   bleEvt["data"],
+				"srData": bleEvt["srData"],
 			},
 			time.Now(),
 		)
+
+		timestamp, ok := evt["timestamp"].(float64)
+		if ok {
+			timestampInt := int64(timestamp)
+			m.AddField("gatewayTimestamp", p.normalizeTimestamp(timestampInt))
+		}
+
 		metrics = append(metrics, m)
 	}
 
@@ -100,11 +101,6 @@ func (p *KontaktEventParser) parseV3(metrics []telegraf.Metric, json map[string]
 		if !ok {
 			continue
 		}
-		timestamp, ok := evt["timestamp"].(float64)
-		if !ok {
-			continue
-		}
-		timestampInt := int64(timestamp)
 
 		m, _ := metric.New(
 			"telemetry",
@@ -112,14 +108,20 @@ func (p *KontaktEventParser) parseV3(metrics []telegraf.Metric, json map[string]
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi":             evt["rssi"],
-				"data":             evt["data"],
-				"srData":           evt["srData"],
-				"sourceId":         sourceId,
-				"gatewayTimestamp": p.normalizeTimestamp(timestampInt),
+				"rssi":     evt["rssi"],
+				"data":     evt["data"],
+				"srData":   evt["srData"],
+				"sourceId": sourceId,
 			},
 			time.Now(),
 		)
+
+		timestamp, ok := evt["timestamp"].(float64)
+		if ok {
+			timestampInt := int64(timestamp)
+			m.AddField("gatewayTimestamp", p.normalizeTimestamp(timestampInt))
+		}
+
 		metrics = append(metrics, m)
 	}
 
