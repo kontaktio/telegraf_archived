@@ -291,7 +291,10 @@ func (k *Kafka) routingKey(metric telegraf.Metric) string {
 
 func (k *Kafka) Write(metrics []telegraf.Metric) error {
 	msgs := make([]*sarama.ProducerMessage, 0, len(metrics))
-	for _, metric := range metrics {
+
+	//For some reason, messages from each buffer were emitted in reverse order
+	for i := len(metrics) - 1; i >= 0; i-- {
+		metric := metrics[i]
 		buf, err := k.serializer.Serialize(metric)
 		if err != nil {
 			return err
