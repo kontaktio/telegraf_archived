@@ -10,10 +10,14 @@ import (
 )
 
 type Printer struct {
+	Tags       map[string][]string
 	serializer serializers.Serializer
 }
 
 var sampleConfig = `
+	## Tags with values for which metric should be printed 
+	# [processors.printer.tags]
+    #   tag1Name = ["tag1_value", "tag1_other_value"]
 `
 
 func (p *Printer) SampleConfig() string {
@@ -26,13 +30,35 @@ func (p *Printer) Description() string {
 
 func (p *Printer) Apply(in ...telegraf.Metric) []telegraf.Metric {
 	for _, metric := range in {
-		octets, err := p.serializer.Serialize(metric)
-		if err != nil {
-			continue
+		if p.Tags == nil || p.shouldPrint(metric) {
+			octets, err := p.serializer.Serialize(metric)
+			if err != nil {
+				continue
+			}
+			fmt.Printf("%s", octets)
 		}
-		fmt.Printf("%s", octets)
 	}
 	return in
+}
+
+func (p *Printer) shouldPrint(metric telegraf.Metric) bool {
+	for wantedName, wantedValues := range p.Tags {
+		tagValue, ok := metric.GetTag(wantedName)
+		if !ok {
+			return false
+		}
+		found := false
+		for _, wantedValue := range wantedValues {
+			if wantedValue == tagValue {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
 
 func init() {
