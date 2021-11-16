@@ -5,7 +5,7 @@ import (
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/pkg/errors"
-	"github.com/rubyist/circuitbreaker"
+	circuit "github.com/rubyist/circuitbreaker"
 	"log"
 	"net/http"
 	"time"
@@ -59,7 +59,7 @@ func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 		unknownCache[apiKey] = time.Now()
 	} else {
 		//Don't cache if there wasn't a correct response
-		return apiManager{}, errors.New("error querying manager")
+		return apiManager{}, err
 	}
 	return manager, err
 }
@@ -101,6 +101,7 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		apiKey, _ := metric.GetTag(apiKeyTag)
 		manager, err := p.getManager(apiKey)
 		if err != nil {
+			log.Printf("exception while getting manager: %v\n", err)
 			continue
 		}
 		metric.RemoveTag(apiKeyTag)
