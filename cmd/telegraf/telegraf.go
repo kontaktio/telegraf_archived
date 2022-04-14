@@ -25,12 +25,15 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/outputs/all"
 	_ "github.com/influxdata/telegraf/plugins/processors/all"
 	"github.com/kardianos/service"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var fDebug = flag.Bool("debug", false,
 	"turn on debug logging")
 var pprofAddr = flag.String("pprof-addr", "",
 	"pprof address to listen on, not activate pprof if empty")
+var prometheusMetricsAddr = flag.String("prometheus-addr", ":8081",
+	"address of prometheus metrics endpoint")
 var fQuiet = flag.Bool("quiet", false,
 	"run in quiet mode")
 var fTest = flag.Bool("test", false, "gather metrics, print them out, and exit")
@@ -263,6 +266,13 @@ func main() {
 	}
 	if *fProcessorFilters != "" {
 		processorFilters = strings.Split(":"+strings.TrimSpace(*fProcessorFilters)+":", ":")
+	}
+
+	if *prometheusMetricsAddr != "" {
+		go func() {
+			http.Handle("/metrics", promhttp.Handler())
+			http.ListenAndServe(*prometheusMetricsAddr, nil)
+		}()
 	}
 
 	if *pprofAddr != "" {
