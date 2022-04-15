@@ -34,7 +34,7 @@ var pprofAddr = flag.String("pprof-addr", "",
 	"pprof address to listen on, not activate pprof if empty")
 var prometheusMetricsAddr = flag.String("prometheus-addr", ":8082",
 	"address of prometheus metrics endpoint")
-var prometheusMetricsPath = flag.String("prometheus-path", "/actuator/metrics",
+var prometheusMetricsPath = flag.String("prometheus-path", "/actuator/prometheus",
 	"address of prometheus metrics endpoint")
 var fQuiet = flag.Bool("quiet", false,
 	"run in quiet mode")
