@@ -7,10 +7,20 @@ import (
 	"github.com/influxdata/telegraf/metric"
 	"math"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 const (
 	millisInSecond = int64(time.Second / time.Millisecond)
+)
+
+var (
+	eventsParsed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "telegraf_parsers_kontakt_parsed_events",
+		Help: "Number of events in parsed requests",
+	})
 )
 
 type KontaktEventParser struct {
@@ -142,6 +152,10 @@ func (p *KontaktEventParser) Parse(buf []byte) ([]telegraf.Metric, error) {
 		err = fmt.Errorf("unable to parse Kontakt Event, %s", err)
 		return nil, err
 	}
+
+	metricsCount := len(metrics)
+	eventsParsed.Add(float64(metricsCount))
+
 	return metrics, nil
 }
 

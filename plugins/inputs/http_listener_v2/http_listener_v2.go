@@ -16,6 +16,8 @@ import (
 	tlsint "github.com/influxdata/telegraf/internal/tls"
 	"github.com/influxdata/telegraf/plugins/inputs"
 	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // defaultMaxBodySize is the default maximum request body size, in bytes.
@@ -47,7 +49,8 @@ type HTTPListenerV2 struct {
 
 	HeaderTags []string
 	parsers.Parser
-	acc telegraf.Accumulator
+	acc               telegraf.Accumulator
+	requestsProcessed prometheus.Counter
 }
 
 const sampleConfig = `
@@ -225,8 +228,10 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 			}
 		}
 		h.acc.AddFields(m.Name(), m.Fields(), m.Tags(), m.Time())
-		
+
 	}
+
+	h.requestsProcessed.Inc()
 	res.WriteHeader(http.StatusNoContent)
 }
 
@@ -276,6 +281,10 @@ func init() {
 			TimeFunc:       time.Now,
 			Path:           "/telegraf",
 			Methods:        []string{"POST", "PUT"},
+			requestsProcessed: promauto.NewCounter(prometheus.CounterOpts{
+				Name: "telegraf_input_http_requests",
+				Help: "Number of processed incoming requests",
+			}),
 		}
 	})
 }

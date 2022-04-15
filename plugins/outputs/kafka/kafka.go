@@ -13,6 +13,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/Shopify/sarama"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var ValidTopicSuffixMethods = []string{
@@ -54,7 +56,8 @@ type (
 		tlsConfig tls.Config
 		producer  sarama.SyncProducer
 
-		serializer serializers.Serializer
+		serializer  serializers.Serializer
+		recordsSent prometheus.Counter
 	}
 	TopicSuffix struct {
 		Method    string   `toml:"method"`
@@ -313,6 +316,7 @@ func (k *Kafka) Write(metrics []telegraf.Metric) error {
 	}
 
 	err := k.producer.SendMessages(msgs)
+	recordCount := len(msgs)
 	if err != nil {
 		// We could have many errors, return only the first encountered.
 		if errs, ok := err.(sarama.ProducerErrors); ok {
@@ -326,7 +330,7 @@ func (k *Kafka) Write(metrics []telegraf.Metric) error {
 		}
 		return err
 	}
-
+	k.recordsSent.Add(float64(recordCount))
 	return nil
 }
 
@@ -335,6 +339,10 @@ func init() {
 		return &Kafka{
 			MaxRetry:     3,
 			RequiredAcks: -1,
+			recordsSent: promauto.NewCounter(prometheus.CounterOpts{
+				Name: "telegraf_output_kafka_records_sent",
+				Help: "Number of records sent to kafka",
+			}),
 		}
 	})
 }

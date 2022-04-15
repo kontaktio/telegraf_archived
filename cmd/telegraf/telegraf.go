@@ -32,7 +32,7 @@ var fDebug = flag.Bool("debug", false,
 	"turn on debug logging")
 var pprofAddr = flag.String("pprof-addr", "",
 	"pprof address to listen on, not activate pprof if empty")
-var prometheusMetricsAddr = flag.String("prometheus-addr", ":8081",
+var prometheusMetricsAddr = flag.String("prometheus-addr", ":8082",
 	"address of prometheus metrics endpoint")
 var fQuiet = flag.Bool("quiet", false,
 	"run in quiet mode")
