@@ -34,6 +34,8 @@ var pprofAddr = flag.String("pprof-addr", "",
 	"pprof address to listen on, not activate pprof if empty")
 var prometheusMetricsAddr = flag.String("prometheus-addr", ":8082",
 	"address of prometheus metrics endpoint")
+var prometheusMetricsPath = flag.String("prometheus-path", "/actuator/metrics",
+	"address of prometheus metrics endpoint")
 var fQuiet = flag.Bool("quiet", false,
 	"run in quiet mode")
 var fTest = flag.Bool("test", false, "gather metrics, print them out, and exit")
@@ -268,9 +270,9 @@ func main() {
 		processorFilters = strings.Split(":"+strings.TrimSpace(*fProcessorFilters)+":", ":")
 	}
 
-	if *prometheusMetricsAddr != "" {
+	if *prometheusMetricsAddr != "" && *prometheusMetricsPath != "" {
 		go func() {
-			http.Handle("/metrics", promhttp.Handler())
+			http.Handle(*prometheusMetricsPath, promhttp.Handler())
 			http.ListenAndServe(*prometheusMetricsAddr, nil)
 		}()
 	}
