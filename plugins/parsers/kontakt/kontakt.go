@@ -9,19 +9,20 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 const (
 	millisInSecond = int64(time.Second / time.Millisecond)
 )
 
-var (
-	eventsParsed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "telegraf_parsers_kontakt_parsed_events",
-		Help: "Number of events in parsed requests",
-	})
-)
+var eventsParsed = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "telegraf_parsers_kontakt_parsed_events",
+	Help: "Number of events in parsed requests",
+})
+
+func init() {
+	prometheus.MustRegister(eventsParsed)
+}
 
 type KontaktEventParser struct {
 	DefaultTags map[string]string

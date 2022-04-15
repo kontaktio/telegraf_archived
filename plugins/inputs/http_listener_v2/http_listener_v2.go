@@ -17,8 +17,16 @@ import (
 	"github.com/influxdata/telegraf/plugins/inputs"
 	"github.com/influxdata/telegraf/plugins/parsers"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
+
+var requestsProcessed = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "telegraf_input_http_requests",
+	Help: "Number of processed incoming requests",
+})
+
+func init() {
+	prometheus.MustRegister(requestsProcessed)
+}
 
 // defaultMaxBodySize is the default maximum request body size, in bytes.
 // if the request body is over this size, we will return an HTTP 413 error.
@@ -49,8 +57,7 @@ type HTTPListenerV2 struct {
 
 	HeaderTags []string
 	parsers.Parser
-	acc               telegraf.Accumulator
-	requestsProcessed prometheus.Counter
+	acc telegraf.Accumulator
 }
 
 const sampleConfig = `
@@ -231,7 +238,7 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 
 	}
 
-	h.requestsProcessed.Inc()
+	requestsProcessed.Inc()
 	res.WriteHeader(http.StatusNoContent)
 }
 
@@ -281,10 +288,6 @@ func init() {
 			TimeFunc:       time.Now,
 			Path:           "/telegraf",
 			Methods:        []string{"POST", "PUT"},
-			requestsProcessed: promauto.NewCounter(prometheus.CounterOpts{
-				Name: "telegraf_input_http_requests",
-				Help: "Number of processed incoming requests",
-			}),
 		}
 	})
 }
