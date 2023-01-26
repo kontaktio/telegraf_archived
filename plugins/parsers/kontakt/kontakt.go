@@ -51,22 +51,21 @@ func parseV4(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 			continue
 		}
 
-		m, _ := metric.New(
+		m := metric.New(
 			"telemetry",
 			map[string]string{
-				"sourceId": sourceId,
+				"sourceId":      sourceId,
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi": evt["rssi"],
-				"data": bleEvt["data"],
+				"rssi":   evt["rssi"],
+				"data":   bleEvt["data"],
 				"srData": bleEvt["srData"],
 			},
 			time.Now(),
 		)
 		metrics = append(metrics, m)
 	}
-
 
 	return metrics, nil
 }
@@ -91,22 +90,21 @@ func parseV3(metrics []telegraf.Metric, json map[string]interface{}) ([]telegraf
 			continue
 		}
 
-		m, _ := metric.New(
+		m := metric.New(
 			"telemetry",
 			map[string]string{
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi": evt["rssi"],
-				"data": evt["data"],
-				"srData": evt["srData"],
+				"rssi":     evt["rssi"],
+				"data":     evt["data"],
+				"srData":   evt["srData"],
 				"sourceId": sourceId,
 			},
 			time.Now(),
 		)
 		metrics = append(metrics, m)
 	}
-
 
 	return metrics, nil
 }
