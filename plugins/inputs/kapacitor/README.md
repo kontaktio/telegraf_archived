@@ -15,13 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read Kapacitor-formatted JSON metrics from one or more HTTP endpoints
-# Kapacitor Plugin
-
-The Kapacitor plugin will collect metrics from the given Kapacitor instances.
-
-### Configuration:
-
-```toml
 [[inputs.kapacitor]]
   ## Multiple URLs from which to read Kapacitor-formatted JSON
   ## Default is "http://localhost:9092/kapacitor/v1/debug/vars".

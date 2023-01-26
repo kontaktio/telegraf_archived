@@ -14,9 +14,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read metrics from one or many mcrouter servers.
 [[inputs.mcrouter]]
   ## An array of address to gather stats about. Specify an ip or hostname

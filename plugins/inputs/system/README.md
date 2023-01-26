@@ -17,9 +17,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read metrics about system load & uptime
 [[inputs.system]]
   # no configuration

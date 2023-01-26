@@ -17,11 +17,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-For more information on what swap memory is, read [All about Linux swap space](https://www.linux.com/news/all-about-linux-swap-space).
-
-### Configuration:
-
-```toml
 # Read metrics about swap memory usage
 [[inputs.swap]]
   # no configuration

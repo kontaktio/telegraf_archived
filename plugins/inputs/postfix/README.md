@@ -20,11 +20,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Measure postfix queue statistics
-For each of the active, hold, incoming, maildrop, and deferred queues (http://www.postfix.org/QSHAPE_README.html#queues), it will report the queue length (number of items), size (bytes used by items), and age (age of oldest item in seconds).
-
-### Configuration
-
-```toml
 [[inputs.postfix]]
   ## Postfix queue directory. If not provided, telegraf will try to use
   ## 'postconf -h queue_directory' to determine it.

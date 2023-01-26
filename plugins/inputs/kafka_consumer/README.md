@@ -29,25 +29,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## When set this tag will be added to all metrics with the topic as the value.
   # topic_tag = ""
 
-For old kafka version (< 0.8), please use the [kafka_consumer_legacy][] input plugin
-and use the old zookeeper connection method.
-
-### Configuration
-
-```toml
-[[inputs.kafka_consumer]]
-  ## kafka servers
-  brokers = ["localhost:9092"]
-  ## topic(s) to consume
-  topics = ["telegraf"]
-
   ## Optional Client id
   # client_id = "Telegraf"
 
   ## Set the minimal supported Kafka version.  Setting this enables the use of new
   ## Kafka features and APIs.  Must be 0.10.2.0 or greater.
-  ## Kafka features and APIs.  Of particular interest, lz4 compression
-  ## requires at least version 0.10.0.0.
   ##   ex: version = "1.1.0"
   # version = ""
 
@@ -129,14 +115,6 @@ and use the old zookeeper connection method.
   ## started, but if there are any typos in the broker setting, they will cause
   ## connection failures without warning at startup
   # connection_strategy = "startup"
-  ## Optional SASL Config
-  # sasl_username = "kafka"
-  # sasl_password = "secret"
-
-  ## the name of the consumer group
-  consumer_group = "telegraf_metrics_consumers"
-  ## Offset (must be either "oldest" or "newest")
-  offset = "oldest"
 
   ## Maximum length of a message to consume, in bytes (default 0/unlimited);
   ## larger messages are dropped

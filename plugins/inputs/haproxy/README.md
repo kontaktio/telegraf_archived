@@ -19,14 +19,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The [HAProxy](http://www.haproxy.org/) input plugin gathers
-[statistics](https://cbonte.github.io/haproxy-dconv/1.9/intro.html#3.3.16)
-using the [stats socket](https://cbonte.github.io/haproxy-dconv/1.9/management.html#9.3)
-or [HTTP statistics page](https://cbonte.github.io/haproxy-dconv/1.9/management.html#9) of a HAProxy server.
-
-### Configuration:
-
-```toml
 # Read metrics of HAProxy, via socket or HTTP stats page
 [[inputs.haproxy]]
   ## An array of address to gather stats about. Specify an ip on hostname

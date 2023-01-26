@@ -25,21 +25,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # server = "192.168.50.10"
   # port = 8161
 
-# Telegraf Input Plugin: ActiveMQ
-
-This plugin gather queues, topics & subscribers metrics using ActiveMQ Console API.
-
-### Configuration:
-
-```toml
-# Description
-[[inputs.activemq]]
-  ## Required ActiveMQ Endpoint
-  # server = "192.168.50.10"
-
-  ## Required ActiveMQ port
-  # port = 8161
-  
   ## Credentials for basic HTTP authentication
   # username = "admin"
   # password = "admin"
@@ -50,7 +35,6 @@ This plugin gather queues, topics & subscribers metrics using ActiveMQ Console A
   ## Maximum time to receive response.
   # response_timeout = "5s"
 
-  
   ## Optional TLS Config
   # tls_ca = "/etc/telegraf/ca.pem"
   # tls_cert = "/etc/telegraf/cert.pem"

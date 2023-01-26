@@ -39,13 +39,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 [[inputs.mysql]]
   ## specify servers via a url matching:
   ##  [username[:password]@][protocol[(address)]]/[?tls=[true|false|skip-verify|custom]]
-### Configuration
-
-```toml
-# Read metrics from one or many mysql servers
-[[inputs.mysql]]
-  ## specify servers via a url matching:
-  ##  [username[:password]@][protocol[(address)]]/[?tls=[true|false|skip-verify]]
   ##  see https://github.com/go-sql-driver/mysql#dsn-data-source-name
   ##  e.g.
   ##    servers = ["user:passwd@tcp(127.0.0.1:3306)/?tls=false"]

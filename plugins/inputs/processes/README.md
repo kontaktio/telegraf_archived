@@ -20,9 +20,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Get the number of processes and group them by status
 [[inputs.processes]]
   # no configuration

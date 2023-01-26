@@ -30,26 +30,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 # Pull Metric Statistics from Amazon CloudWatch
 [[inputs.cloudwatch]]
   ## Amazon Region
-# Amazon CloudWatch Statistics Input
-
-This plugin will pull Metric Statistics from Amazon CloudWatch.
-
-### Amazon Authentication
-
-This plugin uses a credential chain for Authentication with the CloudWatch
-API endpoint. In the following order the plugin will attempt to authenticate.
-1. Assumed credentials via STS if `role_arn` attribute is specified (source credentials are evaluated from subsequent rules)
-2. Explicit credentials from `access_key`, `secret_key`, and `token` attributes
-3. Shared profile from `profile` attribute
-4. [Environment Variables](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#environment-variables)
-5. [Shared Credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#shared-credentials-file)
-6. [EC2 Instance Profile](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
-
-### Configuration:
-
-```toml
-[[inputs.cloudwatch]]
-  ## Amazon Region (required)
   region = "us-east-1"
 
   ## Amazon Credentials
@@ -70,18 +50,6 @@ API endpoint. In the following order the plugin will attempt to authenticate.
   # role_session_name = ""
   # profile = ""
   # shared_credential_file = ""
-  ## 1) Assumed credentials via STS if role_arn is specified
-  ## 2) explicit credentials from 'access_key' and 'secret_key'
-  ## 3) shared profile from 'profile'
-  ## 4) environment variables
-  ## 5) shared credentials file
-  ## 6) EC2 Instance Profile
-  #access_key = ""
-  #secret_key = ""
-  #token = ""
-  #role_arn = ""
-  #profile = ""
-  #shared_credential_file = ""
 
   ## Endpoint to make request against, the correct endpoint is automatically
   ## determined and this option should only be set if you wish to override the

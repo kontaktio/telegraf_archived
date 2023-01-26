@@ -19,14 +19,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The plugin expects messages in the
-[Telegraf Input Data Formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
-
-### Configuration:
-
-This is a sample configuration for the plugin.
-
-```toml
 # Generic socket listener capable of handling multiple socket types.
 [[inputs.socket_listener]]
   ## URL to listen on

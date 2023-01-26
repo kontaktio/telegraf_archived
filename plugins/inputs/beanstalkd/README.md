@@ -16,11 +16,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Collects Beanstalkd server and tubes stats
-The `beanstalkd` plugin collects server stats as well as tube stats (reported by `stats` and `stats-tube` commands respectively).
-
-### Configuration:
-
-```toml
 [[inputs.beanstalkd]]
   ## Server to collect data from
   server = "localhost:11300"

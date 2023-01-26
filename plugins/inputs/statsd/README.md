@@ -14,11 +14,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-# Telegraf Service Plugin: statsd
-
-### Configuration
-
-```toml
 # Statsd Server
 [[inputs.statsd]]
   ## Protocol, must be "tcp", "udp4", "udp6" or "udp" (default=udp)
@@ -52,8 +47,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Percentiles to calculate for timing & histogram stats.
   percentiles = [50.0, 90.0, 99.0, 99.9, 99.95, 100.0]
-  ## Percentiles to calculate for timing & histogram stats
-  percentiles = [90]
 
   ## separator to use between elements of a statsd metric
   metric_separator = "_"
@@ -71,8 +64,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Parses distributions metric as specified in the datadog statsd format
   ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#definition
   datadog_distributions = false
-
-  parse_data_dog_tags = false
 
   ## Statsd data translation templates, more info can be read here:
   ## https://github.com/influxdata/telegraf/blob/master/docs/TEMPLATE_PATTERN.md

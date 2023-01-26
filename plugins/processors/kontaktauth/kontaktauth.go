@@ -1,6 +1,7 @@
 package kontaktauth
 
 import (
+	_ "embed"
 	"encoding/json"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
@@ -28,9 +29,8 @@ type apiManager struct {
 	Company apiCompany
 }
 
-var SampleConfig = `
-api_address="https://testba-api.kontakt.io"
-`
+//go:embed sample.conf
+var sampleConfig string
 
 var unknownApiKeyDuration = time.Minute * 10
 
@@ -85,7 +85,7 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error
 }
 
 func (p *KontaktAuth) SampleConfig() string {
-	return SampleConfig
+	return sampleConfig
 }
 
 func (p *KontaktAuth) Description() string {

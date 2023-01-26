@@ -17,9 +17,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Collect bond interface status, slaves statuses and failures count
-### Configuration:
-
-```toml
 [[inputs.bond]]
   ## Sets 'proc' directory path
   ## If not specified, then default is /proc

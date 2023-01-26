@@ -19,14 +19,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read metrics from one or more commands that can output to stdout
-The `exec` plugin executes the `commands` on every interval and parses metrics from
-their output in any one of the accepted [Input Data Formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
-
-This plugin can be used to poll for custom metrics from any source.
-
-### Configuration:
-
-```toml
 [[inputs.exec]]
   ## Commands array
   commands = [

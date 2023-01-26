@@ -26,17 +26,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # server = "https://localhost:5665"
   
   ## Required Icinga2 object type ("services" or "hosts")
-[here](https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api)
-
-### Configuration:
-
-```toml
-# Description
-[[inputs.icinga2]]
-  ## Required Icinga2 server address (default: "https://localhost:5665")
-  # server = "https://localhost:5665"
-  
-  ## Required Icinga2 object type ("services" or "hosts, default "services")
   # object_type = "services"
 
   ## Credentials for basic HTTP authentication

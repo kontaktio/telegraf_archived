@@ -128,9 +128,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read metrics from Microsoft SQL Server
 [[inputs.sqlserver]]
   ## Specify instances to monitor with a list of connection strings.
@@ -185,17 +182,12 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Following are old config settings
   ## You may use them only if you are using the earlier flavor of queries, however it is recommended to use
   ## the new mechanism of identifying the database_type there by use it's corresponding queries
-  ##   parameters.
-  # servers = [
-  #  "Server=192.168.1.10;Port=1433;User Id=<user>;Password=<pw>;app name=telegraf;log=1;",
-  # ]
 
   ## Optional parameter, setting this to 2 will use a new version
   ## of the collection queries that break compatibility with the original
   ## dashboards.
   ## Version 2 - is compatible from SQL Server 2012 and later versions and also for SQL Azure DB
   # query_version = 2
-  query_version = 2
 
   ## If you are using AzureDB, setting this to true will gather resource utilization metrics
   # azuredb = false

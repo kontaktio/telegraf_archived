@@ -26,19 +26,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
             "smtp://mail.localhost:25", "udp://127.0.0.1:4433",
             "/etc/ssl/certs/ssl-cert-snakeoil.pem",
             "/etc/mycerts/*.mydomain.org.pem", "file:///path/to/*.pem"]
-# X509 Cert Input Plugin
-
-This plugin provides information about X509 certificate accessible via local
-file or network connection.
-
-
-### Configuration
-
-```toml
-# Reads metrics from a SSL certificate
-[[inputs.x509_cert]]
-  ## List certificate sources
-  sources = ["/etc/ssl/certs/ssl-cert-snakeoil.pem", "https://example.org:443"]
 
   ## Timeout for SSL connection
   # timeout = "5s"

@@ -22,18 +22,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 # Read status information from one or more Kibana servers
 [[inputs.kibana]]
   ## Specify a list of one or more Kibana servers
-# Kibana input plugin
-
-The [kibana](https://www.elastic.co/) plugin queries Kibana status API to
-obtain the health status of Kibana and some useful metrics.
-
-This plugin has been tested and works on Kibana 6.x versions.
-
-### Configuration
-
-```toml
-[[inputs.kibana]]
-  ## specify a list of one or more Kibana servers
   servers = ["http://localhost:5601"]
 
   ## Timeout for HTTP requests

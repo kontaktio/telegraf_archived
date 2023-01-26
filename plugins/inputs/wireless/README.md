@@ -15,11 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The wireless plugin gathers metrics about wireless link quality by reading the `/proc/net/wireless` file. This plugin currently supports linux only.
-
-### Configuration:
-
-```toml
 # Monitor wifi signal strength and quality
 [[inputs.wireless]]
   ## Sets 'proc' directory path

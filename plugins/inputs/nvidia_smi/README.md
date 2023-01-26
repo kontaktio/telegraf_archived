@@ -21,16 +21,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## Optional: path to nvidia-smi binary, defaults "/usr/bin/nvidia-smi"
   ## We will first try to locate the nvidia-smi binary with the explicitly specified value (or default value), 
   ## if it is not found, we will try to locate it on PATH(exec.LookPath), if it is still not found, an error will be returned
-# `nvidia-smi` Input Plugin
-
-This plugin uses a query on the [`nvidia-smi`](https://developer.nvidia.com/nvidia-system-management-interface) binary to pull GPU stats including memory and GPU usage, temp and other.
-
-### Configuration
-
-```toml
-# Pulls statistics from nvidia GPUs attached to the host
-[[inputs.nvidia_smi]]
-  ## Optional: path to nvidia-smi binary, defaults to $PATH via exec.LookPath
   # bin_path = "/usr/bin/nvidia-smi"
 
   ## Optional: timeout for GPU polling

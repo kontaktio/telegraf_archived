@@ -23,17 +23,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The aerospike plugin queries aerospike server(s) and get node statistics & stats for
-all the configured namespaces.
-
-For what the measurements mean, please consult the [Aerospike Metrics Reference Docs](http://www.aerospike.com/docs/reference/metrics).
-
-The metric names, to make it less complicated in querying, have replaced all `-` with `_` as Aerospike metrics come in both forms (no idea why).
-
-All metrics are attempted to be cast to integers, then booleans, then strings.
-
-### Configuration:
-```toml
 # Read stats from aerospike server(s)
 [[inputs.aerospike]]
   ## Aerospike servers to connect to (with port)

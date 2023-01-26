@@ -15,10 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The DNS plugin gathers dns query times in miliseconds - like [Dig](https://en.wikipedia.org/wiki/Dig_\(command\))
-
-### Configuration:
-```toml
 # Query given DNS server and gives statistics
 [[inputs.dns_query]]
   ## servers to query
@@ -32,7 +28,6 @@ The DNS plugin gathers dns query times in miliseconds - like [Dig](https://en.wi
 
   ## Query record type.
   ## Possible values: A, AAAA, CNAME, MX, NS, PTR, TXT, SOA, SPF, SRV.
-  ## Posible values: A, AAAA, CNAME, MX, NS, PTR, TXT, SOA, SPF, SRV.
   # record_type = "A"
 
   ## Dns server port.

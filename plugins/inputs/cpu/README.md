@@ -28,14 +28,17 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read metrics about cpu usage
-# Telegraf plugin: CPU
-
-#### Plugin arguments:
-- **totalcpu** boolean: If true, include `cpu-total` data
-- **percpu** boolean: If true, include data on a per-cpu basis `cpu0, cpu1, etc.`
-
-
-##### Configuration:
+[[inputs.cpu]]
+  ## Whether to report per-cpu stats or not
+  percpu = true
+  ## Whether to report total system cpu stats or not
+  totalcpu = true
+  ## If true, collect raw CPU time metrics
+  collect_cpu_time = false
+  ## If true, compute and report the sum of all non-idle CPU states
+  report_active = false
+  ## If true and the info is available then add core_id and physical_id tags
+  core_tags = false
 ```
 [[inputs.cpu]]
   ## Whether to report per-cpu stats or not

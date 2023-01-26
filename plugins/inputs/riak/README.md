@@ -15,14 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read metrics one or many Riak servers
-# Riak Plugin
-
-The Riak plugin gathers metrics from one or more riak instances.
-
-### Configuration:
-
-```toml
-# Description
 [[inputs.riak]]
   # Specify a list of one or more riak http servers
   servers = ["http://localhost:8098"]

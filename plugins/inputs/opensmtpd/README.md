@@ -16,11 +16,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # A plugin to collect stats from Opensmtpd - a validating, recursive, and caching DNS resolver
-This plugin gathers stats from [OpenSMTPD - a FREE implementation of the server-side SMTP protocol](https://www.opensmtpd.org/)
-
-### Configuration:
-
-```toml
  [[inputs.opensmtpd]]
    ## If running as a restricted user you can prepend sudo for additional access:
    #use_sudo = false

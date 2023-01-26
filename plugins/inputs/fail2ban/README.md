@@ -21,20 +21,10 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The fail2ban plugin gathers the count of failed and banned ip addresses using [fail2ban](https://www.fail2ban.org).
-
-This plugin runs the `fail2ban-client` command which generally requires root access.
-Acquiring the required permissions can be done using several methods:
-
-- Use sudo run fail2ban-client.
-- Run telegraf as root. (not recommended)
-
-### Using sudo
-
-You may edit your sudo configuration with the following:
-
-``` sudo
-telegraf ALL=(root) NOEXEC: NOPASSWD: /usr/bin/fail2ban-client status, /usr/bin/fail2ban-client status *
+# Read metrics from fail2ban.
+[[inputs.fail2ban]]
+  ## Use sudo to run fail2ban-client
+  use_sudo = false
 ```
 
 ### Configuration:

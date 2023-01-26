@@ -16,12 +16,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The Fibaro plugin makes HTTP calls to the Fibaro controller API to gather values of hooked devices.
-Those values could be true (1) or false (0) for switches, percentage for dimmers, temperature, etc.
-
-### Configuration:
-
-```toml
 # Read devices value(s) from a Fibaro controller
 [[inputs.fibaro]]
   ## Required Fibaro controller address/hostname.

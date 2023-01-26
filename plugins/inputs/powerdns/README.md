@@ -15,8 +15,12 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Read metrics from one or many PowerDNS servers
-### Configuration:
-
+[[inputs.powerdns]]
+  # An array of sockets to gather stats about.
+  # Specify a path to unix socket.
+  #
+  # If no servers are specified, then '/var/run/pdns.controlsocket' is used as the path.
+  unix_sockets = ["/var/run/pdns.controlsocket"]
 ```
 # Description
 [[inputs.powerdns]]

@@ -31,9 +31,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Monitor process cpu and memory usage
 [[inputs.procstat]]
   ## PID file to monitor process
@@ -48,9 +45,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # systemd_unit = "nginx.service"
   # include_systemd_children = false
   ## CGroup name or path, supports globs
-  ## Systemd unit name
-  # systemd_unit = "nginx.service"
-  ## CGroup name or path
   # cgroup = "systemd/system.slice/nginx.service"
 
   ## Windows service name
@@ -75,9 +69,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ##
   ## Enabling this option may result in a large number of series, especially
   ## when processes have a short lifetime.
-  ## Add PID as a tag instead of a field; useful to differentiate between
-  ## processes whose tags are otherwise the same.  Can create a large number
-  ## of series, use judiciously.
   # pid_tag = false
 
   ## Method to use when finding process IDs.  Can be one of 'pgrep', or

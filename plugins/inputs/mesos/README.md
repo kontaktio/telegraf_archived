@@ -17,12 +17,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-This input plugin gathers metrics from Mesos.
-For more information, please check the [Mesos Observability Metrics](http://mesos.apache.org/documentation/latest/monitoring/) page.
-
-### Configuration:
-
-```toml
 # Telegraf plugin for gathering metrics from N Mesos masters
 [[inputs.mesos]]
   ## Timeout, in ms.
@@ -31,8 +25,6 @@ For more information, please check the [Mesos Observability Metrics](http://meso
   ## A list of Mesos masters.
   masters = ["http://localhost:5050"]
 
-  ## A list of Mesos masters.
-  masters = ["http://localhost:5050"]
   ## Master metrics groups to be collected, by default, all enabled.
   master_collections = [
     "resources",
@@ -51,9 +43,6 @@ For more information, please check the [Mesos Observability Metrics](http://meso
   ## A list of Mesos slaves, default is []
   # slaves = []
 
-  ]
-  ## A list of Mesos slaves, default is []
-  # slaves = []
   ## Slave metrics groups to be collected, by default, all enabled.
   # slave_collections = [
   #   "resources",

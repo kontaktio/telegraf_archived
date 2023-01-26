@@ -16,9 +16,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read Tengine's basic status information (ngx_http_reqstat_module)
 [[inputs.tengine]]
   ## An array of Tengine reqstat module URI to gather stats.

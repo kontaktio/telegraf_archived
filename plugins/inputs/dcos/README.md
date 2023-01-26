@@ -38,8 +38,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Input plugin for DC/OS metrics
-### Configuration:
-```toml
 [[inputs.dcos]]
   ## The DC/OS cluster URL.
   cluster_url = "https://dcos-master-1"

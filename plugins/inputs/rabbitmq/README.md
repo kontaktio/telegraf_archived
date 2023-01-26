@@ -21,13 +21,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Reads metrics from RabbitMQ servers via the Management Plugin
-Reads metrics from RabbitMQ servers via the [Management Plugin](https://www.rabbitmq.com/management.html).
-
-For additional details reference the [RabbitMQ Management HTTP Stats](https://cdn.rawgit.com/rabbitmq/rabbitmq-management/master/priv/www/doc/stats.html).
-
-### Configuration:
-
-```toml
 [[inputs.rabbitmq]]
   ## Management Plugin url. (default: http://localhost:15672)
   # url = "http://localhost:15672"

@@ -18,12 +18,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Provides metrics about the state of a NATS server
-The [NATS](http://www.nats.io/about/) monitoring plugin gathers metrics from
-the NATS [monitoring http server](https://www.nats.io/documentation/server/gnatsd-monitoring/).
-
-### Configuration
-
-```toml
 [[inputs.nats]]
   ## The address of the monitoring endpoint of the NATS server
   server = "http://localhost:8222"

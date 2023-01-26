@@ -19,12 +19,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-This plugin reads Juniper Networks implementation of OpenConfig telemetry data from listed sensors using Junos Telemetry Interface. Refer to
-[openconfig.net](http://openconfig.net/) for more details about OpenConfig and [Junos Telemetry Interface (JTI)](https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-telemetry-interface-oveview.html).
-
-### Configuration:
-
-```toml
 # Subscribe and receive OpenConfig Telemetry data using JTI
 [[inputs.jti_openconfig_telemetry]]
   ## List of device addresses to collect telemetry from
@@ -69,9 +63,6 @@ This plugin reads Juniper Networks implementation of OpenConfig telemetry data f
   # tls_min_version = "TLS12"
   ## Use TLS but skip chain & host verification
   # insecure_skip_verify = false
-  ## x509 Certificate to use with TLS connection. If it is not provided, an insecure
-  ## channel will be opened with server
-  ssl_cert = "/etc/telegraf/cert.pem"
 
   ## Delay between retry attempts of failed RPC calls or streams. Defaults to 1000ms.
   ## Failed streams/calls will not be retried if 0 is provided

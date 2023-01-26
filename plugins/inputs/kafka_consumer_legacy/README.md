@@ -35,27 +35,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## the name of the consumer group
   consumer_group = "telegraf_metrics_consumers"
 
-# Kafka Consumer Input Plugin
-
-The [Kafka](http://kafka.apache.org/) consumer plugin polls a specified Kafka
-topic and adds messages to InfluxDB. The plugin assumes messages follow the
-line protocol. [Consumer Group](http://godoc.org/github.com/wvanbergen/kafka/consumergroup)
-is used to talk to the Kafka cluster so multiple instances of telegraf can read
-from the same topic in parallel.
-
-## Configuration
-
-```toml
-# Read metrics from Kafka topic(s)
-[[inputs.kafka_consumer]]
-  ## topic(s) to consume
-  topics = ["telegraf"]
-  ## an array of Zookeeper connection strings
-  zookeeper_peers = ["localhost:2181"]
-  ## Zookeeper Chroot
-  zookeeper_chroot = ""
-  ## the name of the consumer group
-  consumer_group = "telegraf_metrics_consumers"
   ## Offset (must be either "oldest" or "newest")
   offset = "oldest"
 

@@ -21,14 +21,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-## Zookeeper Input Plugin
-
-The zookeeper plugin collects variables outputted from the 'mntr' command
-[Zookeeper Admin](https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html).
-
-### Configuration
-
-```toml
 # Reads 'mntr' stats from one or many zookeeper servers
 [[inputs.zookeeper]]
   ## An array of address to gather stats about. Specify an ip or hostname
@@ -49,8 +41,6 @@ The zookeeper plugin collects variables outputted from the 'mntr' command
 
   ## Optional TLS Config
   # enable_tls = false
-  ## Optional TLS Config
-  # enable_ssl = true
   # tls_ca = "/etc/telegraf/ca.pem"
   # tls_cert = "/etc/telegraf/cert.pem"
   # tls_key = "/etc/telegraf/key.pem"

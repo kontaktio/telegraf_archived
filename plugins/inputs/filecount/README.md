@@ -29,23 +29,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Count files in subdirectories. Defaults to true.
   recursive = true
-# filecount Input Plugin
-
-Counts files in directories that match certain criteria.
-
-### Configuration:
-
-```toml
-# Count files in a directory
-[[inputs.filecount]]
-  ## Directory to gather stats about.
-  directory = "/var/cache/apt/archives"
-
-  ## Only count files that match the name pattern. Defaults to "*".
-  name = "*.deb"
-
-  ## Count files in subdirectories. Defaults to true.
-  recursive = false
 
   ## Only count regular files. Defaults to true.
   regular_only = true

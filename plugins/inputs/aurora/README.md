@@ -19,13 +19,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Gather metrics from Apache Aurora schedulers
-The Aurora Input Plugin gathers metrics from [Apache Aurora](https://aurora.apache.org/) schedulers.
-
-For monitoring recommendations reference [Monitoring your Aurora cluster](https://aurora.apache.org/documentation/latest/operations/monitoring/)
-
-### Configuration:
-
-```toml
 [[inputs.aurora]]
   ## Schedulers are the base addresses of your Aurora Schedulers
   schedulers = ["http://127.0.0.1:8081"]

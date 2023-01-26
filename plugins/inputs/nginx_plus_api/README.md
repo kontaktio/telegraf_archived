@@ -18,12 +18,22 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-# Telegraf Plugin: nginx_plus_api
+# Read Nginx Plus API advanced status information
+[[inputs.nginx_plus_api]]
+  ## An array of Nginx API URIs to gather stats.
+  urls = ["http://localhost/api"]
+  # Nginx API version, default: 3
+  # api_version = 3
 
-Nginx Plus is a commercial version of the open source web server Nginx. The use this plugin you will need a license. For more information about the differences between Nginx (F/OSS) and Nginx Plus, [click here](https://www.nginx.com/blog/whats-difference-nginx-foss-nginx-plus/).
+  # HTTP response timeout (default: 5s)
+  response_timeout = "5s"
 
-### Configuration:
-
+  ## Optional TLS Config
+  # tls_ca = "/etc/telegraf/ca.pem"
+  # tls_cert = "/etc/telegraf/cert.pem"
+  # tls_key = "/etc/telegraf/key.pem"
+  ## Use TLS but skip chain & host verification
+  # insecure_skip_verify = false
 ```
 # Read Nginx Plus API advanced status information
 [[inputs.nginx_plus_api]]

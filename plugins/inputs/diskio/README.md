@@ -14,9 +14,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read metrics about disk IO by device
 [[inputs.diskio]]
   ## By default, telegraf will gather stats for all devices including
@@ -25,7 +22,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## NOTE: Globbing expressions (e.g. asterix) are not supported for
   ##       disk synonyms like '/dev/disk/by-id'.
   # devices = ["sda", "sdb", "vd*", "/dev/disk/by-id/nvme-eui.00123deadc0de123"]
-  # devices = ["sda", "sdb"]
   ## Uncomment the following line if you need disk serial numbers.
   # skip_serial_number = false
   #

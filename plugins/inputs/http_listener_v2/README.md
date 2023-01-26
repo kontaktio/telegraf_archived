@@ -24,17 +24,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
 ```toml @sample.conf
 # Generic HTTP write listener
-HTTP.  Metrics may be sent in any supported [data format][data_format].
-
-**Note:** The plugin previously known as `http_listener` has been renamed
-`influxdb_listener`.  If you would like Telegraf to act as a proxy/relay for
-InfluxDB it is recommended to use [`influxdb_listener`][influxdb_listener].
-
-### Configuration:
-
-This is a sample configuration for the plugin.
-
-```toml
 [[inputs.http_listener_v2]]
   ## Address and port to host HTTP listener on
   service_address = ":8080"
@@ -44,8 +33,6 @@ This is a sample configuration for the plugin.
 
   ## Save path as http_listener_v2_path tag if set to true
   # path_tag = false
-  ## Path to listen to.
-  # path = "/telegraf"
 
   ## HTTP methods to accept.
   # methods = ["POST", "PUT"]

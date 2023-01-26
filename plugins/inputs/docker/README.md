@@ -22,12 +22,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The docker plugin uses the [Official Docker Client](https://github.com/moby/moby/tree/master/client)
-to gather stats from the [Engine API](https://docs.docker.com/engine/api/v1.24/).
-
-### Configuration:
-
-```toml
 # Read metrics about docker containers
 [[inputs.docker]]
   ## Docker Endpoint
@@ -85,13 +79,6 @@ to gather stats from the [Engine API](https://docs.docker.com/engine/api/v1.24/)
   ## Total 'cpu' is reported directly by Docker daemon, and 'network' and 'blkio' totals are aggregated by this plugin.
   ## Please note that this setting has no effect if 'total' is set to 'false'
   # total_include = ["cpu", "blkio", "network"]
-
-  ## Whether to report for each container per-device blkio (8:0, 8:1...) and
-  ## network (eth0, eth1, ...) stats or not
-  perdevice = true
-
-  ## Whether to report for each container total blkio and network stats or not
-  total = false
 
   ## docker labels to include and exclude as tags.  Globs accepted.
   ## Note that an empty array for both will include all labels as tags

@@ -20,13 +20,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-The Tomcat plugin collects statistics available from the tomcat manager status page from the `http://<host>/manager/status/all?XML=true URL.` (`XML=true` will return only xml data).
-
-See the [Tomcat documentation](https://tomcat.apache.org/tomcat-9.0-doc/manager-howto.html#Server_Status) for details of these statistics.
-
-### Configuration:
-
-```toml
 # Gather metrics from the Tomcat server status page.
 [[inputs.tomcat]]
   ## URL of the Tomcat server status

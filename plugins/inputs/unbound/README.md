@@ -15,9 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # A plugin to collect stats from the Unbound DNS resolver
 [[inputs.unbound]]
   ## Address of server to connect to, read from unbound conf default, optionally ':port'
@@ -34,13 +31,11 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   # config_file = "/etc/unbound/unbound.conf"
 
   ## The default timeout of 1s can be overridden with:
-  ## The default timeout of 1s can be overriden with:
   # timeout = "1s"
 
   ## When set to true, thread metrics are tagged with the thread id.
   ##
   ## The default is false for backwards compatibility, and will be changed to
-  ## The default is false for backwards compatibility, and will be change to
   ## true in a future version.  It is recommended to set to true on new
   ## deployments.
   thread_as_tag = false

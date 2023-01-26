@@ -15,9 +15,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Read metrics from one or many prometheus clients
 [[inputs.prometheus]]
   ## An array of urls to scrape metrics from.
@@ -127,16 +124,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 
   ## Optional custom HTTP headers
   # headers = {"X-Special-Header" = "Special-Value"}
-  ## Scrape Kubernetes pods for the following prometheus annotations:
-  ## - prometheus.io/scrape: Enable scraping for this pod
-  ## - prometheus.io/scheme: If the metrics endpoint is secured then you will need to
-  ##     set this to `https` & most likely set the tls config.
-  ## - prometheus.io/path: If the metrics path is not /metrics, define it with this annotation.
-  ## - prometheus.io/port: If port is not 9102 use this annotation
-  # monitor_kubernetes_pods = true
-
-  ## Use bearer token for authorization
-  # bearer_token = /path/to/bearer/token
 
   ## Specify timeout duration for slower prometheus clients (default is 3s)
   # response_timeout = "3s"

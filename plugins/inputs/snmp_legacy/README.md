@@ -25,25 +25,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   snmptranslate_file = "/tmp/oids.txt"
   [[inputs.snmp.host]]
     address = "192.168.2.2:161"
-# SNMP Input Plugin
-
-The SNMP input plugin gathers metrics from SNMP agents
-
-### Configuration:
-
-
-#### Very simple example
-
-In this example, the plugin will gather value of OIDS:
-
- - `.1.3.6.1.2.1.2.2.1.4.1`
-
-```toml
-# Very Simple Example
-[[inputs.snmp]]
-
-  [[inputs.snmp.host]]
-    address = "127.0.0.1:161"
     # SNMP community
     community = "public" # default public
     # SNMP version (1, 2 or 3)

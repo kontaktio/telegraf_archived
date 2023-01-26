@@ -25,18 +25,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 [[inputs.consul]]
   ## Consul server address
   # address = "localhost:8500"
-Consul. It uses [Consul API](https://www.consul.io/docs/agent/http/health.html#health_state)
-to query the data. It will not report the
-[telemetry](https://www.consul.io/docs/agent/telemetry.html) but Consul can
-report those stats already using StatsD protocol if needed.
-
-### Configuration:
-
-```toml
-# Gather health check statuses from services registered in Consul
-[[inputs.consul]]
-  ## Consul server address
-  # address = "localhost"
 
   ## URI scheme for the Consul server, one of "http", "https"
   # scheme = "http"
@@ -58,8 +46,6 @@ report those stats already using StatsD protocol if needed.
 
   ## Data center to query the health checks from
   # datacenter = ""
-  ## Data centre to query the health checks from
-  # datacentre = ""
 
   ## Optional TLS Config
   # tls_ca = "/etc/telegraf/ca.pem"

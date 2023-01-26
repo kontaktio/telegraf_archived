@@ -143,7 +143,9 @@ require (
 	github.com/rabbitmq/amqp091-go v1.5.0
 	github.com/riemann/riemann-go-client v0.5.1-0.20211206220514-f58f10cdce16
 	github.com/robbiet480/go.nut v0.0.0-20220219091450-bd8f121e1fa1
+	github.com/rubyist/circuitbreaker v2.2.1+incompatible
 	github.com/safchain/ethtool v0.0.0-20210803160452-9aa261dae9b1
+	github.com/satori/go.uuid v1.2.0
 	github.com/sensu/sensu-go/api/core/v2 v2.15.0
 	github.com/shirou/gopsutil/v3 v3.22.9
 	github.com/showwin/speedtest-go v1.2.1
@@ -184,6 +186,7 @@ require (
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/gorethink/gorethink.v3 v3.0.5
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/olivere/elastic.v5 v5.0.86
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 	gopkg.in/yaml.v2 v2.4.0
@@ -191,6 +194,12 @@ require (
 	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.0
 	modernc.org/sqlite v1.19.2
+)
+
+require (
+	github.com/cenk/backoff v2.2.1+incompatible // indirect
+	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
+	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 )
 
 require (

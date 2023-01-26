@@ -18,9 +18,6 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
 ## Configuration
 
 ```toml @sample.conf
-### Configuration:
-
-```toml
 # Collect statistics about itself
 [[inputs.internal]]
   ## If true, collect telegraf memory stats.
