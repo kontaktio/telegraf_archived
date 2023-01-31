@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/metric"
+	"github.com/influxdata/telegraf/plugins/parsers"
 	"time"
 )
 
@@ -142,4 +143,11 @@ func (p *KontaktEventParser) ParseLine(line string) (telegraf.Metric, error) {
 
 func (p *KontaktEventParser) SetDefaultTags(tags map[string]string) {
 	p.DefaultTags = tags
+}
+
+func init() {
+	parsers.Add("kontakt",
+		func(defaultMetricName string) telegraf.Parser {
+			return &KontaktEventParser{}
+		})
 }
