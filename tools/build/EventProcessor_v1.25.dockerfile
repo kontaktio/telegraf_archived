@@ -9,7 +9,7 @@ RUN apk --update upgrade && \
 COPY . $HOME/src/
 WORKDIR $HOME/src
 RUN make build_tools
-RUN ./tools/custom_builder/custom_builder --config test.conf
+RUN ./tools/custom_builder/custom_builder --config ./tools/build/example.conf
 
 
 FROM alpine:3.9
