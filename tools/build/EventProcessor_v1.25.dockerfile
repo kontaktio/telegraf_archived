@@ -34,6 +34,8 @@ RUN chmod +x /start_telegraf_and_acceptor.sh
 RUN mkdir /root/.aws
 #
 EXPOSE 8080
-ENV SCRIPTS_SOURCE=$SCRIPTS_SOURCE
-#
+
+ENV CONFIG_FROM_S3="true"
+ENV TELEGRAF_CONFIG_PATH="/etc/telegraf/telegraf.conf"
+
 ENTRYPOINT "/start_telegraf_and_acceptor.sh" "${SCRIPTS_SOURCE}"

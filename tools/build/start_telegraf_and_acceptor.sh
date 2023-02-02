@@ -1,6 +1,10 @@
 #!/bin/sh
 
 mkdir /config_generator
-aws s3 cp s3://kontakt-telegraf-config/build-$1/telegraf.eventprocessor.$1.conf /
 
-/usr/bin/telegraf -config /telegraf.eventprocessor.$1.conf
+if [[ "${CONFIG_FROM_S3}" == "true" ]]; then
+    mkdir $(dirname "${TELEGRAF_CONFIG_PATH}")
+    aws s3 cp "${configPath}" "${TELEGRAF_CONFIG_PATH}"
+fi
+
+/usr/bin/telegraf -config "${TELEGRAF_CONFIG_PATH}"
