@@ -2,6 +2,7 @@ package serializers
 
 import (
 	"fmt"
+	"github.com/influxdata/telegraf/plugins/serializers/flat_json"
 	"time"
 
 	"github.com/influxdata/telegraf"
@@ -140,6 +141,9 @@ type Config struct {
 
 	// Encode metrics without HELP metadata. This helps reduce the payload size.
 	PrometheusCompactEncoding bool `toml:"prometheus_compact_encoding"`
+
+	// Should include timestamp in the output
+	ExcludeTimestamp bool
 }
 
 // NewSerializer a Serializer interface based on the given config.
@@ -162,6 +166,8 @@ func NewSerializer(config *Config) (Serializer, error) {
 		)
 	case "json":
 		serializer, err = NewJSONSerializer(config)
+	case "flat_json":
+		serializer, err = NewFlatJsonSerializer(config.TimestampUnits, config.ExcludeTimestamp)
 	case "splunkmetric":
 		serializer, err = NewSplunkmetricSerializer(config.HecRouting, config.SplunkmetricMultiMetric, config.SplunkmetricOmitEventTag), nil
 	case "nowmetric":
@@ -189,6 +195,10 @@ func NewSerializer(config *Config) (Serializer, error) {
 
 func NewCSVSerializer(config *Config) (Serializer, error) {
 	return csv.NewSerializer(config.TimestampFormat, config.CSVSeparator, config.CSVHeader, config.CSVPrefix)
+}
+
+func NewFlatJsonSerializer(timestampUnits time.Duration, excludeTimestamp bool) (Serializer, error) {
+	return flat_json.NewSerializer(timestampUnits, excludeTimestamp)
 }
 
 func NewPrometheusRemoteWriteSerializer(config *Config) Serializer {

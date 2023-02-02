@@ -7,12 +7,14 @@ import (
 )
 
 type serializer struct {
-	TimestampUnits time.Duration
+	TimestampUnits   time.Duration
+	ExcludeTimestamp bool
 }
 
-func NewSerializer(timestampUnits time.Duration) (*serializer, error) {
+func NewSerializer(timestampUnits time.Duration, excludeTimestamp bool) (*serializer, error) {
 	s := &serializer{
-		TimestampUnits: truncateDuration(timestampUnits),
+		TimestampUnits:   truncateDuration(timestampUnits),
+		ExcludeTimestamp: excludeTimestamp,
 	}
 	return s, nil
 }
