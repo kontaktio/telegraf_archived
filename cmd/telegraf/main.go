@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
@@ -383,6 +385,10 @@ func main() {
 	agent := Telegraf{}
 	pprof := NewPprofServer()
 	c := config.NewConfig()
+	go func() {
+		http.Handle("/actuator/metrics", promhttp.Handler())
+		http.ListenAndServe(":8082", nil)
+	}()
 	err := runApp(os.Args, os.Stdout, pprof, c, &agent)
 	if err != nil {
 		log.Fatalf("E! %s", err)
