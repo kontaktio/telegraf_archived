@@ -3,6 +3,7 @@ package kontaktauth
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/pkg/errors"
@@ -26,7 +27,7 @@ type apiManager struct {
 	EMail   string
 	ApiKey  string
 	Company apiCompany
-	ID      string
+	ID      int64
 }
 
 //go:embed sample.conf
@@ -101,7 +102,7 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		}
 		metric.RemoveTag(apiKeyTag)
 		metric.AddTag("companyId", manager.Company.CompanyID)
-		metric.AddTag("userId", manager.ID)
+		metric.AddTag("userId", fmt.Sprintf("%d", manager.ID))
 		result = append(result, metric)
 	}
 	return result
