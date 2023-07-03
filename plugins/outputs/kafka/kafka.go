@@ -4,6 +4,7 @@ package kafka
 import (
 	_ "embed"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"strings"
 	"time"
 
@@ -27,6 +28,11 @@ var ValidTopicSuffixMethods = []string{
 }
 
 var zeroTime = time.Unix(0, 0)
+
+var recordsSent = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "telegraf_output_kafka_records_sent",
+	Help: "Number of records sent to kafka",
+})
 
 type Kafka struct {
 	Brokers         []string    `toml:"brokers"`
@@ -239,7 +245,7 @@ func (k *Kafka) Write(metrics []telegraf.Metric) error {
 		}
 		return err
 	}
-
+	recordsSent.Add(float64(len(msgs)))
 	return nil
 }
 
@@ -253,4 +259,5 @@ func init() {
 			producerFunc: sarama.NewSyncProducer,
 		}
 	})
+	prometheus.MustRegister(recordsSent)
 }

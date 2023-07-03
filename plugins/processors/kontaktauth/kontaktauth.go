@@ -14,8 +14,7 @@ import (
 
 type KontaktAuth struct {
 	ApiAddress string `toml:"api_address"`
-
-	Client *circuit.HTTPClient
+	ApiCaller  ApiCaller
 }
 
 type apiCompany struct {
@@ -27,6 +26,7 @@ type apiManager struct {
 	EMail   string
 	ApiKey  string
 	Company apiCompany
+	ID      string
 }
 
 //go:embed sample.conf
@@ -65,12 +65,7 @@ func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 }
 
 func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error) {
-	request, err := http.NewRequest("GET", ka.ApiAddress+path, nil)
-	if err != nil {
-		return false, err
-	}
-	request.Header.Add("Api-Key", apiKey)
-	response, err := ka.Client.Do(request)
+	response, err := ka.ApiCaller.Call(ka.ApiAddress+path, apiKey)
 	if err != nil {
 		log.Printf("Error %v", err)
 		return false, err
@@ -84,28 +79,29 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error
 	return true, nil
 }
 
-func (p *KontaktAuth) SampleConfig() string {
+func (ka *KontaktAuth) SampleConfig() string {
 	return sampleConfig
 }
 
-func (p *KontaktAuth) Description() string {
+func (ka *KontaktAuth) Description() string {
 	return "Authenticates telemetry and fills companyId"
 }
 
-func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
+func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
 		if !metric.HasTag(apiKeyTag) {
 			continue
 		}
 		apiKey, _ := metric.GetTag(apiKeyTag)
-		manager, err := p.getManager(apiKey)
+		manager, err := ka.getManager(apiKey)
 		if err != nil {
 			log.Printf("exception while getting manager: %v\n", err)
 			continue
 		}
 		metric.RemoveTag(apiKeyTag)
 		metric.AddTag("companyId", manager.Company.CompanyID)
+		metric.AddTag("userId", manager.ID)
 		result = append(result, metric)
 	}
 	return result
@@ -113,7 +109,7 @@ func (p *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 
 func New() *KontaktAuth {
 	kontaktAuth := KontaktAuth{
-		Client: circuit.NewHTTPClient(time.Second*5, 10, nil),
+		ApiCaller: &ApiCallerImpl{Client: circuit.NewHTTPClient(time.Second*5, 10, nil)},
 	}
 	return &kontaktAuth
 }
@@ -122,4 +118,21 @@ func init() {
 	processors.Add("kontaktauth", func() telegraf.Processor {
 		return New()
 	})
+}
+
+type ApiCaller interface {
+	Call(path string, apiKey string) (*http.Response, error)
+}
+
+type ApiCallerImpl struct {
+	Client *circuit.HTTPClient
+}
+
+func (a *ApiCallerImpl) Call(path string, apiKey string) (*http.Response, error) {
+	request, err := http.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add("Api-Key", apiKey)
+	return a.Client.Do(request)
 }

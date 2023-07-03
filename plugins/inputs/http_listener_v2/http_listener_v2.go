@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	_ "embed"
 	"errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"io"
 	"net"
 	"net/http"
@@ -32,6 +33,11 @@ var sampleConfig string
 // if the request body is over this size, we will return an HTTP 413 error.
 // 500 MB
 const defaultMaxBodySize = 500 * 1024 * 1024
+
+var requestsProcessed = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "telegraf_input_http_requests",
+	Help: "Number of processed incoming requests",
+})
 
 const (
 	body    = "body"
@@ -245,6 +251,7 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 	}
 
 	res.WriteHeader(http.StatusNoContent)
+	requestsProcessed.Inc()
 }
 
 func (h *HTTPListenerV2) collectBody(res http.ResponseWriter, req *http.Request) ([]byte, bool) {
@@ -366,4 +373,5 @@ func init() {
 			close:          make(chan struct{}),
 		}
 	})
+	prometheus.MustRegister(requestsProcessed)
 }
