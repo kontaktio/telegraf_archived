@@ -56,7 +56,6 @@ func (s *serializer) createObject(metric telegraf.Metric) map[string]interface{}
 	}
 
 	m["name"] = metric.Name()
-	m["timestamp"] = metric.Time().UnixNano() / int64(s.TimestampUnits)
 	return m
 }
 
