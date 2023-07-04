@@ -20,10 +20,6 @@ var eventsParsed = prometheus.NewCounter(prometheus.CounterOpts{
 	Help: "Number of events in parsed requests",
 })
 
-func init() {
-	prometheus.MustRegister(eventsParsed)
-}
-
 type KontaktEventParser struct {
 	DefaultTags map[string]string
 }
@@ -132,4 +128,5 @@ func init() {
 		func(defaultMetricName string) telegraf.Parser {
 			return &KontaktEventParser{}
 		})
+	prometheus.MustRegister(eventsParsed)
 }
