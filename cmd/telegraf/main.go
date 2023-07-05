@@ -386,7 +386,7 @@ func main() {
 	pprof := NewPprofServer()
 	c := config.NewConfig()
 	go func() {
-		http.Handle("/actuator/metrics", promhttp.Handler())
+		http.Handle("/actuator/prometheus", promhttp.Handler())
 		http.ListenAndServe(":8082", nil)
 	}()
 	err := runApp(os.Args, os.Stdout, pprof, c, &agent)
