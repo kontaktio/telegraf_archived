@@ -52,10 +52,11 @@ func (p *KontaktEventParser) parseObject(metrics []telegraf.Metric, json map[str
 				"deviceAddress": address,
 			},
 			map[string]interface{}{
-				"rssi":     evt["rssi"],
-				"data":     evt["data"],
-				"srData":   evt["srData"],
-				"sourceId": sourceId,
+				"rssi":       evt["rssi"],
+				"data":       evt["data"],
+				"srData":     evt["srData"],
+				"sourceId":   sourceId,
+				"dataSource": "Kio",
 			},
 			time.Now(),
 		)
