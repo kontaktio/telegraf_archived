@@ -44,6 +44,7 @@ func TestParsePacket(t *testing.T) {
 	AssertHasField(t, metric, "sourceId", "gatewayUniqueId")
 	AssertHasField(t, metric, "sourceType", "GATEWAY")
 	AssertHasField(t, metric, "gatewayTimestamp", int64(1688335200000))
+	AssertHasField(t, metric, "dataSource", "Kio")
 
 }
 
