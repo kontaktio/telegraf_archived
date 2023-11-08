@@ -26,7 +26,7 @@ RUN apk --update upgrade && \
     wget -O /etc/ssl/ca-bundle.pem https://curl.haxx.se/ca/cacert.pem
 
 
-RUN pip install awscli
+RUN pip install 'PyYAML<5.4' awscli
 
 COPY tools/build/start_telegraf_and_acceptor.sh /start_telegraf_and_acceptor.sh
 RUN chmod +x /start_telegraf_and_acceptor.sh
