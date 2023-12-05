@@ -133,7 +133,7 @@ func (k *Kafka) Init() error {
 		return err
 	}
 	config := sarama.NewConfig()
-	config.Producer.Flush.Bytes = 2000000
+	config.Producer.Flush.Bytes = 20000000
 	config.Producer.Flush.Frequency = 500 * time.Millisecond
 
 	if err := k.SetConfig(config, k.Log); err != nil {
