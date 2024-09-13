@@ -22,6 +22,23 @@ type topicSuffixTestpair struct {
 	expectedTopic string
 }
 
+func TestPartitioner(t *testing.T) {
+	resultMap := map[string]int32{
+		"klucz":             107,
+		"innyKlucz":         46,
+		"00:00:00:00:00:55": 66,
+		"something":         47,
+		"aaaassssdddfff":    100,
+	}
+	for key, expectedPartition := range resultMap {
+		partitionForKey := GetPartition(key, 120)
+		if partitionForKey != expectedPartition {
+			t.Errorf("Partition for key %s is wrong. Expected: %d, got: %d",
+				key, expectedPartition, partitionForKey)
+		}
+	}
+}
+
 func TestConnectAndWriteIntegration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
