@@ -1,6 +1,6 @@
 #!groovy
 
-node {
+node("ec2-fleet-heavy") {
 
     currentBuild.result = "SUCCESS"
 
