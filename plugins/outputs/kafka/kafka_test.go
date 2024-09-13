@@ -30,8 +30,16 @@ func TestPartitioner(t *testing.T) {
 		"something":         47,
 		"aaaassssdddfff":    100,
 	}
+	partitioner := MurMurPartitioner{}
 	for key, expectedPartition := range resultMap {
-		partitionForKey := GetPartition(key, 120)
+		m := &sarama.ProducerMessage{
+			Key: sarama.StringEncoder(key),
+		}
+
+		partitionForKey, err := partitioner.Partition(m, 120)
+		if err != nil {
+			t.Fatalf("Error while calculating partition: %v", err)
+		}
 		if partitionForKey != expectedPartition {
 			t.Errorf("Partition for key %s is wrong. Expected: %d, got: %d",
 				key, expectedPartition, partitionForKey)

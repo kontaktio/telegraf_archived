@@ -134,17 +134,6 @@ func (m *MurMurPartitioner) RequiresConsistency() bool {
 	return true
 }
 
-func GetPartition(key string, numPartitions int32) int32 {
-	m := &sarama.ProducerMessage{
-		Topic: "whatever",
-		Value: sarama.StringEncoder("dupa"),
-		Key:   sarama.StringEncoder(key),
-	}
-	partitioner := MurMurPartitioner{}
-	result, _ := partitioner.Partition(m, numPartitions)
-	return result
-}
-
 func ValidateTopicSuffixMethod(method string) error {
 	for _, validMethod := range ValidTopicSuffixMethods {
 		if method == validMethod {
