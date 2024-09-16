@@ -72,6 +72,68 @@ type TopicSuffix struct {
 	Separator string   `toml:"separator"`
 }
 
+type MurMurPartitioner struct {
+}
+
+// murmur2 implements hashing algorithm used by JVM clients for Kafka.
+// See the original implementation: https://github.com/apache/kafka/blob/1.0.0/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L353
+func murmur2(data []byte) int32 {
+	length := int32(len(data))
+	seed := uint32(0x9747b28c)
+	m := int32(0x5bd1e995)
+	r := uint32(24)
+
+	h := int32(seed ^ uint32(length))
+	length4 := length / 4
+
+	for i := int32(0); i < length4; i++ {
+		i4 := i * 4
+		k := int32(data[i4+0]&0xff) + (int32(data[i4+1]&0xff) << 8) + (int32(data[i4+2]&0xff) << 16) + (int32(data[i4+3]&0xff) << 24)
+		k *= m
+		k ^= int32(uint32(k) >> r)
+		k *= m
+		h *= m
+		h ^= k
+	}
+
+	switch length % 4 {
+	case 3:
+		h ^= int32(data[(length & ^3)+2]&0xff) << 16
+		fallthrough
+	case 2:
+		h ^= int32(data[(length & ^3)+1]&0xff) << 8
+		fallthrough
+	case 1:
+		h ^= int32(data[length & ^3] & 0xff)
+		h *= m
+	}
+
+	h ^= int32(uint32(h) >> 13)
+	h *= m
+	h ^= int32(uint32(h) >> 15)
+
+	return h
+}
+
+// toPositive converts i to positive number as per the original implementation in the JVM clients for Kafka.
+// See the original implementation: https://github.com/apache/kafka/blob/1.0.0/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L741
+func toPositive(i int32) int32 {
+	return i & 0x7fffffff
+}
+
+func (m *MurMurPartitioner) Partition(message *sarama.ProducerMessage, numPartitions int32) (int32, error) {
+	keyBytes, err := message.Key.Encode()
+	if err != nil {
+		return 0, err
+	}
+	hash := murmur2(keyBytes)
+	return toPositive(hash) % numPartitions, nil
+}
+
+func (m *MurMurPartitioner) RequiresConsistency() bool {
+	return true
+}
+
 func ValidateTopicSuffixMethod(method string) error {
 	for _, validMethod := range ValidTopicSuffixMethods {
 		if method == validMethod {
@@ -135,6 +197,9 @@ func (k *Kafka) Init() error {
 	config := sarama.NewConfig()
 	config.Producer.Flush.Bytes = 20000000
 	config.Producer.Flush.Frequency = 500 * time.Millisecond
+	config.Producer.Partitioner = func(topic string) sarama.Partitioner {
+		return &MurMurPartitioner{}
+	}
 
 	if err := k.SetConfig(config, k.Log); err != nil {
 		return err
