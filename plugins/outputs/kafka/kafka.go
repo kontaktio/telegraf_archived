@@ -196,7 +196,7 @@ func (k *Kafka) Init() error {
 	}
 	config := sarama.NewConfig()
 	config.Producer.Flush.Bytes = 20000000
-	config.Producer.Flush.Frequency = 500 * time.Millisecond
+	config.Producer.Flush.Frequency = 100 * time.Millisecond
 	config.Producer.Partitioner = func(topic string) sarama.Partitioner {
 		return &MurMurPartitioner{}
 	}
