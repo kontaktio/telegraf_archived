@@ -20,6 +20,12 @@ var eventsParsed = prometheus.NewCounter(prometheus.CounterOpts{
 	Help: "Number of events in parsed requests",
 })
 
+var gatewayToServerLatency = prometheus.NewHistogram(prometheus.HistogramOpts{
+	Name:    "telegraf_gateway_to_server_latency_seconds",
+	Help:    "Latency between gateway timestamp and server timestamp, measured in seconds.",
+	Buckets: prometheus.ExponentialBuckets(0.032, 1.3, 24), // 32ms to ~17s
+})
+
 type KontaktEventParser struct {
 	DefaultTags map[string]string
 }
@@ -68,7 +74,9 @@ func (p *KontaktEventParser) parseObject(metrics []telegraf.Metric, json map[str
 		timestamp, ok := evt["timestamp"].(float64)
 		if ok {
 			timestampInt := int64(timestamp)
-			m.AddField("gatewayTimestamp", p.normalizeTimestamp(timestampInt))
+			normalizedTimestamp := p.normalizeTimestamp(timestampInt)
+			m.AddField("gatewayTimestamp", normalizedTimestamp)
+			recordLatency(time.UnixMilli(normalizedTimestamp), time.Now())
 		}
 
 		metrics = append(metrics, m)
@@ -124,10 +132,17 @@ func (p *KontaktEventParser) normalizeTimestamp(timestamp int64) int64 {
 	}
 }
 
+func recordLatency(gatewayTimestamp, serverTimestamp time.Time) {
+	latency := serverTimestamp.Sub(gatewayTimestamp).Seconds()
+	gatewayToServerLatency.Observe(latency)
+}
+
 func init() {
 	parsers.Add("kontakt",
 		func(defaultMetricName string) telegraf.Parser {
 			return &KontaktEventParser{}
 		})
 	prometheus.MustRegister(eventsParsed)
+	prometheus.MustRegister(gatewayToServerLatency)
+
 }
