@@ -7,9 +7,13 @@ import (
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	circuit "github.com/rubyist/circuitbreaker"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -37,10 +41,37 @@ var unknownApiKeyDuration = time.Minute * 10
 
 const apiKeyTag = "Api-Key"
 
+var authenticationTime = prometheus.NewHistogram(prometheus.HistogramOpts{
+	Name:    "telegraf_authentication_time_seconds",
+	Help:    "Time to finish authentication",
+	Buckets: prometheus.ExponentialBuckets(0.032, 1.3, 24), // 32ms to ~17s
+})
+
+var inFlightRequests = make(map[string]struct{})
+var inFlightRequestsLock = sync.Mutex{}
+
+var inFlightRequestsGauge = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+	Name: "telegraf_in_flight_authentication_requests",
+	Help: "Number of authentication requests that are currently in flight to Apps-Api",
+}, func() float64 {
+	return float64(len(inFlightRequests))
+})
+
 var cache = make(map[string]apiManager)
 var unknownCache = make(map[string]time.Time)
 
+func init() {
+	prometheus.Register(authenticationTime)
+	prometheus.Register(inFlightRequestsGauge)
+}
+
 func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
+	authenticationStartTime := time.Now()
+	defer func() {
+		timeDiff := time.Now().Sub(authenticationStartTime).Seconds()
+		authenticationTime.Observe(timeDiff)
+	}()
+
 	if manager, ok := cache[apiKey]; ok {
 		return manager, nil
 	}
@@ -66,6 +97,9 @@ func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 }
 
 func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error) {
+	requestId := onRequestStart()
+	defer onRequestFinish(requestId)
+
 	response, err := ka.ApiCaller.Call(ka.ApiAddress+path, apiKey)
 	if err != nil {
 		log.Printf("Error %v", err)
@@ -78,6 +112,20 @@ func (ka *KontaktAuth) get(path, apiKey string, result interface{}) (bool, error
 		return false, err
 	}
 	return true, nil
+}
+
+func onRequestStart() string {
+	inFlightRequestsLock.Lock()
+	defer inFlightRequestsLock.Unlock()
+	requestId := strconv.FormatUint(rand.Uint64(), 16)
+	inFlightRequests[requestId] = struct{}{} //Value doesn't matter
+	return requestId
+}
+
+func onRequestFinish(requestId string) {
+	inFlightRequestsLock.Lock()
+	defer inFlightRequestsLock.Unlock()
+	delete(inFlightRequests, requestId)
 }
 
 func (ka *KontaktAuth) SampleConfig() string {
