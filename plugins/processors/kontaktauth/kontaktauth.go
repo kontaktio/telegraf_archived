@@ -60,11 +60,6 @@ var inFlightRequestsGauge = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 var cache = make(map[string]apiManager)
 var unknownCache = make(map[string]time.Time)
 
-func init() {
-	prometheus.Register(authenticationTime)
-	prometheus.Register(inFlightRequestsGauge)
-}
-
 func (ka *KontaktAuth) getManager(apiKey string) (apiManager, error) {
 	authenticationStartTime := time.Now()
 	defer func() {
@@ -167,6 +162,9 @@ func init() {
 	processors.Add("kontaktauth", func() telegraf.Processor {
 		return New()
 	})
+
+	prometheus.Register(authenticationTime)
+	prometheus.Register(inFlightRequestsGauge)
 }
 
 type ApiCaller interface {
