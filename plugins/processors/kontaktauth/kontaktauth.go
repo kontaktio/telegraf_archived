@@ -18,8 +18,9 @@ import (
 )
 
 type KontaktAuth struct {
-	ApiAddress string `toml:"api_address"`
-	ApiCaller  ApiCaller
+	KeycloakURL string `toml:"keycloak_url"`
+	ApiAddress  string `toml:"api_address"`
+	ApiCaller   ApiCaller
 }
 
 type apiCompany struct {
