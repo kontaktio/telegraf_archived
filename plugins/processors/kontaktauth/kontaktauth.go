@@ -3,7 +3,6 @@ package kontaktauth
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/pkg/errors"
@@ -21,6 +20,7 @@ type KontaktAuth struct {
 	KeycloakURL string `toml:"keycloak_url"`
 	ApiAddress  string `toml:"api_address"`
 	ApiCaller   ApiCaller
+	JWTAuth     *JWTAuth
 }
 
 type apiCompany struct {
@@ -29,8 +29,6 @@ type apiCompany struct {
 }
 
 type apiManager struct {
-	EMail   string
-	ApiKey  string
 	Company apiCompany
 	ID      int64
 }
@@ -40,7 +38,10 @@ var sampleConfig string
 
 var unknownApiKeyDuration = time.Minute * 10
 
-const apiKeyTag = "Api-Key"
+const (
+	apiKeyTag    = "Api-Key"
+	jwtHeaderTag = "Authorization"
+)
 
 var authenticationTime = prometheus.NewHistogram(prometheus.HistogramOpts{
 	Name:    "telegraf_authentication_time_seconds",
@@ -135,6 +136,20 @@ func (ka *KontaktAuth) Description() string {
 func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
+		if metric.HasTag(jwtHeaderTag) {
+			tokenStr, _ := metric.GetTag(jwtHeaderTag)
+			metric.RemoveTag(jwtHeaderTag)
+
+			if cid, err := ka.JWTAuth.ExtractCompanyID(tokenStr); err == nil {
+				metric.AddTag("companyId", cid)
+				result = append(result, metric)
+				continue
+			} else {
+				log.Printf("invalid JWT: %v", err)
+				continue
+			}
+		}
+
 		if !metric.HasTag(apiKeyTag) {
 			continue
 		}
@@ -146,7 +161,6 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		}
 		metric.RemoveTag(apiKeyTag)
 		metric.AddTag("companyId", manager.Company.CompanyID)
-		metric.AddTag("userId", fmt.Sprintf("%d", manager.ID))
 		result = append(result, metric)
 	}
 	return result
@@ -154,9 +168,17 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 
 func New() *KontaktAuth {
 	kontaktAuth := KontaktAuth{
-		ApiCaller: &ApiCallerImpl{Client: circuit.NewHTTPClient(time.Second*5, 10, nil)},
+		ApiCaller: &ApiCallerImpl{Client: circuit.NewHTTPClient(5*time.Second, 10, nil)},
+		JWTAuth:   NewJWTAuth(),
 	}
 	return &kontaktAuth
+}
+
+func (ka *KontaktAuth) Init() error {
+	ja := NewJWTAuth()
+	ja.KeycloakURL = ka.KeycloakURL
+	ka.JWTAuth = ja
+	return nil
 }
 
 func init() {
