@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,6 +20,7 @@ import (
 type KontaktAuth struct {
 	KeycloakURL string `toml:"keycloak_url"`
 	ApiAddress  string `toml:"api_address"`
+	Audience    string `toml:"audience"`
 	ApiCaller   ApiCaller
 	JWTAuth     *JWTAuth
 }
@@ -140,14 +142,21 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			tokenStr, _ := metric.GetTag(jwtHeaderTag)
 			metric.RemoveTag(jwtHeaderTag)
 
-			if cid, err := ka.JWTAuth.ExtractCompanyID(tokenStr); err == nil {
-				metric.AddTag("companyId", cid)
-				result = append(result, metric)
-				continue
-			} else {
+			claims, err := ka.JWTAuth.VerifyToken(tokenStr)
+			if err != nil {
 				log.Printf("invalid JWT: %v", err)
 				continue
 			}
+
+			cid, err := ka.JWTAuth.ExtractCompanyID(claims)
+			if err != nil {
+				log.Printf("JWT without company-id: %v", err)
+				continue
+			}
+
+			metric.AddTag("companyId", cid)
+			result = append(result, metric)
+			continue
 		}
 
 		if !metric.HasTag(apiKeyTag) {
@@ -169,14 +178,16 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 func New() *KontaktAuth {
 	kontaktAuth := KontaktAuth{
 		ApiCaller: &ApiCallerImpl{Client: circuit.NewHTTPClient(5*time.Second, 10, nil)},
-		JWTAuth:   NewJWTAuth(),
 	}
 	return &kontaktAuth
 }
 
 func (ka *KontaktAuth) Init() error {
 	ja := NewJWTAuth()
-	ja.KeycloakURL = ka.KeycloakURL
+	ja.KeycloakURL = strings.TrimRight(ka.KeycloakURL, "/") + "/"
+	if ka.Audience != "" {
+		ja.Audience = ka.Audience
+	}
 	ka.JWTAuth = ja
 	return nil
 }
