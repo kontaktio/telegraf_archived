@@ -57,13 +57,11 @@ func (ja *JWTAuth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 
-	// --- 2) pobierz / cache JWKS -----------------------------------------
 	jwks, err := ja.getJWKS(realm)
 	if err != nil {
 		return nil, err
 	}
 
-	// --- 3) pełna weryfikacja podpisu + exp/nbf ---------------------------
 	token, err := jwt.ParseWithClaims(tokenStr, jwt.MapClaims{}, jwks.Keyfunc)
 	if err != nil {
 		return nil, fmt.Errorf("jwt parse/verify error: %w", err)
@@ -74,7 +72,6 @@ func (ja *JWTAuth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	// --- 4) aud -----------------------------------------------------------
 	if err := ja.verifyAud(claims); err != nil {
 		return nil, err
 	}
@@ -83,7 +80,6 @@ func (ja *JWTAuth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
 }
 
 func (ja *JWTAuth) verifyIss(tokenStr string) (string, error) {
-	// ParseUnverified — tylko nagłówek i payload, bez weryfikacji podpisu
 	parser := new(jwt.Parser)
 	unverified, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
 	if err != nil {
@@ -96,7 +92,7 @@ func (ja *JWTAuth) verifyIss(tokenStr string) (string, error) {
 		return "", errors.New("issuer claim missing or not a string")
 	}
 
-	prefix := ja.KeycloakURL // musi kończyć się "/"
+	prefix := ja.KeycloakURL
 	if !strings.HasPrefix(iss, prefix) {
 		return "", fmt.Errorf("invalid issuer %q: must start with %q", iss, prefix)
 	}
