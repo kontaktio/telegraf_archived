@@ -109,6 +109,7 @@ func (ja *JWTAuth) getJWKS(realm string) (*keyfunc.JWKS, error) {
 	}
 
 	url := fmt.Sprintf("%s%s/protocol/openid-connect/certs", ja.KeycloakURL, realm)
+	log.Printf("[JWTAuth] fetching JWKS from URL=%s", url)
 	jwksNew, err := keyfunc.Get(url, ja.jwksOpts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load JWKS for realm %q: %w", realm, err)
