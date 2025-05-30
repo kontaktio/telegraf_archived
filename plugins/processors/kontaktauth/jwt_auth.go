@@ -7,26 +7,21 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
-	"github.com/coocood/freecache"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 const (
-	companyIdClaim   = "company-id"
-	defaultAudience  = "compute-api"
-	defaultCacheSize = 1 << 24
+	companyIdClaim  = "company-id"
+	defaultAudience = "compute-api"
 )
 
 type JWTAuth struct {
 	Validator TokenValidator
 }
 
-func NewJWTAuth(KeycloakURL string, Audience string, CacheSize int) *JWTAuth {
+func NewJWTAuth(KeycloakURL string, Audience string) *JWTAuth {
 	if Audience == "" {
 		Audience = defaultAudience
-	}
-	if CacheSize <= 0 {
-		CacheSize = defaultCacheSize
 	}
 
 	base := &JwksValidator{
@@ -41,10 +36,10 @@ func NewJWTAuth(KeycloakURL string, Audience string, CacheSize int) *JWTAuth {
 			RefreshUnknownKID: true,
 		},
 	}
-	cache := freecache.NewCache(CacheSize)
 	caching := &CachingValidator{
-		base:  base,
-		cache: cache,
+		base:      base,
+		cache:     make(map[string]*cacheEntry),
+		jwtParser: new(jwt.Parser),
 	}
 	return &JWTAuth{Validator: caching}
 }

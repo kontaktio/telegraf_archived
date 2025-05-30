@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
-	"github.com/coocood/freecache"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -126,38 +125,51 @@ func (ja *JwksValidator) verifyAud(claims jwt.MapClaims) error {
 	return nil
 }
 
+type cacheEntry struct {
+	valid bool
+	exp   time.Time
+}
+
 type CachingValidator struct {
 	base      TokenValidator
-	cache     *freecache.Cache
-	jwtParser jwt.Parser
+	mu        sync.RWMutex
+	cache     map[string]*cacheEntry
+	jwtParser *jwt.Parser
 }
 
 func (c *CachingValidator) ValidateToken(tokenStr string) bool {
 	key := extractSignature(tokenStr)
 
-	if val, err := c.cache.Get([]byte(key)); err == nil && len(val) > 0 {
-		return val[0] == 1
+	c.mu.RLock()
+	entry, ok := c.cache[key]
+	c.mu.RUnlock()
+	if ok {
+		if entry.valid {
+			if time.Now().After(entry.exp) {
+				entry.valid = false
+				log.Printf("[cachingValidator] token expired for signature %s", key)
+				return false
+			}
+			return true
+		}
+		return false
 	}
 
 	valid := c.base.ValidateToken(tokenStr)
-	expTime := time.Now().Add(time.Minute)
-	if token, _, err := c.jwtParser.ParseUnverified(tokenStr, jwt.MapClaims{}); err == nil {
-		if cl, ok := token.Claims.(jwt.MapClaims); ok {
-			if expVal, ok2 := cl["exp"].(float64); ok2 {
+	expTime := time.Now()
+
+	tokUnv, _, err := c.jwtParser.ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err == nil {
+		if cl, ok2 := tokUnv.Claims.(jwt.MapClaims); ok2 {
+			if expVal, ok3 := cl["exp"].(float64); ok3 {
 				expTime = time.Unix(int64(expVal), 0)
 			}
 		}
 	}
-	ttl := int(time.Until(expTime).Seconds())
-	if ttl <= 0 {
-		ttl = 60
-	}
 
-	cacheVal := []byte{0}
-	if valid {
-		cacheVal[0] = 1
-	}
-	c.cache.Set([]byte(key), cacheVal, ttl)
+	c.mu.Lock()
+	c.cache[key] = &cacheEntry{valid: valid, exp: expTime}
+	c.mu.Unlock()
 
 	return valid
 }

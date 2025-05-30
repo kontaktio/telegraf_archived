@@ -21,7 +21,6 @@ type KontaktAuth struct {
 	KeycloakURL string `toml:"keycloak_url"`
 	ApiAddress  string `toml:"api_address"`
 	Audience    string `toml:"audience"`
-	CacheSize   int    `toml:"cache_size"`
 	ApiCaller   ApiCaller
 	JWTAuth     *JWTAuth
 }
@@ -185,7 +184,7 @@ func New() *KontaktAuth {
 
 func (ka *KontaktAuth) Init() error {
 	KeycloakURL := strings.TrimRight(ka.KeycloakURL, "/") + "/"
-	ja := NewJWTAuth(KeycloakURL, ka.Audience, ka.CacheSize)
+	ja := NewJWTAuth(KeycloakURL, ka.Audience)
 	ka.JWTAuth = ja
 	return nil
 }
