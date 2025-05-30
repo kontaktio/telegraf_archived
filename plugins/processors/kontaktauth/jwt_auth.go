@@ -2,6 +2,7 @@ package kontaktauth
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 )
 
 const (
+	companyIdClaim   = "company-id"
 	defaultAudience  = "compute-api"
 	defaultCacheSize = 1 << 24
 )
@@ -41,24 +43,31 @@ func NewJWTAuth(KeycloakURL string, Audience string, CacheSize int) *JWTAuth {
 	}
 	cache := freecache.NewCache(CacheSize)
 	caching := &CachingValidator{
-		base:       base,
-		tokenCache: cache,
+		base:  base,
+		cache: cache,
 	}
 	return &JWTAuth{Validator: caching}
 }
 
-func (ja *JWTAuth) ExtractCompanyID(claims jwt.MapClaims) (string, error) {
-	rawCid, ok := claims["company-id"]
-	if !ok {
-		return "", errors.New("company-id claim missing")
+func ExtractCompanyID(tokenStr string) (string, error) {
+	parser := new(jwt.Parser)
+	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
+		return "", err
 	}
-	cid, ok := rawCid.(string)
+
+	claims := token.Claims.(jwt.MapClaims)
+	val, ok := claims[companyIdClaim]
+	if !ok {
+		return "", fmt.Errorf("claim %q not found", companyIdClaim)
+	}
+	companyId, ok := val.(string)
 	if !ok {
 		return "", errors.New("company-id claim is not a string")
 	}
-	return cid, nil
+	return companyId, nil
 }
 
-func (ja *JWTAuth) VerifyToken(tokenStr string) (jwt.MapClaims, error) {
+func (ja *JWTAuth) VerifyToken(tokenStr string) bool {
 	return ja.Validator.ValidateToken(tokenStr)
 }

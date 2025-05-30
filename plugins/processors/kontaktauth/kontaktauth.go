@@ -3,7 +3,6 @@ package kontaktauth
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/processors"
 	"github.com/pkg/errors"
@@ -16,8 +15,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type KontaktAuth struct {
@@ -145,18 +142,21 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		if metric.HasTag(jwtHeaderTag) {
 			tokenStr, _ := metric.GetTag(jwtHeaderTag)
 			metric.RemoveTag(jwtHeaderTag)
-
-			rawCompanyId, err := ExtractClaimUnverified(tokenStr, "company-id")
+			if strings.HasPrefix(strings.ToLower(tokenStr), "bearer ") {
+				tokenStr = tokenStr[len("Bearer "):]
+			}
+			cid, err := ExtractCompanyID(tokenStr)
 			if err != nil {
-				log.Printf("company-id claim missing")
+				log.Printf("JWT without company-id: %v", err)
 				continue
 			}
-			companyId, ok := rawCompanyId.(string)
-			if !ok {
-				log.Printf("company-id claim is not a string")
+			valid := ka.JWTAuth.VerifyToken(tokenStr)
+			if !valid {
+				log.Printf("invalid JWT for company %q: %v", cid, err)
 				continue
 			}
-			metric.AddTag("companyId", companyId)
+
+			metric.AddTag("companyId", cid)
 			result = append(result, metric)
 			continue
 		}
@@ -175,23 +175,6 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		result = append(result, metric)
 	}
 	return result
-}
-
-func ExtractClaimUnverified(tokenStr, claimKey string) (interface{}, error) {
-	parser := new(jwt.Parser)
-	// Parsujemy bez weryfikacji, przekazując typ MapClaims
-	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
-	if err != nil {
-		return nil, err
-	}
-
-	// Rzutujemy na MapClaims i wyciągamy klucz
-	claims := token.Claims.(jwt.MapClaims)
-	val, ok := claims[claimKey]
-	if !ok {
-		return nil, fmt.Errorf("claim %q not found", claimKey)
-	}
-	return val, nil
 }
 
 func New() *KontaktAuth {

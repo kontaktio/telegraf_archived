@@ -1,7 +1,6 @@
 package kontaktauth
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -15,7 +14,7 @@ import (
 )
 
 type TokenValidator interface {
-	ValidateToken(tokenStr string) (jwt.MapClaims, error)
+	ValidateToken(tokenStr string) bool
 }
 
 type JwksValidator struct {
@@ -26,36 +25,36 @@ type JwksValidator struct {
 	jwksOpts      keyfunc.Options
 }
 
-func (ja *JwksValidator) ValidateToken(tokenStr string) (jwt.MapClaims, error) {
-	if strings.HasPrefix(strings.ToLower(tokenStr), "bearer ") {
-		tokenStr = tokenStr[len("Bearer "):]
-	}
-
+func (ja *JwksValidator) ValidateToken(tokenStr string) bool {
 	realm, err := ja.verifyIss(tokenStr)
 	if err != nil {
-		return nil, err
+		log.Printf("[jwksValidator] verifyIss error: %v", err)
+		return false
 	}
 
 	jwks, err := ja.getJWKS(realm)
 	if err != nil {
-		return nil, err
+		log.Printf("[jwksValidator] getJWKS error for realm %s: %v", realm, err)
+		return false
 	}
 
 	token, err := jwt.ParseWithClaims(tokenStr, jwt.MapClaims{}, jwks.Keyfunc)
 	if err != nil {
-		return nil, fmt.Errorf("jwt parse/verify error: %w", err)
+		log.Printf("[jwksValidator] jwt.Parse error: %v", err)
+		return false
 	}
 	if !token.Valid {
-		return nil, errors.New("token expired or not valid yet")
+		log.Printf("[jwksValidator] token not valid")
+		return false
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
-
 	if err := ja.verifyAud(claims); err != nil {
-		return nil, err
+		log.Printf("[jwksValidator] verifyAud error: %v", err)
+		return false
 	}
 
-	return claims, nil
+	return true
 }
 
 func (ja *JwksValidator) verifyIss(tokenStr string) (string, error) {
@@ -126,38 +125,45 @@ func (ja *JwksValidator) verifyAud(claims jwt.MapClaims) error {
 }
 
 type CachingValidator struct {
-	base       TokenValidator
-	tokenCache *freecache.Cache
+	base      TokenValidator
+	cache     *freecache.Cache
+	jwtParser jwt.Parser
 }
 
-func (c *CachingValidator) ValidateToken(tokenStr string) (jwt.MapClaims, error) {
-	t := strings.TrimSpace(tokenStr)
-	if strings.HasPrefix(strings.ToLower(t), "bearer ") {
-		t = t[len("bearer "):]
+func (c *CachingValidator) ValidateToken(tokenStr string) bool {
+	key := extractSignature(tokenStr)
+
+	if val, err := c.cache.Get([]byte(key)); err == nil && len(val) > 0 && val[0] == 1 {
+		return true
 	}
 
-	if data, err := c.tokenCache.Get([]byte(t)); err == nil {
-		var claims jwt.MapClaims
-		if err := json.Unmarshal(data, &claims); err == nil {
-			return claims, nil
-		}
-		c.tokenCache.Del([]byte(t))
-	}
-
-	claims, err := c.base.ValidateToken(t)
-	if err != nil {
-		return nil, err
-	}
-
-	expVal, ok := claims["exp"].(float64)
-	if ok {
-		expTime := time.Unix(int64(expVal), 0)
-		ttl := time.Until(expTime)
-		if ttl > 0 {
-			if data, err := json.Marshal(claims); err == nil {
-				c.tokenCache.Set([]byte(t), data, int(ttl.Seconds()))
+	valid := c.base.ValidateToken(tokenStr)
+	expTime := time.Now().Add(time.Minute)
+	if token, _, err := c.jwtParser.ParseUnverified(tokenStr, jwt.MapClaims{}); err == nil {
+		if cl, ok := token.Claims.(jwt.MapClaims); ok {
+			if expVal, ok2 := cl["exp"].(float64); ok2 {
+				expTime = time.Unix(int64(expVal), 0)
 			}
 		}
 	}
-	return claims, nil
+	ttl := int(time.Until(expTime).Seconds())
+	if ttl <= 0 {
+		ttl = 60
+	}
+
+	cacheVal := []byte{0}
+	if valid {
+		cacheVal[0] = 1
+	}
+	c.cache.Set([]byte(key), cacheVal, ttl)
+
+	return valid
+}
+
+func extractSignature(tokenStr string) string {
+	parts := strings.Split(tokenStr, ".")
+	if len(parts) == 3 {
+		return parts[2]
+	}
+	return tokenStr
 }
