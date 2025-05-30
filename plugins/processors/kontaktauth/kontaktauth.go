@@ -152,7 +152,6 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			}
 			valid := ka.JWTAuth.VerifyToken(tokenStr)
 			if !valid {
-				log.Printf("invalid JWT for company %q: %v", cid, err)
 				continue
 			}
 

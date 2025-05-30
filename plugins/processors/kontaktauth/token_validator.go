@@ -26,6 +26,8 @@ type JwksValidator struct {
 }
 
 func (ja *JwksValidator) ValidateToken(tokenStr string) bool {
+	companyId, _ := ExtractCompanyID(tokenStr)
+	log.Printf("[jwksValidator] validating token for company %s", companyId)
 	realm, err := ja.verifyIss(tokenStr)
 	if err != nil {
 		log.Printf("[jwksValidator] verifyIss error: %v", err)
@@ -133,8 +135,8 @@ type CachingValidator struct {
 func (c *CachingValidator) ValidateToken(tokenStr string) bool {
 	key := extractSignature(tokenStr)
 
-	if val, err := c.cache.Get([]byte(key)); err == nil && len(val) > 0 && val[0] == 1 {
-		return true
+	if val, err := c.cache.Get([]byte(key)); err == nil && len(val) > 0 {
+		return val[0] == 1
 	}
 
 	valid := c.base.ValidateToken(tokenStr)
