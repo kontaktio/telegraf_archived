@@ -38,7 +38,7 @@ func NewJWTAuth(KeycloakURL string, Audience string) *JWTAuth {
 	}
 	caching := &CachingValidator{
 		base:      base,
-		cache:     make(map[string]*cacheEntry),
+		cache:     make(map[string][]*cacheEntry),
 		jwtParser: new(jwt.Parser),
 	}
 	return &JWTAuth{Validator: caching}

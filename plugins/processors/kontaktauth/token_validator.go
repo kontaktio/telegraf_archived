@@ -126,33 +126,42 @@ func (ja *JwksValidator) verifyAud(claims jwt.MapClaims) error {
 }
 
 type cacheEntry struct {
-	valid bool
-	exp   time.Time
+	valid   bool
+	exp     time.Time
+	fullSig string
 }
 
 type CachingValidator struct {
 	base      TokenValidator
 	mu        sync.RWMutex
-	cache     map[string]*cacheEntry
+	cache     map[string][]*cacheEntry
 	jwtParser *jwt.Parser
 }
 
 func (c *CachingValidator) ValidateToken(tokenStr string) bool {
-	key := extractSignature(tokenStr)
+	signature := extractSignature(tokenStr)
+	prefix := prefix(signature)
 
 	c.mu.RLock()
-	entry, ok := c.cache[key]
+	entries, ok := c.cache[prefix]
 	c.mu.RUnlock()
+
 	if ok {
-		if entry.valid {
-			if time.Now().After(entry.exp) {
-				entry.valid = false
-				log.Printf("[cachingValidator] token expired for signature %s", key)
+		for _, entry := range entries {
+			if entry.fullSig == signature {
+				// found
+				if entry.valid {
+					if time.Now().After(entry.exp) {
+						// expired -> mark invalid and log
+						entry.valid = false
+						log.Printf("[cachingValidator] token expired for signature %s", signature)
+						return false
+					}
+					return true
+				}
 				return false
 			}
-			return true
 		}
-		return false
 	}
 
 	valid := c.base.ValidateToken(tokenStr)
@@ -167,8 +176,9 @@ func (c *CachingValidator) ValidateToken(tokenStr string) bool {
 		}
 	}
 
+	entry := &cacheEntry{fullSig: signature, valid: valid, exp: expTime}
 	c.mu.Lock()
-	c.cache[key] = &cacheEntry{valid: valid, exp: expTime}
+	c.cache[prefix] = append(c.cache[prefix], entry)
 	c.mu.Unlock()
 
 	return valid
@@ -180,4 +190,11 @@ func extractSignature(tokenStr string) string {
 		return parts[2]
 	}
 	return tokenStr
+}
+
+func prefix(key string) string {
+	if len(key) > 5 {
+		return key[:5]
+	}
+	return key
 }
