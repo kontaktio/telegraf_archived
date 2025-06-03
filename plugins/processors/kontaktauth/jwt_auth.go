@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync/atomic"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
@@ -14,6 +15,8 @@ const (
 	companyIdClaim  = "company-id"
 	defaultAudience = "compute-api"
 )
+
+var parseUnverifiedCount uint64
 
 type JWTAuth struct {
 	Validator TokenValidator
@@ -45,6 +48,10 @@ func NewJWTAuth(KeycloakURL string, Audience string) *JWTAuth {
 }
 
 func ExtractCompanyID(tokenStr string) (string, error) {
+	count := atomic.AddUint64(&parseUnverifiedCount, 1)
+	if count%5000 == 0 {
+		log.Printf("ParseUnverified zostało wywołane %d razy\n", count)
+	}
 	parser := new(jwt.Parser)
 	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
 	if err != nil {
