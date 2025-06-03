@@ -14,8 +14,11 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
+
+var metricCount uint64
 
 type KontaktAuth struct {
 	KeycloakURL string `toml:"keycloak_url"`
@@ -138,6 +141,11 @@ func (ka *KontaktAuth) Description() string {
 func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
+
+		count := atomic.AddUint64(&metricCount, 1)
+		if count%5000 == 0 {
+			log.Printf("Processed metric count %d \n", count)
+		}
 		if metric.HasTag(jwtHeaderTag) {
 			tokenStr, _ := metric.GetTag(jwtHeaderTag)
 			metric.RemoveTag(jwtHeaderTag)
