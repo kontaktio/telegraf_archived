@@ -141,20 +141,15 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		if metric.HasTag(jwtHeaderTag) {
 			tokenStr, _ := metric.GetTag(jwtHeaderTag)
 			metric.RemoveTag(jwtHeaderTag)
-
-			claims, err := ka.JWTAuth.VerifyToken(tokenStr)
-			if err != nil {
-				log.Printf("invalid JWT: %v", err)
+			if strings.HasPrefix(strings.ToLower(tokenStr), "bearer ") {
+				tokenStr = tokenStr[len("Bearer "):]
+			}
+			companyId, valid := ka.JWTAuth.VerifyToken(tokenStr)
+			if !valid {
 				continue
 			}
 
-			cid, err := ka.JWTAuth.ExtractCompanyID(claims)
-			if err != nil {
-				log.Printf("JWT without company-id: %v", err)
-				continue
-			}
-
-			metric.AddTag("companyId", cid)
+			metric.AddTag("companyId", companyId)
 			result = append(result, metric)
 			continue
 		}
@@ -183,11 +178,8 @@ func New() *KontaktAuth {
 }
 
 func (ka *KontaktAuth) Init() error {
-	ja := NewJWTAuth()
-	ja.KeycloakURL = strings.TrimRight(ka.KeycloakURL, "/") + "/"
-	if ka.Audience != "" {
-		ja.Audience = ka.Audience
-	}
+	KeycloakURL := strings.TrimRight(ka.KeycloakURL, "/") + "/"
+	ja := NewJWTAuth(KeycloakURL, ka.Audience)
 	ka.JWTAuth = ja
 	return nil
 }
