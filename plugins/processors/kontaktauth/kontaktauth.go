@@ -19,6 +19,7 @@ import (
 )
 
 var metricCount uint64
+var requestCount uint64
 
 type KontaktAuth struct {
 	KeycloakURL string `toml:"keycloak_url"`
@@ -169,6 +170,10 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 		}
 	}
 	result := make([]telegraf.Metric, 0)
+	requestCount := atomic.AddUint64(&requestCount, 1)
+	if requestCount%5000 == 0 {
+		log.Printf("Processed request count %d \n", requestCount)
+	}
 	for _, metric := range metrics {
 
 		count := atomic.AddUint64(&metricCount, 1)
