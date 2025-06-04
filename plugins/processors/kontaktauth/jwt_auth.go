@@ -1,8 +1,6 @@
 package kontaktauth
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -44,25 +42,6 @@ func NewJWTAuth(KeycloakURL string, Audience string) *JWTAuth {
 	return &JWTAuth{Validator: caching}
 }
 
-func ExtractCompanyID(tokenStr string) (string, error) {
-	parser := new(jwt.Parser)
-	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
-	if err != nil {
-		return "", err
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	val, ok := claims[companyIdClaim]
-	if !ok {
-		return "", fmt.Errorf("claim %q not found", companyIdClaim)
-	}
-	companyId, ok := val.(string)
-	if !ok {
-		return "", errors.New("company-id claim is not a string")
-	}
-	return companyId, nil
-}
-
-func (ja *JWTAuth) VerifyToken(tokenStr string) bool {
+func (ja *JWTAuth) VerifyToken(tokenStr string) (string, bool) {
 	return ja.Validator.ValidateToken(tokenStr)
 }

@@ -144,17 +144,12 @@ func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
 			if strings.HasPrefix(strings.ToLower(tokenStr), "bearer ") {
 				tokenStr = tokenStr[len("Bearer "):]
 			}
-			cid, err := ExtractCompanyID(tokenStr)
-			if err != nil {
-				log.Printf("JWT without company-id: %v", err)
-				continue
-			}
-			valid := ka.JWTAuth.VerifyToken(tokenStr)
+			companyId, valid := ka.JWTAuth.VerifyToken(tokenStr)
 			if !valid {
 				continue
 			}
 
-			metric.AddTag("companyId", cid)
+			metric.AddTag("companyId", companyId)
 			result = append(result, metric)
 			continue
 		}

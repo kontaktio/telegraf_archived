@@ -13,7 +13,7 @@ import (
 )
 
 type TokenValidator interface {
-	ValidateToken(tokenStr string) bool
+	ValidateToken(tokenStr string) (string, bool)
 }
 
 type JwksValidator struct {
@@ -24,38 +24,61 @@ type JwksValidator struct {
 	jwksOpts      keyfunc.Options
 }
 
-func (ja *JwksValidator) ValidateToken(tokenStr string) bool {
-	companyId, _ := ExtractCompanyID(tokenStr)
+func (ja *JwksValidator) ValidateToken(tokenStr string) (string, bool) {
+	companyId, err := ja.ExtractCompanyID(tokenStr)
+	if err != nil {
+		log.Printf("[jwksValidator] extract company-id claim error: %v", err)
+		return "", false
+	}
 	log.Printf("[jwksValidator] validating token for company %s", companyId)
 	realm, err := ja.verifyIss(tokenStr)
 	if err != nil {
 		log.Printf("[jwksValidator] verifyIss error: %v", err)
-		return false
+		return companyId, false
 	}
 
 	jwks, err := ja.getJWKS(realm)
 	if err != nil {
 		log.Printf("[jwksValidator] getJWKS error for realm %s: %v", realm, err)
-		return false
+		return companyId, false
 	}
 
 	token, err := jwt.ParseWithClaims(tokenStr, jwt.MapClaims{}, jwks.Keyfunc)
 	if err != nil {
 		log.Printf("[jwksValidator] jwt.Parse error: %v", err)
-		return false
+		return companyId, false
 	}
 	if !token.Valid {
 		log.Printf("[jwksValidator] token not valid")
-		return false
+		return companyId, false
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
 	if err := ja.verifyAud(claims); err != nil {
 		log.Printf("[jwksValidator] verifyAud error: %v", err)
-		return false
+		return companyId, false
 	}
 
-	return true
+	return companyId, true
+}
+
+func (ja *JwksValidator) ExtractCompanyID(tokenStr string) (string, error) {
+	parser := new(jwt.Parser)
+	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
+		return "", err
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	val, ok := claims[companyIdClaim]
+	if !ok {
+		return "", fmt.Errorf("claim %q not found", companyIdClaim)
+	}
+	companyId, ok := val.(string)
+	if !ok {
+		return "", errors.New("company-id claim is not a string")
+	}
+	return companyId, nil
 }
 
 func (ja *JwksValidator) verifyIss(tokenStr string) (string, error) {
@@ -126,9 +149,10 @@ func (ja *JwksValidator) verifyAud(claims jwt.MapClaims) error {
 }
 
 type cacheEntry struct {
-	valid   bool
-	exp     time.Time
-	fullSig string
+	valid     bool
+	companyId string
+	exp       time.Time
+	fullSig   string
 }
 
 type CachingValidator struct {
@@ -138,7 +162,7 @@ type CachingValidator struct {
 	jwtParser *jwt.Parser
 }
 
-func (c *CachingValidator) ValidateToken(tokenStr string) bool {
+func (c *CachingValidator) ValidateToken(tokenStr string) (string, bool) {
 	signature := extractSignature(tokenStr)
 	prefix := prefix(signature)
 
@@ -150,21 +174,19 @@ func (c *CachingValidator) ValidateToken(tokenStr string) bool {
 		for _, entry := range entries {
 			if entry.fullSig == signature {
 				// found
-				if entry.valid {
-					if time.Now().After(entry.exp) {
-						// expired -> mark invalid and log
-						entry.valid = false
-						log.Printf("[cachingValidator] token expired for signature %s", signature)
-						return false
-					}
-					return true
+				if entry.valid && time.Now().After(entry.exp) {
+					// expired -> mark invalid and log
+					entry.valid = false
+					log.Printf("[cachingValidator] token expired for signature %s", signature)
 				}
-				return false
+				return entry.companyId, entry.valid
 			}
+			log.Printf("[cachingValidator] expected entry was not found %s", signature)
+			return entry.companyId, false
 		}
 	}
 
-	valid := c.base.ValidateToken(tokenStr)
+	companyId, valid := c.base.ValidateToken(tokenStr)
 	expTime := time.Now()
 
 	tokUnv, _, err := c.jwtParser.ParseUnverified(tokenStr, jwt.MapClaims{})
@@ -176,12 +198,12 @@ func (c *CachingValidator) ValidateToken(tokenStr string) bool {
 		}
 	}
 
-	entry := &cacheEntry{fullSig: signature, valid: valid, exp: expTime}
+	entry := &cacheEntry{fullSig: signature, companyId: companyId, valid: valid, exp: expTime}
 	c.mu.Lock()
 	c.cache[prefix] = append(c.cache[prefix], entry)
 	c.mu.Unlock()
 
-	return valid
+	return companyId, valid
 }
 
 func extractSignature(tokenStr string) string {
