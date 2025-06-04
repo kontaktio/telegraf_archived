@@ -12,8 +12,10 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang/snappy"
@@ -38,6 +40,8 @@ var requestsProcessed = prometheus.NewCounter(prometheus.CounterOpts{
 	Name: "telegraf_input_http_requests",
 	Help: "Number of processed incoming requests",
 })
+
+var requestCount uint64
 
 const (
 	body    = "body"
@@ -235,6 +239,8 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	atomic.AddUint64(&requestCount, 1)
+	count := strconv.FormatUint(requestCount, 10)
 	for _, m := range metrics {
 		for headerName, measurementName := range h.HTTPHeaderTags {
 			headerValues := req.Header.Get(headerName)
@@ -242,6 +248,7 @@ func (h *HTTPListenerV2) serveWrite(res http.ResponseWriter, req *http.Request) 
 				m.AddTag(measurementName, headerValues)
 			}
 		}
+		m.AddTag("request_counter", count)
 
 		if h.PathTag {
 			m.AddTag(pathTag, req.URL.Path)

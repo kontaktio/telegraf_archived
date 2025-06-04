@@ -138,7 +138,36 @@ func (ka *KontaktAuth) Description() string {
 	return "Authenticates telemetry and fills companyId"
 }
 
+const requestCounterTag = "request_counter"
+
 func (ka *KontaktAuth) Apply(metrics ...telegraf.Metric) []telegraf.Metric {
+	var expectedCounter string
+	found := false
+
+	for i, metric := range metrics {
+		// Jeśli metryka nie ma w ogóle taga "request_counter"
+		if !metric.HasTag(requestCounterTag) {
+			log.Printf("Metric at index %d is missing tag '%s'\n", i, requestCounterTag)
+			continue
+		}
+
+		// Pobierz wartość taga
+		counterValue, _ := metric.GetTag(requestCounterTag)
+
+		// Ustawiamy pierwszą znalezioną wartość jako wzorcową
+		if !found {
+			expectedCounter = counterValue
+			found = true
+		} else {
+			// Porównujemy pozostałe wartości z wzorcową
+			if counterValue != expectedCounter {
+				log.Printf(
+					"Metric at index %d has different '%s': %s (expected %s)\n",
+					i, requestCounterTag, counterValue, expectedCounter,
+				)
+			}
+		}
+	}
 	result := make([]telegraf.Metric, 0)
 	for _, metric := range metrics {
 
